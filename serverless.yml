@@ -1,0 +1,73 @@
+service: customer-service
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+
+  vpc:
+    securityGroupIds:
+      - sg-0c53a9fdbac3c3f1d
+    subnetIds:
+      - subnet-0db66bddd09cf4ea4
+      - subnet-0025ce174e80dbd39
+      - subnet-0b3d786ce9758f63d
+      - subnet-04db367d4eefcbc92
+      - subnet-044f588274a69635f
+      - subnet-09be2de009329d2a1
+
+  environment:
+    DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core
+    JWT_SECRET: uma-super-chave-secreta
+
+functions:
+  heartbeat:
+    handler: src/handlers/workers/heartbeat.handler
+    events:
+      - httpApi:
+          path: /worker/heartbeat
+          method: post
+    package:
+      patterns:
+        - node_modules/.prisma/client/**
+        - node_modules/@prisma/client/**
+        - node_modules/@prisma/client/index.js
+        - prisma/schema.prisma
+        - src/handlers/workers/heartbeat.ts
+        - src/lib/**
+        - src/middleware/**
+
+  getWorkers:
+    handler: src/handlers/workers/getWorkers.handler
+    events:
+      - httpApi:
+          path: /workers
+          method: get
+    package:
+      patterns:
+        - node_modules/.prisma/client/**
+        - node_modules/@prisma/client/**
+        - node_modules/@prisma/client/index.js
+        - prisma/schema.prisma
+        - src/handlers/workers/getWorkers.ts
+        - src/lib/**
+        - src/middleware/**
+
+  updateWorkerStatus:
+    handler: src/handlers/workers/updateWorkerStatus.handler
+    events:
+      - httpApi:
+          path: /workers/{id}/status
+          method: patch
+    package:
+      patterns:
+        - node_modules/.prisma/client/**
+        - node_modules/@prisma/client/**
+        - node_modules/@prisma/client/index.js
+        - prisma/schema.prisma
+        - src/handlers/workers/updateWorkerStatus.ts
+        - src/lib/**
+        - src/middleware/**
+
+package:
+  individually: true

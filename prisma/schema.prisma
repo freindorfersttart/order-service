@@ -1,0 +1,66 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-1.0.x"]
+  engineType    = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model core_customers {
+  id          String                  @id @default(uuid())
+  type        CustomerType            // 'pf' ou 'pj'
+  document    String                  // CPF ou CNPJ
+  name        String
+  email       String?
+  created_at  DateTime                @default(now())
+  updated_at  DateTime                @updatedAt
+
+  entities    core_customer_entities[]
+  pix_keys    core_pix_keys[]        @relation("CustomerPixKeys")
+}
+
+model core_customer_entities {
+  id          String              @id @default(uuid())
+  customer_id String
+  name        String
+  document    String              // CNPJ
+  created_at  DateTime            @default(now())
+
+  customer    core_customers      @relation(fields: [customer_id], references: [id])
+  pix_keys    core_pix_keys[]     @relation("EntityPixKeys")
+}
+
+model core_pix_keys {
+  id          String       @id @default(uuid())
+  owner_type  OwnerType    // 'customer' ou 'entity'
+  owner_id    String
+  key_type    PixKeyType   // 'cpf' | 'cnpj' | 'email' | 'phone' | 'random'
+  key_value   String
+  active      Boolean      @default(true)
+  label       String?
+  created_at  DateTime     @default(now())
+
+  customer    core_customers?          @relation("CustomerPixKeys", fields: [owner_id], references: [id])
+  entity      core_customer_entities?  @relation("EntityPixKeys", fields: [owner_id], references: [id])
+}
+
+enum CustomerType {
+  pf
+  pj
+}
+
+enum OwnerType {
+  customer
+  entity
+}
+
+enum PixKeyType {
+  cpf
+  cnpj
+  email
+  phone
+  random
+}
