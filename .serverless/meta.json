@@ -1,6 +1,6 @@
 {
   "/Users/tecnologia01/sttartpay/customer-service/serverless.yml": {
-    "versionFramework": "4.31.0",
+    "versionFramework": "4.31.1",
     "servicePath": "/Users/tecnologia01/sttartpay/customer-service/serverless.yml",
     "serviceConfigFileName": "serverless.yml",
     "service": {
@@ -32,22 +32,34 @@
           "AWSTemplateFormatVersion": "2010-09-09",
           "Description": "The AWS CloudFormation template for this Serverless application",
           "Resources": {
-            "HeartbeatLogGroup": {
+            "CreateCustomerLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/customer-service-dev-heartbeat"
+                "LogGroupName": "/aws/lambda/customer-service-dev-createCustomer"
               }
             },
-            "GetWorkersLogGroup": {
+            "GetCustomersLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/customer-service-dev-getWorkers"
+                "LogGroupName": "/aws/lambda/customer-service-dev-getCustomers"
               }
             },
-            "UpdateWorkerStatusLogGroup": {
+            "CreateEntityLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
-                "LogGroupName": "/aws/lambda/customer-service-dev-updateWorkerStatus"
+                "LogGroupName": "/aws/lambda/customer-service-dev-createEntity"
+              }
+            },
+            "CreatePixKeyLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/customer-service-dev-createPixKey"
+              }
+            },
+            "IsActiveLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/customer-service-dev-isActive"
               }
             },
             "IamRoleLambdaExecution": {
@@ -142,16 +154,16 @@
                 ]
               }
             },
-            "HeartbeatLambdaFunction": {
+            "CreateCustomerLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-heartbeat.zip"
+                  "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createCustomer.zip"
                 },
-                "Handler": "src/handlers/workers/heartbeat.handler",
+                "Handler": "src/handlers/customers/create.create",
                 "Runtime": "nodejs18.x",
-                "FunctionName": "customer-service-dev-heartbeat",
+                "FunctionName": "customer-service-dev-createCustomer",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Environment": {
@@ -182,19 +194,19 @@
                 }
               },
               "DependsOn": [
-                "HeartbeatLogGroup"
+                "CreateCustomerLogGroup"
               ]
             },
-            "GetWorkersLambdaFunction": {
+            "GetCustomersLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-getWorkers.zip"
+                  "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-getCustomers.zip"
                 },
-                "Handler": "src/handlers/workers/getWorkers.handler",
+                "Handler": "src/handlers/customers/getAll.getAll",
                 "Runtime": "nodejs18.x",
-                "FunctionName": "customer-service-dev-getWorkers",
+                "FunctionName": "customer-service-dev-getCustomers",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Environment": {
@@ -225,19 +237,19 @@
                 }
               },
               "DependsOn": [
-                "GetWorkersLogGroup"
+                "GetCustomersLogGroup"
               ]
             },
-            "UpdateWorkerStatusLambdaFunction": {
+            "CreateEntityLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-updateWorkerStatus.zip"
+                  "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createEntity.zip"
                 },
-                "Handler": "src/handlers/workers/updateWorkerStatus.handler",
+                "Handler": "src/handlers/entities/create.create",
                 "Runtime": "nodejs18.x",
-                "FunctionName": "customer-service-dev-updateWorkerStatus",
+                "FunctionName": "customer-service-dev-createEntity",
                 "MemorySize": 1024,
                 "Timeout": 6,
                 "Environment": {
@@ -268,37 +280,143 @@
                 }
               },
               "DependsOn": [
-                "UpdateWorkerStatusLogGroup"
+                "CreateEntityLogGroup"
               ]
             },
-            "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU": {
+            "CreatePixKeyLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createPixKey.zip"
+                },
+                "Handler": "src/handlers/pix/create.create",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "customer-service-dev-createPixKey",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "CreatePixKeyLogGroup"
+              ]
+            },
+            "IsActiveLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-isActive.zip"
+                },
+                "Handler": "src/handlers/customers/isActive.isActive",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "customer-service-dev-isActive",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "IsActiveLogGroup"
+              ]
+            },
+            "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
-                  "Ref": "GetWorkersLambdaFunction"
+                  "Ref": "IsActiveLambdaFunction"
                 },
-                "CodeSha256": "yUEmtCORNfh9XldvxJAFMCoPZGzjAK1RUF6pWI7LvJ8="
+                "CodeSha256": "AXXmzGbYstD+tDNrBo0smBX8LZZYsXuh+9I3JC+bwbA="
               }
             },
-            "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM": {
+            "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
-                  "Ref": "UpdateWorkerStatusLambdaFunction"
+                  "Ref": "CreatePixKeyLambdaFunction"
                 },
-                "CodeSha256": "BOqmNcgvr7wUj7GyR+OXNtGrYwyGWCbwCOVkWBMNrpk="
+                "CodeSha256": "xBCQgGWcvTI5HdynHTEkBdSrQh4Oo4G+0IXudPYVWJ4="
               }
             },
-            "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA": {
+            "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
-                  "Ref": "HeartbeatLambdaFunction"
+                  "Ref": "CreateEntityLambdaFunction"
                 },
-                "CodeSha256": "N0mX6f2q3GEbeeqykLMgYLcVP0FIOOlrEIpw7D/gin4="
+                "CodeSha256": "vg1pnfVL9e9eGd3xEiQWfnosCuY0+cxtCe3iWwRFQwg="
+              }
+            },
+            "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetCustomersLambdaFunction"
+                },
+                "CodeSha256": "yXDBnW57ESZV1C35HAe/sHUPbSyGtU1pryRm/8/SMYM="
+              }
+            },
+            "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateCustomerLambdaFunction"
+                },
+                "CodeSha256": "TGgdIHa4xMjwrhLqtYhFdO77R8W1lCB//mTiORq3Y+Q="
               }
             },
             "HttpApi": {
@@ -321,12 +439,12 @@
                 }
               }
             },
-            "HeartbeatLambdaPermissionHttpApi": {
+            "CreateCustomerLambdaPermissionHttpApi": {
               "Type": "AWS::Lambda::Permission",
               "Properties": {
                 "FunctionName": {
                   "Fn::GetAtt": [
-                    "HeartbeatLambdaFunction",
+                    "CreateCustomerLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -358,7 +476,7 @@
                 }
               }
             },
-            "HttpApiIntegrationHeartbeat": {
+            "HttpApiIntegrationCreateCustomer": {
               "Type": "AWS::ApiGatewayV2::Integration",
               "Properties": {
                 "ApiId": {
@@ -367,7 +485,7 @@
                 "IntegrationType": "AWS_PROXY",
                 "IntegrationUri": {
                   "Fn::GetAtt": [
-                    "HeartbeatLambdaFunction",
+                    "CreateCustomerLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -375,33 +493,33 @@
                 "TimeoutInMillis": 30000
               }
             },
-            "HttpApiRoutePostWorkerHeartbeat": {
+            "HttpApiRoutePostCustomers": {
               "Type": "AWS::ApiGatewayV2::Route",
               "Properties": {
                 "ApiId": {
                   "Ref": "HttpApi"
                 },
-                "RouteKey": "POST /worker/heartbeat",
+                "RouteKey": "POST /customers",
                 "Target": {
                   "Fn::Join": [
                     "/",
                     [
                       "integrations",
                       {
-                        "Ref": "HttpApiIntegrationHeartbeat"
+                        "Ref": "HttpApiIntegrationCreateCustomer"
                       }
                     ]
                   ]
                 }
               },
-              "DependsOn": "HttpApiIntegrationHeartbeat"
+              "DependsOn": "HttpApiIntegrationCreateCustomer"
             },
-            "GetWorkersLambdaPermissionHttpApi": {
+            "GetCustomersLambdaPermissionHttpApi": {
               "Type": "AWS::Lambda::Permission",
               "Properties": {
                 "FunctionName": {
                   "Fn::GetAtt": [
-                    "GetWorkersLambdaFunction",
+                    "GetCustomersLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -433,7 +551,7 @@
                 }
               }
             },
-            "HttpApiIntegrationGetWorkers": {
+            "HttpApiIntegrationGetCustomers": {
               "Type": "AWS::ApiGatewayV2::Integration",
               "Properties": {
                 "ApiId": {
@@ -442,7 +560,7 @@
                 "IntegrationType": "AWS_PROXY",
                 "IntegrationUri": {
                   "Fn::GetAtt": [
-                    "GetWorkersLambdaFunction",
+                    "GetCustomersLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -450,33 +568,33 @@
                 "TimeoutInMillis": 30000
               }
             },
-            "HttpApiRouteGetWorkers": {
+            "HttpApiRouteGetCustomers": {
               "Type": "AWS::ApiGatewayV2::Route",
               "Properties": {
                 "ApiId": {
                   "Ref": "HttpApi"
                 },
-                "RouteKey": "GET /workers",
+                "RouteKey": "GET /customers",
                 "Target": {
                   "Fn::Join": [
                     "/",
                     [
                       "integrations",
                       {
-                        "Ref": "HttpApiIntegrationGetWorkers"
+                        "Ref": "HttpApiIntegrationGetCustomers"
                       }
                     ]
                   ]
                 }
               },
-              "DependsOn": "HttpApiIntegrationGetWorkers"
+              "DependsOn": "HttpApiIntegrationGetCustomers"
             },
-            "UpdateWorkerStatusLambdaPermissionHttpApi": {
+            "CreateEntityLambdaPermissionHttpApi": {
               "Type": "AWS::Lambda::Permission",
               "Properties": {
                 "FunctionName": {
                   "Fn::GetAtt": [
-                    "UpdateWorkerStatusLambdaFunction",
+                    "CreateEntityLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -508,7 +626,7 @@
                 }
               }
             },
-            "HttpApiIntegrationUpdateWorkerStatus": {
+            "HttpApiIntegrationCreateEntity": {
               "Type": "AWS::ApiGatewayV2::Integration",
               "Properties": {
                 "ApiId": {
@@ -517,7 +635,7 @@
                 "IntegrationType": "AWS_PROXY",
                 "IntegrationUri": {
                   "Fn::GetAtt": [
-                    "UpdateWorkerStatusLambdaFunction",
+                    "CreateEntityLambdaFunction",
                     "Arn"
                   ]
                 },
@@ -525,26 +643,176 @@
                 "TimeoutInMillis": 30000
               }
             },
-            "HttpApiRoutePatchWorkersIdVarStatus": {
+            "HttpApiRoutePostCustomersIdVarEntities": {
               "Type": "AWS::ApiGatewayV2::Route",
               "Properties": {
                 "ApiId": {
                   "Ref": "HttpApi"
                 },
-                "RouteKey": "PATCH /workers/{id}/status",
+                "RouteKey": "POST /customers/{id}/entities",
                 "Target": {
                   "Fn::Join": [
                     "/",
                     [
                       "integrations",
                       {
-                        "Ref": "HttpApiIntegrationUpdateWorkerStatus"
+                        "Ref": "HttpApiIntegrationCreateEntity"
                       }
                     ]
                   ]
                 }
               },
-              "DependsOn": "HttpApiIntegrationUpdateWorkerStatus"
+              "DependsOn": "HttpApiIntegrationCreateEntity"
+            },
+            "CreatePixKeyLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "CreatePixKeyLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationCreatePixKey": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "CreatePixKeyLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostCustomersIdVarPixDashkeys": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "POST /customers/{id}/pix-keys",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationCreatePixKey"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationCreatePixKey"
+            },
+            "IsActiveLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "IsActiveLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationIsActive": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "IsActiveLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePatchCustomersIdVarStatus": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "PATCH /customers/{id}/status",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationIsActive"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationIsActive"
             }
           },
           "Outputs": {
@@ -554,31 +822,49 @@
                 "Name": "sls-customer-service-dev-ServerlessDeploymentBucketName"
               }
             },
-            "GetWorkersLambdaFunctionQualifiedArn": {
+            "IsActiveLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU"
+                "Ref": "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY"
               },
               "Export": {
-                "Name": "sls-customer-service-dev-GetWorkersLambdaFunctionQualifiedArn"
+                "Name": "sls-customer-service-dev-IsActiveLambdaFunctionQualifiedArn"
               }
             },
-            "UpdateWorkerStatusLambdaFunctionQualifiedArn": {
+            "CreatePixKeyLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM"
+                "Ref": "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q"
               },
               "Export": {
-                "Name": "sls-customer-service-dev-UpdateWorkerStatusLambdaFunctionQualifiedArn"
+                "Name": "sls-customer-service-dev-CreatePixKeyLambdaFunctionQualifiedArn"
               }
             },
-            "HeartbeatLambdaFunctionQualifiedArn": {
+            "CreateEntityLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA"
+                "Ref": "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0"
               },
               "Export": {
-                "Name": "sls-customer-service-dev-HeartbeatLambdaFunctionQualifiedArn"
+                "Name": "sls-customer-service-dev-CreateEntityLambdaFunctionQualifiedArn"
+              }
+            },
+            "GetCustomersLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8"
+              },
+              "Export": {
+                "Name": "sls-customer-service-dev-GetCustomersLambdaFunctionQualifiedArn"
+              }
+            },
+            "CreateCustomerLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA"
+              },
+              "Export": {
+                "Name": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
               }
             },
             "HttpApiId": {
@@ -619,22 +905,22 @@
         }
       },
       "functions": {
-        "heartbeat": {
-          "handler": "src/handlers/workers/heartbeat.handler",
+        "createCustomer": {
+          "handler": "src/handlers/customers/create.create",
           "events": [
             {
               "httpApi": {
-                "path": "/worker/heartbeat",
+                "path": "/customers",
                 "method": "post"
               },
               "resolvedMethod": "POST",
-              "resolvedPath": "/worker/heartbeat"
+              "resolvedPath": "/customers"
             }
           ],
           "package": {
-            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-heartbeat.zip"
+            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-createCustomer.zip"
           },
-          "name": "customer-service-dev-heartbeat",
+          "name": "customer-service-dev-createCustomer",
           "environment": {
             "NODE_OPTIONS": "--enable-source-maps"
           },
@@ -642,24 +928,24 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA"
+          "versionLogicalId": "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA"
         },
-        "getWorkers": {
-          "handler": "src/handlers/workers/getWorkers.handler",
+        "getCustomers": {
+          "handler": "src/handlers/customers/getAll.getAll",
           "events": [
             {
               "httpApi": {
-                "path": "/workers",
+                "path": "/customers",
                 "method": "get"
               },
               "resolvedMethod": "GET",
-              "resolvedPath": "/workers"
+              "resolvedPath": "/customers"
             }
           ],
           "package": {
-            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-getWorkers.zip"
+            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-getCustomers.zip"
           },
-          "name": "customer-service-dev-getWorkers",
+          "name": "customer-service-dev-getCustomers",
           "environment": {
             "NODE_OPTIONS": "--enable-source-maps"
           },
@@ -667,24 +953,24 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU"
+          "versionLogicalId": "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8"
         },
-        "updateWorkerStatus": {
-          "handler": "src/handlers/workers/updateWorkerStatus.handler",
+        "createEntity": {
+          "handler": "src/handlers/entities/create.create",
           "events": [
             {
               "httpApi": {
-                "path": "/workers/{id}/status",
-                "method": "patch"
+                "path": "/customers/{id}/entities",
+                "method": "post"
               },
-              "resolvedMethod": "PATCH",
-              "resolvedPath": "/workers/{id}/status"
+              "resolvedMethod": "POST",
+              "resolvedPath": "/customers/{id}/entities"
             }
           ],
           "package": {
-            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-updateWorkerStatus.zip"
+            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-createEntity.zip"
           },
-          "name": "customer-service-dev-updateWorkerStatus",
+          "name": "customer-service-dev-createEntity",
           "environment": {
             "NODE_OPTIONS": "--enable-source-maps"
           },
@@ -692,14 +978,64 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM"
+          "versionLogicalId": "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0"
+        },
+        "createPixKey": {
+          "handler": "src/handlers/pix/create.create",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/customers/{id}/pix-keys",
+                "method": "post"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/customers/{id}/pix-keys"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-createPixKey.zip"
+          },
+          "name": "customer-service-dev-createPixKey",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q"
+        },
+        "isActive": {
+          "handler": "src/handlers/customers/isActive.isActive",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/customers/{id}/status",
+                "method": "patch"
+              },
+              "resolvedMethod": "PATCH",
+              "resolvedPath": "/customers/{id}/status"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/customer-service/.serverless/build/customer-service-isActive.zip"
+          },
+          "name": "customer-service-dev-isActive",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY"
         }
       },
       "package": {
         "individually": true,
         "artifactsS3KeyDirname": "serverless/customer-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-        "artifactDirectoryName": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z"
+        "artifactDirectoryName": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z"
       }
     },
     "provider": {
@@ -729,22 +1065,34 @@
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "The AWS CloudFormation template for this Serverless application",
         "Resources": {
-          "HeartbeatLogGroup": {
+          "CreateCustomerLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/customer-service-dev-heartbeat"
+              "LogGroupName": "/aws/lambda/customer-service-dev-createCustomer"
             }
           },
-          "GetWorkersLogGroup": {
+          "GetCustomersLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/customer-service-dev-getWorkers"
+              "LogGroupName": "/aws/lambda/customer-service-dev-getCustomers"
             }
           },
-          "UpdateWorkerStatusLogGroup": {
+          "CreateEntityLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/customer-service-dev-updateWorkerStatus"
+              "LogGroupName": "/aws/lambda/customer-service-dev-createEntity"
+            }
+          },
+          "CreatePixKeyLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/customer-service-dev-createPixKey"
+            }
+          },
+          "IsActiveLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/customer-service-dev-isActive"
             }
           },
           "IamRoleLambdaExecution": {
@@ -839,16 +1187,16 @@
               ]
             }
           },
-          "HeartbeatLambdaFunction": {
+          "CreateCustomerLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-heartbeat.zip"
+                "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createCustomer.zip"
               },
-              "Handler": "src/handlers/workers/heartbeat.handler",
+              "Handler": "src/handlers/customers/create.create",
               "Runtime": "nodejs18.x",
-              "FunctionName": "customer-service-dev-heartbeat",
+              "FunctionName": "customer-service-dev-createCustomer",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -879,19 +1227,19 @@
               }
             },
             "DependsOn": [
-              "HeartbeatLogGroup"
+              "CreateCustomerLogGroup"
             ]
           },
-          "GetWorkersLambdaFunction": {
+          "GetCustomersLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-getWorkers.zip"
+                "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-getCustomers.zip"
               },
-              "Handler": "src/handlers/workers/getWorkers.handler",
+              "Handler": "src/handlers/customers/getAll.getAll",
               "Runtime": "nodejs18.x",
-              "FunctionName": "customer-service-dev-getWorkers",
+              "FunctionName": "customer-service-dev-getCustomers",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -922,19 +1270,19 @@
               }
             },
             "DependsOn": [
-              "GetWorkersLogGroup"
+              "GetCustomersLogGroup"
             ]
           },
-          "UpdateWorkerStatusLambdaFunction": {
+          "CreateEntityLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-updateWorkerStatus.zip"
+                "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createEntity.zip"
               },
-              "Handler": "src/handlers/workers/updateWorkerStatus.handler",
+              "Handler": "src/handlers/entities/create.create",
               "Runtime": "nodejs18.x",
-              "FunctionName": "customer-service-dev-updateWorkerStatus",
+              "FunctionName": "customer-service-dev-createEntity",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -965,37 +1313,143 @@
               }
             },
             "DependsOn": [
-              "UpdateWorkerStatusLogGroup"
+              "CreateEntityLogGroup"
             ]
           },
-          "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU": {
+          "CreatePixKeyLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createPixKey.zip"
+              },
+              "Handler": "src/handlers/pix/create.create",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "customer-service-dev-createPixKey",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreatePixKeyLogGroup"
+            ]
+          },
+          "IsActiveLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-isActive.zip"
+              },
+              "Handler": "src/handlers/customers/isActive.isActive",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "customer-service-dev-isActive",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "IsActiveLogGroup"
+            ]
+          },
+          "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "GetWorkersLambdaFunction"
+                "Ref": "IsActiveLambdaFunction"
               },
-              "CodeSha256": "yUEmtCORNfh9XldvxJAFMCoPZGzjAK1RUF6pWI7LvJ8="
+              "CodeSha256": "AXXmzGbYstD+tDNrBo0smBX8LZZYsXuh+9I3JC+bwbA="
             }
           },
-          "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM": {
+          "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "UpdateWorkerStatusLambdaFunction"
+                "Ref": "CreatePixKeyLambdaFunction"
               },
-              "CodeSha256": "BOqmNcgvr7wUj7GyR+OXNtGrYwyGWCbwCOVkWBMNrpk="
+              "CodeSha256": "xBCQgGWcvTI5HdynHTEkBdSrQh4Oo4G+0IXudPYVWJ4="
             }
           },
-          "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA": {
+          "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "HeartbeatLambdaFunction"
+                "Ref": "CreateEntityLambdaFunction"
               },
-              "CodeSha256": "N0mX6f2q3GEbeeqykLMgYLcVP0FIOOlrEIpw7D/gin4="
+              "CodeSha256": "vg1pnfVL9e9eGd3xEiQWfnosCuY0+cxtCe3iWwRFQwg="
+            }
+          },
+          "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetCustomersLambdaFunction"
+              },
+              "CodeSha256": "yXDBnW57ESZV1C35HAe/sHUPbSyGtU1pryRm/8/SMYM="
+            }
+          },
+          "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateCustomerLambdaFunction"
+              },
+              "CodeSha256": "TGgdIHa4xMjwrhLqtYhFdO77R8W1lCB//mTiORq3Y+Q="
             }
           },
           "HttpApi": {
@@ -1018,12 +1472,12 @@
               }
             }
           },
-          "HeartbeatLambdaPermissionHttpApi": {
+          "CreateCustomerLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "HeartbeatLambdaFunction",
+                  "CreateCustomerLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1055,7 +1509,7 @@
               }
             }
           },
-          "HttpApiIntegrationHeartbeat": {
+          "HttpApiIntegrationCreateCustomer": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -1064,7 +1518,7 @@
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
                 "Fn::GetAtt": [
-                  "HeartbeatLambdaFunction",
+                  "CreateCustomerLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1072,33 +1526,33 @@
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRoutePostWorkerHeartbeat": {
+          "HttpApiRoutePostCustomers": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "POST /worker/heartbeat",
+              "RouteKey": "POST /customers",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationHeartbeat"
+                      "Ref": "HttpApiIntegrationCreateCustomer"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationHeartbeat"
+            "DependsOn": "HttpApiIntegrationCreateCustomer"
           },
-          "GetWorkersLambdaPermissionHttpApi": {
+          "GetCustomersLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "GetWorkersLambdaFunction",
+                  "GetCustomersLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1130,7 +1584,7 @@
               }
             }
           },
-          "HttpApiIntegrationGetWorkers": {
+          "HttpApiIntegrationGetCustomers": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -1139,7 +1593,7 @@
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
                 "Fn::GetAtt": [
-                  "GetWorkersLambdaFunction",
+                  "GetCustomersLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1147,33 +1601,33 @@
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRouteGetWorkers": {
+          "HttpApiRouteGetCustomers": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "GET /workers",
+              "RouteKey": "GET /customers",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationGetWorkers"
+                      "Ref": "HttpApiIntegrationGetCustomers"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationGetWorkers"
+            "DependsOn": "HttpApiIntegrationGetCustomers"
           },
-          "UpdateWorkerStatusLambdaPermissionHttpApi": {
+          "CreateEntityLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "UpdateWorkerStatusLambdaFunction",
+                  "CreateEntityLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1205,7 +1659,7 @@
               }
             }
           },
-          "HttpApiIntegrationUpdateWorkerStatus": {
+          "HttpApiIntegrationCreateEntity": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -1214,7 +1668,7 @@
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
                 "Fn::GetAtt": [
-                  "UpdateWorkerStatusLambdaFunction",
+                  "CreateEntityLambdaFunction",
                   "Arn"
                 ]
               },
@@ -1222,26 +1676,176 @@
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRoutePatchWorkersIdVarStatus": {
+          "HttpApiRoutePostCustomersIdVarEntities": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "PATCH /workers/{id}/status",
+              "RouteKey": "POST /customers/{id}/entities",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationUpdateWorkerStatus"
+                      "Ref": "HttpApiIntegrationCreateEntity"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationUpdateWorkerStatus"
+            "DependsOn": "HttpApiIntegrationCreateEntity"
+          },
+          "CreatePixKeyLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreatePixKeyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCreatePixKey": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "CreatePixKeyLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostCustomersIdVarPixDashkeys": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /customers/{id}/pix-keys",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCreatePixKey"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCreatePixKey"
+          },
+          "IsActiveLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "IsActiveLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationIsActive": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "IsActiveLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePatchCustomersIdVarStatus": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "PATCH /customers/{id}/status",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationIsActive"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationIsActive"
           }
         },
         "Outputs": {
@@ -1251,31 +1855,49 @@
               "Name": "sls-customer-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "GetWorkersLambdaFunctionQualifiedArn": {
+          "IsActiveLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU"
+              "Ref": "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY"
             },
             "Export": {
-              "Name": "sls-customer-service-dev-GetWorkersLambdaFunctionQualifiedArn"
+              "Name": "sls-customer-service-dev-IsActiveLambdaFunctionQualifiedArn"
             }
           },
-          "UpdateWorkerStatusLambdaFunctionQualifiedArn": {
+          "CreatePixKeyLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM"
+              "Ref": "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q"
             },
             "Export": {
-              "Name": "sls-customer-service-dev-UpdateWorkerStatusLambdaFunctionQualifiedArn"
+              "Name": "sls-customer-service-dev-CreatePixKeyLambdaFunctionQualifiedArn"
             }
           },
-          "HeartbeatLambdaFunctionQualifiedArn": {
+          "CreateEntityLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA"
+              "Ref": "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0"
             },
             "Export": {
-              "Name": "sls-customer-service-dev-HeartbeatLambdaFunctionQualifiedArn"
+              "Name": "sls-customer-service-dev-CreateEntityLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetCustomersLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8"
+            },
+            "Export": {
+              "Name": "sls-customer-service-dev-GetCustomersLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateCustomerLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA"
+            },
+            "Export": {
+              "Name": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -1324,7 +1946,7 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: customer-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n\n  vpc:\n    securityGroupIds:\n      - sg-0c53a9fdbac3c3f1d\n    subnetIds:\n      - subnet-0db66bddd09cf4ea4\n      - subnet-0025ce174e80dbd39\n      - subnet-0b3d786ce9758f63d\n      - subnet-04db367d4eefcbc92\n      - subnet-044f588274a69635f\n      - subnet-09be2de009329d2a1\n\n  environment:\n    DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core\n    JWT_SECRET: uma-super-chave-secreta\n\nfunctions:\n  heartbeat:\n    handler: src/handlers/workers/heartbeat.handler\n    events:\n      - httpApi:\n          path: /worker/heartbeat\n          method: post\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - node_modules/@prisma/client/index.js\n        - prisma/schema.prisma\n        - src/handlers/workers/heartbeat.ts\n        - src/lib/**\n        - src/middleware/**\n\n  getWorkers:\n    handler: src/handlers/workers/getWorkers.handler\n    events:\n      - httpApi:\n          path: /workers\n          method: get\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - node_modules/@prisma/client/index.js\n        - prisma/schema.prisma\n        - src/handlers/workers/getWorkers.ts\n        - src/lib/**\n        - src/middleware/**\n\n  updateWorkerStatus:\n    handler: src/handlers/workers/updateWorkerStatus.handler\n    events:\n      - httpApi:\n          path: /workers/{id}/status\n          method: patch\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - node_modules/@prisma/client/index.js\n        - prisma/schema.prisma\n        - src/handlers/workers/updateWorkerStatus.ts\n        - src/lib/**\n        - src/middleware/**\n\npackage:\n  individually: true\n",
+    "serviceRawFile": "service: customer-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n\n  vpc:\n    securityGroupIds:\n      - sg-0c53a9fdbac3c3f1d\n    subnetIds:\n      - subnet-0db66bddd09cf4ea4\n      - subnet-0025ce174e80dbd39\n      - subnet-0b3d786ce9758f63d\n      - subnet-04db367d4eefcbc92\n      - subnet-044f588274a69635f\n      - subnet-09be2de009329d2a1\n\n  environment:\n    DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core\n    JWT_SECRET: uma-super-chave-secreta\n\nfunctions:\n  createCustomer:\n    handler: src/handlers/customers/create.create\n    events:\n      - httpApi:\n          path: /customers\n          method: post\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - node_modules/@prisma/client/index.js\n        - prisma/schema.prisma\n        - src/handlers/customers/create.ts\n        - src/lib/**\n        - src/middleware/**\n\n  getCustomers:\n    handler: src/handlers/customers/getAll.getAll\n    events:\n      - httpApi:\n          path: /customers\n          method: get\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - prisma/schema.prisma\n        - src/handlers/customers/getAll.ts\n        - src/lib/**\n        - src/middleware/**\n\n  createEntity:\n    handler: src/handlers/entities/create.create\n    events:\n      - httpApi:\n          path: /customers/{id}/entities\n          method: post\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - prisma/schema.prisma\n        - src/handlers/entities/create.ts\n        - src/lib/**\n        - src/middleware/**\n\n  createPixKey:\n    handler: src/handlers/pix/create.create\n    events:\n      - httpApi:\n          path: /customers/{id}/pix-keys\n          method: post\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - prisma/schema.prisma\n        - src/handlers/pix/create.ts\n        - src/lib/**\n        - src/middleware/**\n\n  isActive:\n    handler: src/handlers/customers/isActive.isActive\n    events:\n      - httpApi:\n          path: /customers/{id}/status\n          method: patch\n    package:\n      patterns:\n        - node_modules/.prisma/client/**\n        - node_modules/@prisma/client/**\n        - prisma/schema.prisma\n        - src/handlers/customers/isActive.ts\n        - src/lib/**\n        - src/middleware/**\n\npackage:\n  individually: true\n",
     "command": [
       "deploy"
     ],
@@ -1337,26 +1959,38 @@
     "userName": "sttartpay",
     "serviceProviderAwsAccountId": "041063250501",
     "serviceProviderAwsCfStackName": "customer-service-dev",
-    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:041063250501:stack/customer-service-dev/cd8caa70-fae8-11f0-9081-125bd2cbdf41",
-    "serviceProviderAwsCfStackCreated": "2026-01-26T18:57:03.789Z",
-    "serviceProviderAwsCfStackUpdated": "2026-01-27T16:47:38.284Z",
+    "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:041063250501:stack/customer-service-dev/e5a07310-fbb7-11f0-976c-0ed193197d81",
+    "serviceProviderAwsCfStackCreated": "2026-01-27T19:39:29.985Z",
+    "serviceProviderAwsCfStackUpdated": "2026-01-28T17:26:29.994Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
-        "OutputKey": "GetWorkersLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-getWorkers:3",
+        "OutputKey": "CreateCustomerLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-createCustomer:8",
         "Description": "Current Lambda function version",
-        "ExportName": "sls-customer-service-dev-GetWorkersLambdaFunctionQualifiedArn"
+        "ExportName": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
       },
       {
-        "OutputKey": "HeartbeatLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-heartbeat:6",
+        "OutputKey": "GetCustomersLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-getCustomers:6",
         "Description": "Current Lambda function version",
-        "ExportName": "sls-customer-service-dev-HeartbeatLambdaFunctionQualifiedArn"
+        "ExportName": "sls-customer-service-dev-GetCustomersLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "CreateEntityLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-createEntity:5",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-customer-service-dev-CreateEntityLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "CreatePixKeyLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-createPixKey:4",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-customer-service-dev-CreatePixKeyLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "HttpApiId",
-        "OutputValue": "bqyznm4dak",
+        "OutputValue": "n4lb4tvuoa",
         "Description": "Id of the HTTP API",
         "ExportName": "sls-customer-service-dev-HttpApiId"
       },
@@ -1366,14 +2000,8 @@
         "ExportName": "sls-customer-service-dev-ServerlessDeploymentBucketName"
       },
       {
-        "OutputKey": "UpdateWorkerStatusLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:customer-service-dev-updateWorkerStatus:1",
-        "Description": "Current Lambda function version",
-        "ExportName": "sls-customer-service-dev-UpdateWorkerStatusLambdaFunctionQualifiedArn"
-      },
-      {
         "OutputKey": "HttpApiUrl",
-        "OutputValue": "https://bqyznm4dak.execute-api.us-east-1.amazonaws.com",
+        "OutputValue": "https://n4lb4tvuoa.execute-api.us-east-1.amazonaws.com",
         "Description": "URL of the HTTP API",
         "ExportName": "sls-customer-service-dev-HttpApiUrl"
       }
@@ -1382,22 +2010,34 @@
       "AWSTemplateFormatVersion": "2010-09-09",
       "Description": "The AWS CloudFormation template for this Serverless application",
       "Resources": {
-        "HeartbeatLogGroup": {
+        "CreateCustomerLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
-            "LogGroupName": "/aws/lambda/customer-service-dev-heartbeat"
+            "LogGroupName": "/aws/lambda/customer-service-dev-createCustomer"
           }
         },
-        "GetWorkersLogGroup": {
+        "GetCustomersLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
-            "LogGroupName": "/aws/lambda/customer-service-dev-getWorkers"
+            "LogGroupName": "/aws/lambda/customer-service-dev-getCustomers"
           }
         },
-        "UpdateWorkerStatusLogGroup": {
+        "CreateEntityLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
-            "LogGroupName": "/aws/lambda/customer-service-dev-updateWorkerStatus"
+            "LogGroupName": "/aws/lambda/customer-service-dev-createEntity"
+          }
+        },
+        "CreatePixKeyLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/customer-service-dev-createPixKey"
+          }
+        },
+        "IsActiveLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/customer-service-dev-isActive"
           }
         },
         "IamRoleLambdaExecution": {
@@ -1492,16 +2132,16 @@
             ]
           }
         },
-        "HeartbeatLambdaFunction": {
+        "CreateCustomerLambdaFunction": {
           "Type": "AWS::Lambda::Function",
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-heartbeat.zip"
+              "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createCustomer.zip"
             },
-            "Handler": "src/handlers/workers/heartbeat.handler",
+            "Handler": "src/handlers/customers/create.create",
             "Runtime": "nodejs18.x",
-            "FunctionName": "customer-service-dev-heartbeat",
+            "FunctionName": "customer-service-dev-createCustomer",
             "MemorySize": 1024,
             "Timeout": 6,
             "Environment": {
@@ -1532,19 +2172,19 @@
             }
           },
           "DependsOn": [
-            "HeartbeatLogGroup"
+            "CreateCustomerLogGroup"
           ]
         },
-        "GetWorkersLambdaFunction": {
+        "GetCustomersLambdaFunction": {
           "Type": "AWS::Lambda::Function",
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-getWorkers.zip"
+              "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-getCustomers.zip"
             },
-            "Handler": "src/handlers/workers/getWorkers.handler",
+            "Handler": "src/handlers/customers/getAll.getAll",
             "Runtime": "nodejs18.x",
-            "FunctionName": "customer-service-dev-getWorkers",
+            "FunctionName": "customer-service-dev-getCustomers",
             "MemorySize": 1024,
             "Timeout": 6,
             "Environment": {
@@ -1575,19 +2215,19 @@
             }
           },
           "DependsOn": [
-            "GetWorkersLogGroup"
+            "GetCustomersLogGroup"
           ]
         },
-        "UpdateWorkerStatusLambdaFunction": {
+        "CreateEntityLambdaFunction": {
           "Type": "AWS::Lambda::Function",
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/customer-service/dev/1769533766230-2026-01-27T17:09:26.230Z/customer-service-updateWorkerStatus.zip"
+              "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createEntity.zip"
             },
-            "Handler": "src/handlers/workers/updateWorkerStatus.handler",
+            "Handler": "src/handlers/entities/create.create",
             "Runtime": "nodejs18.x",
-            "FunctionName": "customer-service-dev-updateWorkerStatus",
+            "FunctionName": "customer-service-dev-createEntity",
             "MemorySize": 1024,
             "Timeout": 6,
             "Environment": {
@@ -1618,37 +2258,143 @@
             }
           },
           "DependsOn": [
-            "UpdateWorkerStatusLogGroup"
+            "CreateEntityLogGroup"
           ]
         },
-        "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU": {
+        "CreatePixKeyLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createPixKey.zip"
+            },
+            "Handler": "src/handlers/pix/create.create",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "customer-service-dev-createPixKey",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "CreatePixKeyLogGroup"
+          ]
+        },
+        "IsActiveLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-isActive.zip"
+            },
+            "Handler": "src/handlers/customers/isActive.isActive",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "customer-service-dev-isActive",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "IsActiveLogGroup"
+          ]
+        },
+        "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
-              "Ref": "GetWorkersLambdaFunction"
+              "Ref": "IsActiveLambdaFunction"
             },
-            "CodeSha256": "yUEmtCORNfh9XldvxJAFMCoPZGzjAK1RUF6pWI7LvJ8="
+            "CodeSha256": "AXXmzGbYstD+tDNrBo0smBX8LZZYsXuh+9I3JC+bwbA="
           }
         },
-        "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM": {
+        "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
-              "Ref": "UpdateWorkerStatusLambdaFunction"
+              "Ref": "CreatePixKeyLambdaFunction"
             },
-            "CodeSha256": "BOqmNcgvr7wUj7GyR+OXNtGrYwyGWCbwCOVkWBMNrpk="
+            "CodeSha256": "xBCQgGWcvTI5HdynHTEkBdSrQh4Oo4G+0IXudPYVWJ4="
           }
         },
-        "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA": {
+        "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
-              "Ref": "HeartbeatLambdaFunction"
+              "Ref": "CreateEntityLambdaFunction"
             },
-            "CodeSha256": "N0mX6f2q3GEbeeqykLMgYLcVP0FIOOlrEIpw7D/gin4="
+            "CodeSha256": "vg1pnfVL9e9eGd3xEiQWfnosCuY0+cxtCe3iWwRFQwg="
+          }
+        },
+        "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "GetCustomersLambdaFunction"
+            },
+            "CodeSha256": "yXDBnW57ESZV1C35HAe/sHUPbSyGtU1pryRm/8/SMYM="
+          }
+        },
+        "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CreateCustomerLambdaFunction"
+            },
+            "CodeSha256": "TGgdIHa4xMjwrhLqtYhFdO77R8W1lCB//mTiORq3Y+Q="
           }
         },
         "HttpApi": {
@@ -1671,12 +2417,12 @@
             }
           }
         },
-        "HeartbeatLambdaPermissionHttpApi": {
+        "CreateCustomerLambdaPermissionHttpApi": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
             "FunctionName": {
               "Fn::GetAtt": [
-                "HeartbeatLambdaFunction",
+                "CreateCustomerLambdaFunction",
                 "Arn"
               ]
             },
@@ -1708,7 +2454,7 @@
             }
           }
         },
-        "HttpApiIntegrationHeartbeat": {
+        "HttpApiIntegrationCreateCustomer": {
           "Type": "AWS::ApiGatewayV2::Integration",
           "Properties": {
             "ApiId": {
@@ -1717,7 +2463,7 @@
             "IntegrationType": "AWS_PROXY",
             "IntegrationUri": {
               "Fn::GetAtt": [
-                "HeartbeatLambdaFunction",
+                "CreateCustomerLambdaFunction",
                 "Arn"
               ]
             },
@@ -1725,33 +2471,33 @@
             "TimeoutInMillis": 30000
           }
         },
-        "HttpApiRoutePostWorkerHeartbeat": {
+        "HttpApiRoutePostCustomers": {
           "Type": "AWS::ApiGatewayV2::Route",
           "Properties": {
             "ApiId": {
               "Ref": "HttpApi"
             },
-            "RouteKey": "POST /worker/heartbeat",
+            "RouteKey": "POST /customers",
             "Target": {
               "Fn::Join": [
                 "/",
                 [
                   "integrations",
                   {
-                    "Ref": "HttpApiIntegrationHeartbeat"
+                    "Ref": "HttpApiIntegrationCreateCustomer"
                   }
                 ]
               ]
             }
           },
-          "DependsOn": "HttpApiIntegrationHeartbeat"
+          "DependsOn": "HttpApiIntegrationCreateCustomer"
         },
-        "GetWorkersLambdaPermissionHttpApi": {
+        "GetCustomersLambdaPermissionHttpApi": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
             "FunctionName": {
               "Fn::GetAtt": [
-                "GetWorkersLambdaFunction",
+                "GetCustomersLambdaFunction",
                 "Arn"
               ]
             },
@@ -1783,7 +2529,7 @@
             }
           }
         },
-        "HttpApiIntegrationGetWorkers": {
+        "HttpApiIntegrationGetCustomers": {
           "Type": "AWS::ApiGatewayV2::Integration",
           "Properties": {
             "ApiId": {
@@ -1792,7 +2538,7 @@
             "IntegrationType": "AWS_PROXY",
             "IntegrationUri": {
               "Fn::GetAtt": [
-                "GetWorkersLambdaFunction",
+                "GetCustomersLambdaFunction",
                 "Arn"
               ]
             },
@@ -1800,33 +2546,33 @@
             "TimeoutInMillis": 30000
           }
         },
-        "HttpApiRouteGetWorkers": {
+        "HttpApiRouteGetCustomers": {
           "Type": "AWS::ApiGatewayV2::Route",
           "Properties": {
             "ApiId": {
               "Ref": "HttpApi"
             },
-            "RouteKey": "GET /workers",
+            "RouteKey": "GET /customers",
             "Target": {
               "Fn::Join": [
                 "/",
                 [
                   "integrations",
                   {
-                    "Ref": "HttpApiIntegrationGetWorkers"
+                    "Ref": "HttpApiIntegrationGetCustomers"
                   }
                 ]
               ]
             }
           },
-          "DependsOn": "HttpApiIntegrationGetWorkers"
+          "DependsOn": "HttpApiIntegrationGetCustomers"
         },
-        "UpdateWorkerStatusLambdaPermissionHttpApi": {
+        "CreateEntityLambdaPermissionHttpApi": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
             "FunctionName": {
               "Fn::GetAtt": [
-                "UpdateWorkerStatusLambdaFunction",
+                "CreateEntityLambdaFunction",
                 "Arn"
               ]
             },
@@ -1858,7 +2604,7 @@
             }
           }
         },
-        "HttpApiIntegrationUpdateWorkerStatus": {
+        "HttpApiIntegrationCreateEntity": {
           "Type": "AWS::ApiGatewayV2::Integration",
           "Properties": {
             "ApiId": {
@@ -1867,7 +2613,7 @@
             "IntegrationType": "AWS_PROXY",
             "IntegrationUri": {
               "Fn::GetAtt": [
-                "UpdateWorkerStatusLambdaFunction",
+                "CreateEntityLambdaFunction",
                 "Arn"
               ]
             },
@@ -1875,26 +2621,176 @@
             "TimeoutInMillis": 30000
           }
         },
-        "HttpApiRoutePatchWorkersIdVarStatus": {
+        "HttpApiRoutePostCustomersIdVarEntities": {
           "Type": "AWS::ApiGatewayV2::Route",
           "Properties": {
             "ApiId": {
               "Ref": "HttpApi"
             },
-            "RouteKey": "PATCH /workers/{id}/status",
+            "RouteKey": "POST /customers/{id}/entities",
             "Target": {
               "Fn::Join": [
                 "/",
                 [
                   "integrations",
                   {
-                    "Ref": "HttpApiIntegrationUpdateWorkerStatus"
+                    "Ref": "HttpApiIntegrationCreateEntity"
                   }
                 ]
               ]
             }
           },
-          "DependsOn": "HttpApiIntegrationUpdateWorkerStatus"
+          "DependsOn": "HttpApiIntegrationCreateEntity"
+        },
+        "CreatePixKeyLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "CreatePixKeyLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationCreatePixKey": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "CreatePixKeyLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostCustomersIdVarPixDashkeys": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "POST /customers/{id}/pix-keys",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationCreatePixKey"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationCreatePixKey"
+        },
+        "IsActiveLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "IsActiveLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationIsActive": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "IsActiveLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePatchCustomersIdVarStatus": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "PATCH /customers/{id}/status",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationIsActive"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationIsActive"
         }
       },
       "Outputs": {
@@ -1904,31 +2800,49 @@
             "Name": "sls-customer-service-dev-ServerlessDeploymentBucketName"
           }
         },
-        "GetWorkersLambdaFunctionQualifiedArn": {
+        "IsActiveLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "GetWorkersLambdaVersionZdlXXdvSPzcxzh01CfS9pR909Zpv7ZHpb8gHh5deEvU"
+            "Ref": "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY"
           },
           "Export": {
-            "Name": "sls-customer-service-dev-GetWorkersLambdaFunctionQualifiedArn"
+            "Name": "sls-customer-service-dev-IsActiveLambdaFunctionQualifiedArn"
           }
         },
-        "UpdateWorkerStatusLambdaFunctionQualifiedArn": {
+        "CreatePixKeyLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "UpdateWorkerStatusLambdaVersion6jlOvfyNzyFMDKdC5VAGCP5H4uwIY4ZwOc0TBDmroM"
+            "Ref": "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q"
           },
           "Export": {
-            "Name": "sls-customer-service-dev-UpdateWorkerStatusLambdaFunctionQualifiedArn"
+            "Name": "sls-customer-service-dev-CreatePixKeyLambdaFunctionQualifiedArn"
           }
         },
-        "HeartbeatLambdaFunctionQualifiedArn": {
+        "CreateEntityLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "HeartbeatLambdaVersionZ9F0q00AXMO8DgC5R4BEPb0EtDU8SLNrrmSeEkZ4TjA"
+            "Ref": "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0"
           },
           "Export": {
-            "Name": "sls-customer-service-dev-HeartbeatLambdaFunctionQualifiedArn"
+            "Name": "sls-customer-service-dev-CreateEntityLambdaFunctionQualifiedArn"
+          }
+        },
+        "GetCustomersLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8"
+          },
+          "Export": {
+            "Name": "sls-customer-service-dev-GetCustomersLambdaFunctionQualifiedArn"
+          }
+        },
+        "CreateCustomerLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA"
+          },
+          "Export": {
+            "Name": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
           }
         },
         "HttpApiId": {

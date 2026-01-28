@@ -9,42 +9,69 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model core_customers {
-  id          String                  @id @default(uuid())
-  type        CustomerType            // 'pf' ou 'pj'
-  document    String                  // CPF ou CNPJ
-  name        String
-  email       String?
-  created_at  DateTime                @default(now())
-  updated_at  DateTime                @updatedAt
+model auth_user {
+  id          String  @id @default(uuid())
+  email       String  @unique
+  password    String
+  name        String?
+  role        String?
+  is_active   Boolean @default(true)
+  permissions Json?
 
-  entities    core_customer_entities[]
-  pix_keys    core_pix_keys[]        @relation("CustomerPixKeys")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model core_workers {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  description     String?
+  status          String    @default("online")
+  is_active       Boolean   @default(true)
+  type            String
+  last_checkin_at DateTime? @db.Timestamp(6)
+  created_at      DateTime? @default(now()) @db.Timestamp(6)
+  updated_at      DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model core_customers {
+  id         String       @id @default(uuid())
+  type       CustomerType
+  document   String
+  name       String
+  email      String?
+  is_active  Boolean      @default(true)
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+
+  entities  core_customer_entities[]
+  pix_keys  core_pix_keys[]          @relation("customerPixKeys")
 }
 
 model core_customer_entities {
-  id          String              @id @default(uuid())
+  id          String   @id @default(uuid())
   customer_id String
   name        String
-  document    String              // CNPJ
-  created_at  DateTime            @default(now())
+  document    String
+  created_at  DateTime @default(now())
 
-  customer    core_customers      @relation(fields: [customer_id], references: [id])
-  pix_keys    core_pix_keys[]     @relation("EntityPixKeys")
+  customer core_customers  @relation(fields: [customer_id], references: [id])
+  pix_keys core_pix_keys[] @relation("entityPixKeys")
 }
 
 model core_pix_keys {
-  id          String       @id @default(uuid())
-  owner_type  OwnerType    // 'customer' ou 'entity'
-  owner_id    String
-  key_type    PixKeyType   // 'cpf' | 'cnpj' | 'email' | 'phone' | 'random'
-  key_value   String
-  active      Boolean      @default(true)
-  label       String?
-  created_at  DateTime     @default(now())
+  id         String     @id @default(uuid())
+  key_type   PixKeyType
+  key_value  String
+  label      String?
+  active     Boolean    @default(true)
+  created_at DateTime   @default(now())
 
-  customer    core_customers?          @relation("CustomerPixKeys", fields: [owner_id], references: [id])
-  entity      core_customer_entities?  @relation("EntityPixKeys", fields: [owner_id], references: [id])
+  customer_id String?
+  entity_id   String?
+
+  customer core_customers?         @relation("customerPixKeys", fields: [customer_id], references: [id], map: "fk_pix_customer_id")
+  entity   core_customer_entities? @relation("entityPixKeys", fields: [entity_id], references: [id], map: "fk_pix_entity_id")
 }
 
 enum CustomerType {

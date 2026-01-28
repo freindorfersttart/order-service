@@ -21,11 +21,11 @@ provider:
     JWT_SECRET: uma-super-chave-secreta
 
 functions:
-  heartbeat:
-    handler: src/handlers/workers/heartbeat.handler
+  createCustomer:
+    handler: src/handlers/customers/create.create
     events:
       - httpApi:
-          path: /worker/heartbeat
+          path: /customers
           method: post
     package:
       patterns:
@@ -33,39 +33,67 @@ functions:
         - node_modules/@prisma/client/**
         - node_modules/@prisma/client/index.js
         - prisma/schema.prisma
-        - src/handlers/workers/heartbeat.ts
+        - src/handlers/customers/create.ts
         - src/lib/**
         - src/middleware/**
 
-  getWorkers:
-    handler: src/handlers/workers/getWorkers.handler
+  getCustomers:
+    handler: src/handlers/customers/getAll.getAll
     events:
       - httpApi:
-          path: /workers
+          path: /customers
           method: get
     package:
       patterns:
         - node_modules/.prisma/client/**
         - node_modules/@prisma/client/**
-        - node_modules/@prisma/client/index.js
         - prisma/schema.prisma
-        - src/handlers/workers/getWorkers.ts
+        - src/handlers/customers/getAll.ts
         - src/lib/**
         - src/middleware/**
 
-  updateWorkerStatus:
-    handler: src/handlers/workers/updateWorkerStatus.handler
+  createEntity:
+    handler: src/handlers/entities/create.create
     events:
       - httpApi:
-          path: /workers/{id}/status
+          path: /customers/{id}/entities
+          method: post
+    package:
+      patterns:
+        - node_modules/.prisma/client/**
+        - node_modules/@prisma/client/**
+        - prisma/schema.prisma
+        - src/handlers/entities/create.ts
+        - src/lib/**
+        - src/middleware/**
+
+  createPixKey:
+    handler: src/handlers/pix/create.create
+    events:
+      - httpApi:
+          path: /customers/{id}/pix-keys
+          method: post
+    package:
+      patterns:
+        - node_modules/.prisma/client/**
+        - node_modules/@prisma/client/**
+        - prisma/schema.prisma
+        - src/handlers/pix/create.ts
+        - src/lib/**
+        - src/middleware/**
+
+  isActive:
+    handler: src/handlers/customers/isActive.isActive
+    events:
+      - httpApi:
+          path: /customers/{id}/status
           method: patch
     package:
       patterns:
         - node_modules/.prisma/client/**
         - node_modules/@prisma/client/**
-        - node_modules/@prisma/client/index.js
         - prisma/schema.prisma
-        - src/handlers/workers/updateWorkerStatus.ts
+        - src/handlers/customers/isActive.ts
         - src/lib/**
         - src/middleware/**
 
