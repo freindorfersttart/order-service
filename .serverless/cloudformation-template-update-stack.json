@@ -2,34 +2,22 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "The AWS CloudFormation template for this Serverless application",
   "Resources": {
-    "CreateCustomerLogGroup": {
+    "CreateAccountLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/customer-service-dev-createCustomer"
+        "LogGroupName": "/aws/lambda/order-service-dev-createAccount"
       }
     },
-    "GetCustomersLogGroup": {
+    "GetAccountsLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/customer-service-dev-getCustomers"
-      }
-    },
-    "CreateEntityLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/customer-service-dev-createEntity"
-      }
-    },
-    "CreatePixKeyLogGroup": {
-      "Type": "AWS::Logs::LogGroup",
-      "Properties": {
-        "LogGroupName": "/aws/lambda/customer-service-dev-createPixKey"
+        "LogGroupName": "/aws/lambda/order-service-dev-getAccounts"
       }
     },
     "IsActiveLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/customer-service-dev-isActive"
+        "LogGroupName": "/aws/lambda/order-service-dev-isActive"
       }
     },
     "IamRoleLambdaExecution": {
@@ -57,7 +45,7 @@
               "Fn::Join": [
                 "-",
                 [
-                  "customer-service",
+                  "order-service",
                   "dev",
                   "lambda"
                 ]
@@ -75,7 +63,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/customer-service-dev*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/order-service-dev*:*"
                     }
                   ]
                 },
@@ -86,7 +74,7 @@
                   ],
                   "Resource": [
                     {
-                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/customer-service-dev*:*:*"
+                      "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/order-service-dev*:*:*"
                     }
                   ]
                 }
@@ -99,7 +87,7 @@
           "Fn::Join": [
             "-",
             [
-              "customer-service",
+              "order-service",
               "dev",
               {
                 "Ref": "AWS::Region"
@@ -124,16 +112,16 @@
         ]
       }
     },
-    "CreateCustomerLambdaFunction": {
+    "CreateAccountLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createCustomer.zip"
+          "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-createAccount.zip"
         },
-        "Handler": "src/handlers/customers/create.create",
+        "Handler": "src/handlers/accounts/create.create",
         "Runtime": "nodejs18.x",
-        "FunctionName": "customer-service-dev-createCustomer",
+        "FunctionName": "order-service-dev-createAccount",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
@@ -164,19 +152,19 @@
         }
       },
       "DependsOn": [
-        "CreateCustomerLogGroup"
+        "CreateAccountLogGroup"
       ]
     },
-    "GetCustomersLambdaFunction": {
+    "GetAccountsLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-getCustomers.zip"
+          "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-getAccounts.zip"
         },
-        "Handler": "src/handlers/customers/getAll.getAll",
+        "Handler": "src/handlers/accounts/getAll.getAll",
         "Runtime": "nodejs18.x",
-        "FunctionName": "customer-service-dev-getCustomers",
+        "FunctionName": "order-service-dev-getAccounts",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
@@ -207,93 +195,7 @@
         }
       },
       "DependsOn": [
-        "GetCustomersLogGroup"
-      ]
-    },
-    "CreateEntityLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createEntity.zip"
-        },
-        "Handler": "src/handlers/entities/create.create",
-        "Runtime": "nodejs18.x",
-        "FunctionName": "customer-service-dev-createEntity",
-        "MemorySize": 1024,
-        "Timeout": 6,
-        "Environment": {
-          "Variables": {
-            "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
-            "JWT_SECRET": "uma-super-chave-secreta",
-            "NODE_OPTIONS": "--enable-source-maps"
-          }
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            "sg-0c53a9fdbac3c3f1d"
-          ],
-          "SubnetIds": [
-            "subnet-0db66bddd09cf4ea4",
-            "subnet-0025ce174e80dbd39",
-            "subnet-0b3d786ce9758f63d",
-            "subnet-04db367d4eefcbc92",
-            "subnet-044f588274a69635f",
-            "subnet-09be2de009329d2a1"
-          ]
-        }
-      },
-      "DependsOn": [
-        "CreateEntityLogGroup"
-      ]
-    },
-    "CreatePixKeyLambdaFunction": {
-      "Type": "AWS::Lambda::Function",
-      "Properties": {
-        "Code": {
-          "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-createPixKey.zip"
-        },
-        "Handler": "src/handlers/pix/create.create",
-        "Runtime": "nodejs18.x",
-        "FunctionName": "customer-service-dev-createPixKey",
-        "MemorySize": 1024,
-        "Timeout": 6,
-        "Environment": {
-          "Variables": {
-            "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
-            "JWT_SECRET": "uma-super-chave-secreta",
-            "NODE_OPTIONS": "--enable-source-maps"
-          }
-        },
-        "Role": {
-          "Fn::GetAtt": [
-            "IamRoleLambdaExecution",
-            "Arn"
-          ]
-        },
-        "VpcConfig": {
-          "SecurityGroupIds": [
-            "sg-0c53a9fdbac3c3f1d"
-          ],
-          "SubnetIds": [
-            "subnet-0db66bddd09cf4ea4",
-            "subnet-0025ce174e80dbd39",
-            "subnet-0b3d786ce9758f63d",
-            "subnet-04db367d4eefcbc92",
-            "subnet-044f588274a69635f",
-            "subnet-09be2de009329d2a1"
-          ]
-        }
-      },
-      "DependsOn": [
-        "CreatePixKeyLogGroup"
+        "GetAccountsLogGroup"
       ]
     },
     "IsActiveLambdaFunction": {
@@ -301,11 +203,11 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/customer-service/dev/1769621314279-2026-01-28T17:28:34.279Z/customer-service-isActive.zip"
+          "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-isActive.zip"
         },
-        "Handler": "src/handlers/customers/isActive.isActive",
+        "Handler": "src/handlers/accounts/isActive.isActive",
         "Runtime": "nodejs18.x",
-        "FunctionName": "customer-service-dev-isActive",
+        "FunctionName": "order-service-dev-isActive",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
@@ -339,60 +241,40 @@
         "IsActiveLogGroup"
       ]
     },
-    "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY": {
+    "GetAccountsLambdaVersionc5qHnhVB9vea9CjcNbRpsUCh0zFI2RFA0V4VkQHrI": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GetAccountsLambdaFunction"
+        },
+        "CodeSha256": "H2++H+JpsG+u7q2CCfKdYmJeIbcCR+F47Li1TR/u9lU="
+      }
+    },
+    "CreateAccountLambdaVersionXrnqXJLkPJM61BMqUe3wb54sPyAFC5HiBlr2sw28U": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CreateAccountLambdaFunction"
+        },
+        "CodeSha256": "lov7B8gSjJnGybTwgEEKAnli539a42Kugtu49J7GrKY="
+      }
+    },
+    "IsActiveLambdaVersioneJHE0h2KfIe3z22EetlMcxU5O4vU5mtnR1wAqZ2d3A": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "IsActiveLambdaFunction"
         },
-        "CodeSha256": "AXXmzGbYstD+tDNrBo0smBX8LZZYsXuh+9I3JC+bwbA="
-      }
-    },
-    "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "CreatePixKeyLambdaFunction"
-        },
-        "CodeSha256": "xBCQgGWcvTI5HdynHTEkBdSrQh4Oo4G+0IXudPYVWJ4="
-      }
-    },
-    "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "CreateEntityLambdaFunction"
-        },
-        "CodeSha256": "vg1pnfVL9e9eGd3xEiQWfnosCuY0+cxtCe3iWwRFQwg="
-      }
-    },
-    "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "GetCustomersLambdaFunction"
-        },
-        "CodeSha256": "yXDBnW57ESZV1C35HAe/sHUPbSyGtU1pryRm/8/SMYM="
-      }
-    },
-    "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "CreateCustomerLambdaFunction"
-        },
-        "CodeSha256": "TGgdIHa4xMjwrhLqtYhFdO77R8W1lCB//mTiORq3Y+Q="
+        "CodeSha256": "NRfUbnQw9j9T+6WTkY79kb13aAgCtHlg4FTuU0cAKXc="
       }
     },
     "HttpApi": {
       "Type": "AWS::ApiGatewayV2::Api",
       "Properties": {
-        "Name": "dev-customer-service",
+        "Name": "dev-order-service",
         "ProtocolType": "HTTP"
       }
     },
@@ -409,12 +291,12 @@
         }
       }
     },
-    "CreateCustomerLambdaPermissionHttpApi": {
+    "CreateAccountLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "CreateCustomerLambdaFunction",
+            "CreateAccountLambdaFunction",
             "Arn"
           ]
         },
@@ -446,7 +328,7 @@
         }
       }
     },
-    "HttpApiIntegrationCreateCustomer": {
+    "HttpApiIntegrationCreateAccount": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -455,7 +337,7 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::GetAtt": [
-            "CreateCustomerLambdaFunction",
+            "CreateAccountLambdaFunction",
             "Arn"
           ]
         },
@@ -463,33 +345,33 @@
         "TimeoutInMillis": 30000
       }
     },
-    "HttpApiRoutePostCustomers": {
+    "HttpApiRoutePostAccounts": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "POST /customers",
+        "RouteKey": "POST /accounts",
         "Target": {
           "Fn::Join": [
             "/",
             [
               "integrations",
               {
-                "Ref": "HttpApiIntegrationCreateCustomer"
+                "Ref": "HttpApiIntegrationCreateAccount"
               }
             ]
           ]
         }
       },
-      "DependsOn": "HttpApiIntegrationCreateCustomer"
+      "DependsOn": "HttpApiIntegrationCreateAccount"
     },
-    "GetCustomersLambdaPermissionHttpApi": {
+    "GetAccountsLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "GetCustomersLambdaFunction",
+            "GetAccountsLambdaFunction",
             "Arn"
           ]
         },
@@ -521,7 +403,7 @@
         }
       }
     },
-    "HttpApiIntegrationGetCustomers": {
+    "HttpApiIntegrationGetAccounts": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -530,7 +412,7 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::GetAtt": [
-            "GetCustomersLambdaFunction",
+            "GetAccountsLambdaFunction",
             "Arn"
           ]
         },
@@ -538,176 +420,26 @@
         "TimeoutInMillis": 30000
       }
     },
-    "HttpApiRouteGetCustomers": {
+    "HttpApiRouteGetAccounts": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "GET /customers",
+        "RouteKey": "GET /accounts",
         "Target": {
           "Fn::Join": [
             "/",
             [
               "integrations",
               {
-                "Ref": "HttpApiIntegrationGetCustomers"
+                "Ref": "HttpApiIntegrationGetAccounts"
               }
             ]
           ]
         }
       },
-      "DependsOn": "HttpApiIntegrationGetCustomers"
-    },
-    "CreateEntityLambdaPermissionHttpApi": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "CreateEntityLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
-              {
-                "Ref": "HttpApi"
-              },
-              "/*"
-            ]
-          ]
-        }
-      }
-    },
-    "HttpApiIntegrationCreateEntity": {
-      "Type": "AWS::ApiGatewayV2::Integration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "HttpApi"
-        },
-        "IntegrationType": "AWS_PROXY",
-        "IntegrationUri": {
-          "Fn::GetAtt": [
-            "CreateEntityLambdaFunction",
-            "Arn"
-          ]
-        },
-        "PayloadFormatVersion": "2.0",
-        "TimeoutInMillis": 30000
-      }
-    },
-    "HttpApiRoutePostCustomersIdVarEntities": {
-      "Type": "AWS::ApiGatewayV2::Route",
-      "Properties": {
-        "ApiId": {
-          "Ref": "HttpApi"
-        },
-        "RouteKey": "POST /customers/{id}/entities",
-        "Target": {
-          "Fn::Join": [
-            "/",
-            [
-              "integrations",
-              {
-                "Ref": "HttpApiIntegrationCreateEntity"
-              }
-            ]
-          ]
-        }
-      },
-      "DependsOn": "HttpApiIntegrationCreateEntity"
-    },
-    "CreatePixKeyLambdaPermissionHttpApi": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Fn::GetAtt": [
-            "CreatePixKeyLambdaFunction",
-            "Arn"
-          ]
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "apigateway.amazonaws.com",
-        "SourceArn": {
-          "Fn::Join": [
-            "",
-            [
-              "arn:",
-              {
-                "Ref": "AWS::Partition"
-              },
-              ":execute-api:",
-              {
-                "Ref": "AWS::Region"
-              },
-              ":",
-              {
-                "Ref": "AWS::AccountId"
-              },
-              ":",
-              {
-                "Ref": "HttpApi"
-              },
-              "/*"
-            ]
-          ]
-        }
-      }
-    },
-    "HttpApiIntegrationCreatePixKey": {
-      "Type": "AWS::ApiGatewayV2::Integration",
-      "Properties": {
-        "ApiId": {
-          "Ref": "HttpApi"
-        },
-        "IntegrationType": "AWS_PROXY",
-        "IntegrationUri": {
-          "Fn::GetAtt": [
-            "CreatePixKeyLambdaFunction",
-            "Arn"
-          ]
-        },
-        "PayloadFormatVersion": "2.0",
-        "TimeoutInMillis": 30000
-      }
-    },
-    "HttpApiRoutePostCustomersIdVarPixDashkeys": {
-      "Type": "AWS::ApiGatewayV2::Route",
-      "Properties": {
-        "ApiId": {
-          "Ref": "HttpApi"
-        },
-        "RouteKey": "POST /customers/{id}/pix-keys",
-        "Target": {
-          "Fn::Join": [
-            "/",
-            [
-              "integrations",
-              {
-                "Ref": "HttpApiIntegrationCreatePixKey"
-              }
-            ]
-          ]
-        }
-      },
-      "DependsOn": "HttpApiIntegrationCreatePixKey"
+      "DependsOn": "HttpApiIntegrationGetAccounts"
     },
     "IsActiveLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
@@ -763,13 +495,13 @@
         "TimeoutInMillis": 30000
       }
     },
-    "HttpApiRoutePatchCustomersIdVarStatus": {
+    "HttpApiRoutePatchAccountsIdVarStatus": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "PATCH /customers/{id}/status",
+        "RouteKey": "PATCH /accounts/{id}/status",
         "Target": {
           "Fn::Join": [
             "/",
@@ -789,52 +521,34 @@
     "ServerlessDeploymentBucketName": {
       "Value": "serverless-framework-deployments-us-east-1-450298af-2cc9",
       "Export": {
-        "Name": "sls-customer-service-dev-ServerlessDeploymentBucketName"
+        "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
+      }
+    },
+    "GetAccountsLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GetAccountsLambdaVersionc5qHnhVB9vea9CjcNbRpsUCh0zFI2RFA0V4VkQHrI"
+      },
+      "Export": {
+        "Name": "sls-order-service-dev-GetAccountsLambdaFunctionQualifiedArn"
+      }
+    },
+    "CreateAccountLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CreateAccountLambdaVersionXrnqXJLkPJM61BMqUe3wb54sPyAFC5HiBlr2sw28U"
+      },
+      "Export": {
+        "Name": "sls-order-service-dev-CreateAccountLambdaFunctionQualifiedArn"
       }
     },
     "IsActiveLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "IsActiveLambdaVersionnlrTf7ScciiWzBp1FvtatFm983MOSno7r9UGvronZY"
+        "Ref": "IsActiveLambdaVersioneJHE0h2KfIe3z22EetlMcxU5O4vU5mtnR1wAqZ2d3A"
       },
       "Export": {
-        "Name": "sls-customer-service-dev-IsActiveLambdaFunctionQualifiedArn"
-      }
-    },
-    "CreatePixKeyLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "CreatePixKeyLambdaVersiondbCXGdOwcCJysN0QIJzxajnKGZtMWbHv3duHqPuJ97Q"
-      },
-      "Export": {
-        "Name": "sls-customer-service-dev-CreatePixKeyLambdaFunctionQualifiedArn"
-      }
-    },
-    "CreateEntityLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "CreateEntityLambdaVersiongqXjiI7C6ymY1lcB5ACRTsXwFlbMPA6V4QnAAwAg0"
-      },
-      "Export": {
-        "Name": "sls-customer-service-dev-CreateEntityLambdaFunctionQualifiedArn"
-      }
-    },
-    "GetCustomersLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "GetCustomersLambdaVersionuZHugYbwOq9x6vH3haH7VSxhcM49c4Abo7hHKB8"
-      },
-      "Export": {
-        "Name": "sls-customer-service-dev-GetCustomersLambdaFunctionQualifiedArn"
-      }
-    },
-    "CreateCustomerLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "CreateCustomerLambdaVersionjmub7kiv9LYwB2NooKpDSIhpIiwz7lj7ylITc3taA"
-      },
-      "Export": {
-        "Name": "sls-customer-service-dev-CreateCustomerLambdaFunctionQualifiedArn"
+        "Name": "sls-order-service-dev-IsActiveLambdaFunctionQualifiedArn"
       }
     },
     "HttpApiId": {
@@ -843,7 +557,7 @@
         "Ref": "HttpApi"
       },
       "Export": {
-        "Name": "sls-customer-service-dev-HttpApiId"
+        "Name": "sls-order-service-dev-HttpApiId"
       }
     },
     "HttpApiUrl": {
@@ -868,7 +582,7 @@
         ]
       },
       "Export": {
-        "Name": "sls-customer-service-dev-HttpApiUrl"
+        "Name": "sls-order-service-dev-HttpApiUrl"
       }
     }
   }

@@ -74,6 +74,25 @@ model core_pix_keys {
   entity   core_customer_entities? @relation("entityPixKeys", fields: [entity_id], references: [id], map: "fk_pix_entity_id")
 }
 
+model core_bank_accounts {
+  id             String   @id @default(uuid())
+  bank_code      String   // Ex: 237, 001
+  bank_name      String
+  account_name   String?
+  account_number String
+  agency_number  String
+  ispb           String
+  cnpj           String
+  pix_keys       String[] @default([])
+  daily_limit    Int
+  nightly_limit  Int
+  per_operation_limit Int
+  integration_status String  // Ex: 'API Conectada', 'Sem Integração'
+  active         Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+}
+
 enum CustomerType {
   pf
   pj
