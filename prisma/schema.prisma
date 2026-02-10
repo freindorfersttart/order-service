@@ -10,16 +10,15 @@ datasource db {
 }
 
 model auth_user {
-  id          String  @id @default(uuid())
-  email       String  @unique
+  id          String   @id @default(uuid())
+  email       String   @unique
   password    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  is_active   Boolean  @default(true)
   name        String?
-  role        String?
-  is_active   Boolean @default(true)
   permissions Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role        String?
 }
 
 model core_workers {
@@ -35,72 +34,305 @@ model core_workers {
 }
 
 model core_customers {
-  id         String       @id @default(uuid())
-  type       CustomerType
-  document   String
-  name       String
-  email      String?
-  is_active  Boolean      @default(true)
-  created_at DateTime     @default(now())
-  updated_at DateTime     @updatedAt
-
-  entities  core_customer_entities[]
-  pix_keys  core_pix_keys[]          @relation("customerPixKeys")
-}
-
-model core_customer_entities {
-  id          String   @id @default(uuid())
-  customer_id String
-  name        String
-  document    String
-  created_at  DateTime @default(now())
-
-  customer core_customers  @relation(fields: [customer_id], references: [id])
-  pix_keys core_pix_keys[] @relation("entityPixKeys")
+  id                 String               @id @default(uuid())
+  type               CustomerType
+  name               String
+  email              String?
+  whatsapp           String?
+  is_active          Boolean              @default(true)
+  created_at         DateTime             @default(now())
+  updated_at         DateTime             @updatedAt
+  core_balances      core_balances?
+  core_bank_accounts core_bank_accounts[]
+  core_beneficiaries core_beneficiaries[]
+  core_incoming_pix  core_incoming_pix[]
+  core_orders        core_orders[]
+  pix_keys           core_pix_keys[]      @relation("customerPixKeys")
+  core_transactions  core_transactions[]
 }
 
 model core_pix_keys {
-  id         String     @id @default(uuid())
-  key_type   PixKeyType
-  key_value  String
-  label      String?
-  active     Boolean    @default(true)
-  created_at DateTime   @default(now())
+  id          String         @id @default(uuid())
+  customer_id String
+  key_type    PixKeyType
+  key_value   String
+  label       String?
+  active      Boolean        @default(true)
+  created_at  DateTime       @default(now())
+  customer    core_customers @relation("customerPixKeys", fields: [customer_id], references: [id], onDelete: Cascade, map: "fk_pix_customer_id")
 
-  customer_id String?
-  entity_id   String?
-
-  customer core_customers?         @relation("customerPixKeys", fields: [customer_id], references: [id], map: "fk_pix_customer_id")
-  entity   core_customer_entities? @relation("entityPixKeys", fields: [entity_id], references: [id], map: "fk_pix_entity_id")
+  @@index([customer_id])
+  @@index([key_value])
 }
 
 model core_bank_accounts {
-  id             String   @id @default(uuid())
-  bank_code      String   // Ex: 237, 001
-  bank_name      String
-  account_name   String?
-  account_number String
-  agency_number  String
-  ispb           String
-  cnpj           String
-  pix_keys       String[] @default([])
-  daily_limit    Int
-  nightly_limit  Int
-  per_operation_limit Int
-  integration_status String  // Ex: 'API Conectada', 'Sem Integração'
-  active         Boolean  @default(true)
-  created_at     DateTime @default(now())
-  updated_at     DateTime @updatedAt
+  id                             String                          @id @default(uuid())
+  bank_code                      String
+  bank_name                      String
+  account_number                 String
+  agency_number                  String
+  ispb                           String
+  cnpj                           String
+  pix_keys                       String[]                        @default([])
+  daily_limit                    Int
+  nightly_limit                  Int
+  per_operation_limit            Int
+  integration_status             String
+  active                         Boolean                         @default(true)
+  created_at                     DateTime                        @default(now())
+  updated_at                     DateTime                        @updatedAt
+  account_name                   String?
+  link_code                      String?
+  auto_credit_customer_id        String?
+  confirm_auto_credit            Boolean                         @default(false)
+  integration_id                 String?
+  provider                       BankProvider?
+  purpose                        BankAccountPurpose              @default(DEPOSIT)
+  core_bank_account_balances     core_bank_account_balances?
+  core_customers                 core_customers?                 @relation(fields: [auto_credit_customer_id], references: [id])
+  core_bank_account_integrations core_bank_account_integrations? @relation(fields: [integration_id], references: [id])
+  core_order_subtransactions     core_order_subtransactions[]
+
+  @@index([integration_id])
+  @@index([provider, active])
+  @@index([purpose, active])
+}
+
+model core_balances {
+  id               String         @id
+  customer_id      String         @unique
+  available_amount Decimal        @default(0) @db.Decimal(14, 2)
+  locked_amount    Decimal        @default(0) @db.Decimal(14, 2)
+  updated_at       DateTime
+  credit_limit     Decimal        @default(0) @db.Decimal(14, 2)
+  core_customers   core_customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+}
+
+model core_bank_account_integrations {
+  id                 String               @id @default(uuid())
+  provider           BankProvider
+  auth_type          String
+  secret_ref         String
+  config             Json?
+  status             String               @default("active")
+  created_at         DateTime             @default(now())
+  updated_at         DateTime
+  core_bank_accounts core_bank_accounts[]
+
+  @@index([provider, status])
+}
+
+model core_beneficiaries {
+  id                        String                      @id @default(uuid())
+  customer_id               String
+  name                      String
+  document                  String
+  created_at                DateTime                    @default(now())
+  core_customers            core_customers              @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  core_beneficiary_pix_keys core_beneficiary_pix_keys[]
+
+  // ✅ inverse relation (nomeada pra não dar ambiguidade)
+  core_order_destinations core_order_destinations[] @relation("BeneficiaryOrders")
+
+  @@index([customer_id])
+  @@index([document])
+}
+
+model core_beneficiary_pix_keys {
+  id                 String             @id @default(uuid())
+  beneficiary_id     String
+  key_type           PixKeyType
+  key_value          String
+  label              String?
+  active             Boolean            @default(true)
+  created_at         DateTime           @default(now())
+  core_beneficiaries core_beneficiaries @relation(fields: [beneficiary_id], references: [id], onDelete: Cascade)
+
+  @@index([beneficiary_id])
+  @@index([key_value])
+}
+
+model core_incoming_pix {
+  id             String          @id
+  origin         String
+  document       String?
+  amount         Decimal         @db.Decimal(14, 2)
+  status         PixStatus       @default(pending)
+  raw_payload    Json
+  created_at     DateTime        @default(now())
+  customer_id    String?
+  core_customers core_customers? @relation(fields: [customer_id], references: [id])
+
+  @@index([customer_id])
+  @@index([status, created_at])
+}
+
+model core_order_destinations {
+  id                  String  @id @default(uuid())
+  order_id            String
+  destination         String
+  destination_pix_key String?
+  label               String?
+  beneficiary_id      String?
+
+  // ✅ SNAPSHOT do beneficiário no momento da ordem
+  beneficiary_name     String?
+  beneficiary_document String?
+
+  amount           Decimal?        @db.Decimal(14, 2)
+  destination_type DestinationType @default(AUTO)
+  created_at       DateTime        @default(now())
+
+  core_orders core_orders @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  // ✅ relação nomeada + inverse no model core_beneficiaries
+  core_beneficiaries core_beneficiaries? @relation("BeneficiaryOrders", fields: [beneficiary_id], references: [id])
+
+  core_order_subtransactions core_order_subtransactions[]
+
+  @@index([destination])
+  @@index([destination_pix_key])
+  @@index([order_id])
+  @@index([beneficiary_id])
+  @@index([beneficiary_document])
+}
+
+model core_order_subtransactions {
+  id                  String    @id @default(uuid())
+  order_id            String
+  status              SubStatus @default(PENDING)
+  amount              Decimal   @db.Decimal(14, 2)
+  index               Int
+  created_at          DateTime  @default(now())
+  executed_at         DateTime?
+  attempts            Int       @default(0)
+  bank_account_id     String?
+  destination_pix_key String?
+  idempotency_key     String?   @unique
+  last_error          String?
+  provider_ref        String?
+  destination         String?
+  destination_id      String?
+  execution_metadata  Json?
+  next_retry_at       DateTime?
+  updated_at          DateTime  @default(now()) @db.Timestamp(6)
+
+  // ✅ SNAPSHOT do beneficiário no momento da subtransaction
+  beneficiary_name     String?
+  beneficiary_document String?
+
+  core_bank_accounts      core_bank_accounts?      @relation(fields: [bank_account_id], references: [id])
+  core_order_destinations core_order_destinations? @relation(fields: [destination_id], references: [id])
+  core_orders             core_orders              @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  @@index([bank_account_id, status])
+  @@index([order_id])
+  @@index([status, created_at])
+  @@index([status, next_retry_at])
+  @@index([beneficiary_document])
+}
+
+model core_orders {
+  id                         String                       @id
+  customer_id                String
+  customer_type              String
+  bank_name                  String
+  total_amount               Decimal                      @db.Decimal(14, 2)
+  sub_amount                 Decimal                      @db.Decimal(14, 2)
+  status                     OrderStatus                  @default(PENDING)
+  created_at                 DateTime                     @default(now())
+  updated_at                 DateTime                     @updatedAt
+  base_amount                Decimal                      @default(0) @db.Decimal(14, 2)
+  base_currency              String                       @default("USD")
+  completed_at               DateTime?
+  fees_amount                Decimal                      @default(0) @db.Decimal(14, 2)
+  idempotency_key            String?                      @unique
+  last_error                 String?
+  locked_amount_snapshot     Decimal?                     @db.Decimal(14, 2)
+  metadata                   Json?
+  rate                       Decimal                      @default(1) @db.Decimal(14, 6)
+  settlement_currency        String                       @default("BRL")
+  started_at                 DateTime?
+  type                       OrderType                    @default(TRANSFERENCIA)
+  core_order_destinations    core_order_destinations[]
+  core_order_subtransactions core_order_subtransactions[]
+  core_customers             core_customers               @relation(fields: [customer_id], references: [id])
+
+  @@index([customer_id, idempotency_key])
+  @@index([customer_id])
+  @@index([status, created_at])
+  @@index([type, status, created_at])
+}
+
+model core_transactions {
+  id             String          @id
+  customer_id    String
+  type           TransactionType
+  amount         Decimal         @db.Decimal(14, 2)
+  description    String?
+  metadata       Json?
+  created_at     DateTime        @default(now())
+  core_customers core_customers  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+
+  @@index([customer_id])
+  @@index([type, created_at])
+}
+
+model whats_customer_groups {
+  id          String         @id
+  customer_id String
+  group_id    String
+  group_name  String?
+  is_active   Boolean        @default(true)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime
+  type        WhatsGroupType @default(outgoing)
+
+  @@unique([customer_id, type])
+  @@index([customer_id, type])
+  @@index([is_active])
+}
+
+model whats_outbox_messages {
+  id                String   @id
+  provider          String   @default("zapi")
+  customer_id       String?
+  destination       String
+  message           String
+  reference_type    String
+  reference_id      String
+  idempotency_key   String   @unique
+  status            String   @default("pending")
+  attempts          Int      @default(0)
+  provider_response Json?
+  last_error        String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime
+
+  @@index([reference_type, reference_id])
+  @@index([status])
+}
+
+model core_bank_account_balances {
+  id                 String             @id @default(uuid())
+  bank_account_id    String             @unique
+  available_amount   Decimal            @default(0) @db.Decimal(14, 2)
+  total_amount       Decimal?           @db.Decimal(14, 2)
+  as_of              DateTime           @default(now())
+  status             String             @default("ok")
+  last_error         String?
+  raw_payload        Json?
+  created_at         DateTime           @default(now())
+  updated_at         DateTime
+  core_bank_accounts core_bank_accounts @relation(fields: [bank_account_id], references: [id], onDelete: Cascade)
+
+  @@index([as_of])
+  @@index([status, as_of])
 }
 
 enum CustomerType {
   pf
   pj
-}
-
-enum OwnerType {
-  customer
-  entity
 }
 
 enum PixKeyType {
@@ -109,4 +341,65 @@ enum PixKeyType {
   email
   phone
   random
+}
+
+enum BankAccountPurpose {
+  DEPOSIT
+  PAYOUT
+}
+
+enum BankProvider {
+  ONLYUP
+}
+
+enum DestinationType {
+  AUTO
+  PIX
+  WALLET
+  IBAN
+  ACCOUNT
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PROGRESS
+  PAUSED
+  COMPLETED
+  FAILED
+}
+
+enum OrderType {
+  TRX
+  WIRE
+  USDT
+  EFETIVO
+  TRANSFERENCIA
+  AJUSTE_SALDO
+  ACERTO_IMPOSTO
+}
+
+enum PixStatus {
+  pending
+  matched
+  credited
+  pending_auto
+}
+
+enum SubStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionType {
+  credit
+  debit
+  lock
+  unlock
+}
+
+enum WhatsGroupType {
+  outgoing
+  incoming
 }

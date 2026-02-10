@@ -8,6 +8,27 @@
       "name": "aws",
       "runtime": "nodejs18.x",
       "region": "us-east-1",
+      "stage": "dev",
+      "httpApi": {
+        "name": "order-service-httpapi-dev",
+        "payload": "2.0",
+        "cors": {
+          "allowedOrigins": [
+            "*"
+          ],
+          "allowedHeaders": [
+            "Authorization",
+            "Content-Type",
+            "x-api-key"
+          ],
+          "allowedMethods": [
+            "GET",
+            "POST",
+            "PATCH",
+            "OPTIONS"
+          ]
+        }
+      },
       "vpc": {
         "securityGroupIds": [
           "sg-0c53a9fdbac3c3f1d"
@@ -25,28 +46,33 @@
         "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
         "JWT_SECRET": "uma-super-chave-secreta"
       },
-      "stage": "dev",
       "versionFunctions": true,
       "compiledCloudFormationTemplate": {
         "AWSTemplateFormatVersion": "2010-09-09",
         "Description": "The AWS CloudFormation template for this Serverless application",
         "Resources": {
-          "CreateAccountLogGroup": {
+          "CreateOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-createAccount"
+              "LogGroupName": "/aws/lambda/order-service-dev-createOrder"
             }
           },
-          "GetAccountsLogGroup": {
+          "GetOrderByIdLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-getAccounts"
+              "LogGroupName": "/aws/lambda/order-service-dev-getOrderById"
             }
           },
-          "IsActiveLogGroup": {
+          "GetOrdersLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-isActive"
+              "LogGroupName": "/aws/lambda/order-service-dev-getOrders"
+            }
+          },
+          "RetryOrderLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/order-service-dev-retryOrder"
             }
           },
           "IamRoleLambdaExecution": {
@@ -141,16 +167,16 @@
               ]
             }
           },
-          "CreateAccountLambdaFunction": {
+          "CreateOrderLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-createAccount.zip"
+                "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-createOrder.zip"
               },
-              "Handler": "src/handlers/accounts/create.create",
+              "Handler": "src/handlers/orders/create.create",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-createAccount",
+              "FunctionName": "order-service-dev-createOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -176,19 +202,19 @@
               }
             },
             "DependsOn": [
-              "CreateAccountLogGroup"
+              "CreateOrderLogGroup"
             ]
           },
-          "GetAccountsLambdaFunction": {
+          "GetOrderByIdLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-getAccounts.zip"
+                "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-getOrderById.zip"
               },
-              "Handler": "src/handlers/accounts/getAll.getAll",
+              "Handler": "src/handlers/orders/getById.getById",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-getAccounts",
+              "FunctionName": "order-service-dev-getOrderById",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -214,19 +240,19 @@
               }
             },
             "DependsOn": [
-              "GetAccountsLogGroup"
+              "GetOrderByIdLogGroup"
             ]
           },
-          "IsActiveLambdaFunction": {
+          "GetOrdersLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z/order-service-isActive.zip"
+                "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-getOrders.zip"
               },
-              "Handler": "src/handlers/accounts/isActive.isActive",
+              "Handler": "src/handlers/orders/getAll.getAll",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-isActive",
+              "FunctionName": "order-service-dev-getOrders",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -252,44 +278,108 @@
               }
             },
             "DependsOn": [
-              "IsActiveLogGroup"
+              "GetOrdersLogGroup"
             ]
           },
-          "GetAccountsLambdaVersionc5qHnhVB9vea9CjcNbRpsUCh0zFI2RFA0V4VkQHrI": {
+          "RetryOrderLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-retryOrder.zip"
+              },
+              "Handler": "src/handlers/orders/retry.retry",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "order-service-dev-retryOrder",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "uma-super-chave-secreta",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"securityGroupIds\"]"
+                },
+                "SubnetIds": {
+                  "$ref": "$[\"service\"][\"provider\"][\"vpc\"][\"subnetIds\"]"
+                }
+              }
+            },
+            "DependsOn": [
+              "RetryOrderLogGroup"
+            ]
+          },
+          "GetOrderByIdLambdaVersionWgUNv040g6BcJBCM79bTDPh7PN4CSOHWwJYXmWCv8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "GetAccountsLambdaFunction"
+                "Ref": "GetOrderByIdLambdaFunction"
               },
-              "CodeSha256": "H2++H+JpsG+u7q2CCfKdYmJeIbcCR+F47Li1TR/u9lU="
+              "CodeSha256": "4HSpmCtTu1JYEC/3eQDTHy2HotT9idMff5EP9wmrxVA="
             }
           },
-          "CreateAccountLambdaVersionXrnqXJLkPJM61BMqUe3wb54sPyAFC5HiBlr2sw28U": {
+          "RetryOrderLambdaVersionPnOwxwfLzO5tLCzGuMt1RcwTxtDijGAz2aeUXGatDU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "CreateAccountLambdaFunction"
+                "Ref": "RetryOrderLambdaFunction"
               },
-              "CodeSha256": "lov7B8gSjJnGybTwgEEKAnli539a42Kugtu49J7GrKY="
+              "CodeSha256": "2OddRmtfB0AmsRSyUTL66bAykGEs7wXMMQD2QXjJIQc="
             }
           },
-          "IsActiveLambdaVersioneJHE0h2KfIe3z22EetlMcxU5O4vU5mtnR1wAqZ2d3A": {
+          "CreateOrderLambdaVersion8ITHkxm1PKhA3UcIcu7OX6prfU0wFmpolkGMOodDnM": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
-                "Ref": "IsActiveLambdaFunction"
+                "Ref": "CreateOrderLambdaFunction"
               },
-              "CodeSha256": "NRfUbnQw9j9T+6WTkY79kb13aAgCtHlg4FTuU0cAKXc="
+              "CodeSha256": "M8kEHyVpYrfA0sEEAuvHeP61M8hW2ELSUCT0C/0C0A4="
+            }
+          },
+          "GetOrdersLambdaVersionJEf6SUOOkSv8ihCu8dACMqkC0JB4GlSqYUFKGR7UI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetOrdersLambdaFunction"
+              },
+              "CodeSha256": "/v0SBYWzGQJldghDUFsdzn000jXAnWZumZDpZJliZYk="
             }
           },
           "HttpApi": {
             "Type": "AWS::ApiGatewayV2::Api",
             "Properties": {
-              "Name": "dev-order-service",
-              "ProtocolType": "HTTP"
+              "Name": "order-service-httpapi-dev",
+              "ProtocolType": "HTTP",
+              "CorsConfiguration": {
+                "AllowHeaders": [
+                  "Authorization",
+                  "Content-Type",
+                  "x-api-key"
+                ],
+                "AllowMethods": [
+                  "GET",
+                  "POST",
+                  "PATCH",
+                  "OPTIONS"
+                ],
+                "AllowOrigins": [
+                  "*"
+                ]
+              }
             }
           },
           "HttpApiStage": {
@@ -305,12 +395,12 @@
               }
             }
           },
-          "CreateAccountLambdaPermissionHttpApi": {
+          "CreateOrderLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "CreateAccountLambdaFunction",
+                  "CreateOrderLambdaFunction",
                   "Arn"
                 ]
               },
@@ -342,7 +432,7 @@
               }
             }
           },
-          "HttpApiIntegrationCreateAccount": {
+          "HttpApiIntegrationCreateOrder": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -350,39 +440,39 @@
               },
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateAccountLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"CreateOrderLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
               },
               "PayloadFormatVersion": "2.0",
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRoutePostAccounts": {
+          "HttpApiRoutePostOrders": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "POST /accounts",
+              "RouteKey": "POST /orders",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationCreateAccount"
+                      "Ref": "HttpApiIntegrationCreateOrder"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationCreateAccount"
+            "DependsOn": "HttpApiIntegrationCreateOrder"
           },
-          "GetAccountsLambdaPermissionHttpApi": {
+          "GetOrderByIdLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "GetAccountsLambdaFunction",
+                  "GetOrderByIdLambdaFunction",
                   "Arn"
                 ]
               },
@@ -414,7 +504,7 @@
               }
             }
           },
-          "HttpApiIntegrationGetAccounts": {
+          "HttpApiIntegrationGetOrderById": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -422,39 +512,39 @@
               },
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetAccountsLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetOrderByIdLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
               },
               "PayloadFormatVersion": "2.0",
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRouteGetAccounts": {
+          "HttpApiRouteGetOrdersIdVar": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "GET /accounts",
+              "RouteKey": "GET /orders/{id}",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationGetAccounts"
+                      "Ref": "HttpApiIntegrationGetOrderById"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationGetAccounts"
+            "DependsOn": "HttpApiIntegrationGetOrderById"
           },
-          "IsActiveLambdaPermissionHttpApi": {
+          "GetOrdersLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
               "FunctionName": {
                 "Fn::GetAtt": [
-                  "IsActiveLambdaFunction",
+                  "GetOrdersLambdaFunction",
                   "Arn"
                 ]
               },
@@ -486,7 +576,7 @@
               }
             }
           },
-          "HttpApiIntegrationIsActive": {
+          "HttpApiIntegrationGetOrders": {
             "Type": "AWS::ApiGatewayV2::Integration",
             "Properties": {
               "ApiId": {
@@ -494,32 +584,104 @@
               },
               "IntegrationType": "AWS_PROXY",
               "IntegrationUri": {
-                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"IsActiveLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"GetOrdersLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
               },
               "PayloadFormatVersion": "2.0",
               "TimeoutInMillis": 30000
             }
           },
-          "HttpApiRoutePatchAccountsIdVarStatus": {
+          "HttpApiRouteGetOrders": {
             "Type": "AWS::ApiGatewayV2::Route",
             "Properties": {
               "ApiId": {
                 "Ref": "HttpApi"
               },
-              "RouteKey": "PATCH /accounts/{id}/status",
+              "RouteKey": "GET /orders",
               "Target": {
                 "Fn::Join": [
                   "/",
                   [
                     "integrations",
                     {
-                      "Ref": "HttpApiIntegrationIsActive"
+                      "Ref": "HttpApiIntegrationGetOrders"
                     }
                   ]
                 ]
               }
             },
-            "DependsOn": "HttpApiIntegrationIsActive"
+            "DependsOn": "HttpApiIntegrationGetOrders"
+          },
+          "RetryOrderLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "RetryOrderLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationRetryOrder": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "$ref": "$[\"service\"][\"provider\"][\"compiledCloudFormationTemplate\"][\"Resources\"][\"RetryOrderLambdaPermissionHttpApi\"][\"Properties\"][\"FunctionName\"]"
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostOrdersIdVarRetry": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /orders/{id}/retry",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationRetryOrder"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationRetryOrder"
           }
         },
         "Outputs": {
@@ -529,31 +691,40 @@
               "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "GetAccountsLambdaFunctionQualifiedArn": {
+          "GetOrderByIdLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetAccountsLambdaVersionc5qHnhVB9vea9CjcNbRpsUCh0zFI2RFA0V4VkQHrI"
+              "Ref": "GetOrderByIdLambdaVersionWgUNv040g6BcJBCM79bTDPh7PN4CSOHWwJYXmWCv8"
             },
             "Export": {
-              "Name": "sls-order-service-dev-GetAccountsLambdaFunctionQualifiedArn"
+              "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
             }
           },
-          "CreateAccountLambdaFunctionQualifiedArn": {
+          "RetryOrderLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateAccountLambdaVersionXrnqXJLkPJM61BMqUe3wb54sPyAFC5HiBlr2sw28U"
+              "Ref": "RetryOrderLambdaVersionPnOwxwfLzO5tLCzGuMt1RcwTxtDijGAz2aeUXGatDU"
             },
             "Export": {
-              "Name": "sls-order-service-dev-CreateAccountLambdaFunctionQualifiedArn"
+              "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
             }
           },
-          "IsActiveLambdaFunctionQualifiedArn": {
+          "CreateOrderLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "IsActiveLambdaVersioneJHE0h2KfIe3z22EetlMcxU5O4vU5mtnR1wAqZ2d3A"
+              "Ref": "CreateOrderLambdaVersion8ITHkxm1PKhA3UcIcu7OX6prfU0wFmpolkGMOodDnM"
             },
             "Export": {
-              "Name": "sls-order-service-dev-IsActiveLambdaFunctionQualifiedArn"
+              "Name": "sls-order-service-dev-CreateOrderLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetOrdersLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetOrdersLambdaVersionJEf6SUOOkSv8ihCu8dACMqkC0JB4GlSqYUFKGR7UI"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -595,22 +766,22 @@
     },
     "pluginsData": {},
     "functions": {
-      "createAccount": {
-        "handler": "src/handlers/accounts/create.create",
+      "createOrder": {
+        "handler": "src/handlers/orders/create.create",
         "events": [
           {
             "httpApi": {
-              "path": "/accounts",
-              "method": "post"
+              "path": "/orders",
+              "method": "POST"
             },
             "resolvedMethod": "POST",
-            "resolvedPath": "/accounts"
+            "resolvedPath": "/orders"
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createAccount.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createOrder.zip"
         },
-        "name": "order-service-dev-createAccount",
+        "name": "order-service-dev-createOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -618,24 +789,24 @@
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "CreateAccountLambdaVersionXrnqXJLkPJM61BMqUe3wb54sPyAFC5HiBlr2sw28U"
+        "versionLogicalId": "CreateOrderLambdaVersion8ITHkxm1PKhA3UcIcu7OX6prfU0wFmpolkGMOodDnM"
       },
-      "getAccounts": {
-        "handler": "src/handlers/accounts/getAll.getAll",
+      "getOrderById": {
+        "handler": "src/handlers/orders/getById.getById",
         "events": [
           {
             "httpApi": {
-              "path": "/accounts",
-              "method": "get"
+              "path": "/orders/{id}",
+              "method": "GET"
             },
             "resolvedMethod": "GET",
-            "resolvedPath": "/accounts"
+            "resolvedPath": "/orders/{id}"
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getAccounts.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getOrderById.zip"
         },
-        "name": "order-service-dev-getAccounts",
+        "name": "order-service-dev-getOrderById",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -643,24 +814,24 @@
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "GetAccountsLambdaVersionc5qHnhVB9vea9CjcNbRpsUCh0zFI2RFA0V4VkQHrI"
+        "versionLogicalId": "GetOrderByIdLambdaVersionWgUNv040g6BcJBCM79bTDPh7PN4CSOHWwJYXmWCv8"
       },
-      "isActive": {
-        "handler": "src/handlers/accounts/isActive.isActive",
+      "getOrders": {
+        "handler": "src/handlers/orders/getAll.getAll",
         "events": [
           {
             "httpApi": {
-              "path": "/accounts/{id}/status",
-              "method": "patch"
+              "path": "/orders",
+              "method": "GET"
             },
-            "resolvedMethod": "PATCH",
-            "resolvedPath": "/accounts/{id}/status"
+            "resolvedMethod": "GET",
+            "resolvedPath": "/orders"
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-isActive.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getOrders.zip"
         },
-        "name": "order-service-dev-isActive",
+        "name": "order-service-dev-getOrders",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -668,7 +839,32 @@
         "timeout": 6,
         "runtime": "nodejs18.x",
         "vpc": {},
-        "versionLogicalId": "IsActiveLambdaVersioneJHE0h2KfIe3z22EetlMcxU5O4vU5mtnR1wAqZ2d3A"
+        "versionLogicalId": "GetOrdersLambdaVersionJEf6SUOOkSv8ihCu8dACMqkC0JB4GlSqYUFKGR7UI"
+      },
+      "retryOrder": {
+        "handler": "src/handlers/orders/retry.retry",
+        "events": [
+          {
+            "httpApi": {
+              "path": "/orders/{id}/retry",
+              "method": "POST"
+            },
+            "resolvedMethod": "POST",
+            "resolvedPath": "/orders/{id}/retry"
+          }
+        ],
+        "package": {
+          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-retryOrder.zip"
+        },
+        "name": "order-service-dev-retryOrder",
+        "environment": {
+          "NODE_OPTIONS": "--enable-source-maps"
+        },
+        "memory": 1024,
+        "timeout": 6,
+        "runtime": "nodejs18.x",
+        "vpc": {},
+        "versionLogicalId": "RetryOrderLambdaVersionPnOwxwfLzO5tLCzGuMt1RcwTxtDijGAz2aeUXGatDU"
       }
     },
     "configValidationMode": "warn",
@@ -678,14 +874,14 @@
       "provider": {
         "$ref": "$[\"service\"][\"provider\"]"
       },
-      "functions": {
-        "$ref": "$[\"service\"][\"functions\"]"
-      },
       "package": {
         "individually": true,
         "artifactsS3KeyDirname": "serverless/order-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-        "artifactDirectoryName": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z"
+        "artifactDirectoryName": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z"
+      },
+      "functions": {
+        "$ref": "$[\"service\"][\"functions\"]"
       }
     },
     "appId": null,
@@ -694,7 +890,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/order-service/dev/1769630048901-2026-01-28T19:54:08.901Z",
+    "artifactDirectoryName": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z",
     "artifact": ""
   }
 }

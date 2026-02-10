@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "deploy": "serverless deploy --stage dev",
-    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/handler.ts"
+    "deploy": "npx prisma generate && npx serverless deploy --stage dev",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/handler.ts",
+    "dbpush": "npx prisma db push",
+    "dbpull": "npx prisma db pull",
+    "client": "npx prisma generate"
   },
   "author": "André Freindorfer",
   "license": "MIT",

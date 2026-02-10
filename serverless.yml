@@ -4,6 +4,23 @@ provider:
   name: aws
   runtime: nodejs18.x
   region: us-east-1
+  stage: dev
+
+  httpApi:
+    name: order-service-httpapi-dev
+    payload: '2.0'
+    cors:
+      allowedOrigins:
+        - '*'
+      allowedHeaders:
+        - Authorization
+        - Content-Type
+        - x-api-key
+      allowedMethods:
+        - GET
+        - POST
+        - PATCH
+        - OPTIONS
 
   vpc:
     securityGroupIds:
@@ -20,52 +37,114 @@ provider:
     DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core
     JWT_SECRET: uma-super-chave-secreta
 
-functions:
-  createAccount:
-    handler: src/handlers/accounts/create.create
-    events:
-      - httpApi:
-          path: /accounts
-          method: post
-    package:
-      patterns:
-        - node_modules/.prisma/client/**
-        - node_modules/@prisma/client/**
-        - node_modules/@prisma/client/index.js
-        - prisma/schema.prisma
-        - src/handlers/accounts/create.ts
-        - src/lib/**
-        - src/middleware/**
-
-  getAccounts:
-    handler: src/handlers/accounts/getAll.getAll
-    events:
-      - httpApi:
-          path: /accounts
-          method: get
-    package:
-      patterns:
-        - node_modules/.prisma/client/**
-        - node_modules/@prisma/client/**
-        - node_modules/@prisma/client/index.js
-        - prisma/schema.prisma
-        - src/handlers/accounts/getAll.ts
-        - src/lib/prisma.ts
-
-  isActive:
-    handler: src/handlers/accounts/isActive.isActive
-    events:
-      - httpApi:
-          path: /accounts/{id}/status
-          method: patch
-    package:
-      patterns:
-        - node_modules/.prisma/client/**
-        - node_modules/@prisma/client/**
-        - node_modules/@prisma/client/index.js
-        - prisma/schema.prisma
-        - src/handlers/accounts/isActive.ts
-        - src/lib/prisma.ts
-
 package:
   individually: true
+
+functions:
+  createOrder:
+    handler: src/handlers/orders/create.create
+    events:
+      - httpApi:
+          path: /orders
+          method: POST
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/create.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        # ✅ Prisma Client + engine
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        # ✅ deps usadas no handler
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
+
+  getOrderById:
+    handler: src/handlers/orders/getById.getById
+    events:
+      - httpApi:
+          path: /orders/{id}
+          method: GET
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/getById.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
+
+  getOrders:
+    handler: src/handlers/orders/getAll.getAll
+    events:
+      - httpApi:
+          path: /orders
+          method: GET
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/getAll.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
+
+  retryOrder:
+    handler: src/handlers/orders/retry.retry
+    events:
+      - httpApi:
+          path: /orders/{id}/retry
+          method: POST
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/retry.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
