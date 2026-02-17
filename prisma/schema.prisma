@@ -130,9 +130,7 @@ model core_beneficiaries {
   created_at                DateTime                    @default(now())
   core_customers            core_customers              @relation(fields: [customer_id], references: [id], onDelete: Cascade)
   core_beneficiary_pix_keys core_beneficiary_pix_keys[]
-
-  // ✅ inverse relation (nomeada pra não dar ambiguidade)
-  core_order_destinations core_order_destinations[] @relation("BeneficiaryOrders")
+  core_order_destinations   core_order_destinations[]   @relation("BeneficiaryOrders")
 
   @@index([customer_id])
   @@index([document])
@@ -168,26 +166,19 @@ model core_incoming_pix {
 }
 
 model core_order_destinations {
-  id                  String  @id @default(uuid())
-  order_id            String
-  destination         String
-  destination_pix_key String?
-  label               String?
-  beneficiary_id      String?
-
-  // ✅ SNAPSHOT do beneficiário no momento da ordem
-  beneficiary_name     String?
-  beneficiary_document String?
-
-  amount           Decimal?        @db.Decimal(14, 2)
-  destination_type DestinationType @default(AUTO)
-  created_at       DateTime        @default(now())
-
-  core_orders core_orders @relation(fields: [order_id], references: [id], onDelete: Cascade)
-
-  // ✅ relação nomeada + inverse no model core_beneficiaries
-  core_beneficiaries core_beneficiaries? @relation("BeneficiaryOrders", fields: [beneficiary_id], references: [id])
-
+  id                         String                       @id @default(uuid())
+  order_id                   String
+  destination                String
+  destination_pix_key        String?
+  label                      String?
+  beneficiary_id             String?
+  amount                     Decimal?                     @db.Decimal(14, 2)
+  destination_type           DestinationType              @default(AUTO)
+  created_at                 DateTime                     @default(now())
+  beneficiary_document       String?
+  beneficiary_name           String?
+  core_beneficiaries         core_beneficiaries?          @relation("BeneficiaryOrders", fields: [beneficiary_id], references: [id])
+  core_orders                core_orders                  @relation(fields: [order_id], references: [id], onDelete: Cascade)
   core_order_subtransactions core_order_subtransactions[]
 
   @@index([destination])
@@ -198,38 +189,42 @@ model core_order_destinations {
 }
 
 model core_order_subtransactions {
-  id                  String    @id @default(uuid())
-  order_id            String
-  status              SubStatus @default(PENDING)
-  amount              Decimal   @db.Decimal(14, 2)
-  index               Int
-  created_at          DateTime  @default(now())
-  executed_at         DateTime?
-  attempts            Int       @default(0)
-  bank_account_id     String?
-  destination_pix_key String?
-  idempotency_key     String?   @unique
-  last_error          String?
-  provider_ref        String?
-  destination         String?
-  destination_id      String?
-  execution_metadata  Json?
-  next_retry_at       DateTime?
-  updated_at          DateTime  @default(now()) @db.Timestamp(6)
-
-  // ✅ SNAPSHOT do beneficiário no momento da subtransaction
-  beneficiary_name     String?
-  beneficiary_document String?
-
+  id                      String                   @id @default(uuid())
+  order_id                String
+  status                  SubStatus                @default(PENDING)
+  amount                  Decimal                  @db.Decimal(14, 2)
+  index                   Int
+  created_at              DateTime                 @default(now())
+  executed_at             DateTime?
+  attempts                Int                      @default(0)
+  bank_account_id         String?
+  destination_pix_key     String?
+  idempotency_key         String?                  @unique
+  last_error              String?
+  provider_ref            String?
+  destination             String?
+  destination_id          String?
+  execution_metadata      Json?
+  next_retry_at           DateTime?
+  updated_at              DateTime                 @default(now()) @db.Timestamp(6)
+  beneficiary_document    String?
+  beneficiary_name        String?
+  end_to_end_id           String?
+  provider_status         String?
+  settled_at              DateTime?
+  settlement_status       String?
   core_bank_accounts      core_bank_accounts?      @relation(fields: [bank_account_id], references: [id])
   core_order_destinations core_order_destinations? @relation(fields: [destination_id], references: [id])
   core_orders             core_orders              @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  core_payment_receipts   core_payment_receipts[]
 
   @@index([bank_account_id, status])
   @@index([order_id])
   @@index([status, created_at])
   @@index([status, next_retry_at])
   @@index([beneficiary_document])
+  @@index([end_to_end_id])
+  @@index([settlement_status, settled_at])
 }
 
 model core_orders {
@@ -254,14 +249,19 @@ model core_orders {
   settlement_currency        String                       @default("BRL")
   started_at                 DateTime?
   type                       OrderType                    @default(TRANSFERENCIA)
+  kind                       OrderKind                    @default(OTC)
+  supplier_id                String?
   core_order_destinations    core_order_destinations[]
   core_order_subtransactions core_order_subtransactions[]
   core_customers             core_customers               @relation(fields: [customer_id], references: [id])
+  core_suppliers             core_suppliers?              @relation(fields: [supplier_id], references: [id])
 
   @@index([customer_id, idempotency_key])
   @@index([customer_id])
   @@index([status, created_at])
   @@index([type, status, created_at])
+  @@index([kind, status, created_at])
+  @@index([supplier_id])
 }
 
 model core_transactions {
@@ -272,10 +272,12 @@ model core_transactions {
   description    String?
   metadata       Json?
   created_at     DateTime        @default(now())
+  reason_code    String?
   core_customers core_customers  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 
   @@index([customer_id])
   @@index([type, created_at])
+  @@index([reason_code, created_at])
 }
 
 model whats_customer_groups {
@@ -328,6 +330,67 @@ model core_bank_account_balances {
 
   @@index([as_of])
   @@index([status, as_of])
+}
+
+model core_payment_receipts {
+  id                         String                      @id @default(dbgenerated("gen_random_uuid()"))
+  provider                   BankProvider
+  webhook_type               String?
+  provider_payment_id        String?
+  provider_status            String?
+  status                     ReceiptStatus               @default(RECEIVED)
+  idempotency_key            String?
+  end_to_end_id              String?
+  remittance_information     String?
+  pix_key                    String?
+  amount                     Decimal?                    @db.Decimal(14, 2)
+  currency                   String?
+  debtor_document            String?
+  debtor_name                String?
+  creditor_document          String?
+  creditor_name              String?
+  subtransaction_id          String?
+  raw_payload                Json?
+  received_at                DateTime                    @default(now())
+  created_at                 DateTime                    @default(now())
+  updated_at                 DateTime
+  core_order_subtransactions core_order_subtransactions? @relation(fields: [subtransaction_id], references: [id])
+
+  @@unique([provider, provider_payment_id])
+  @@index([end_to_end_id])
+  @@index([idempotency_key])
+  @@index([status, received_at])
+  @@index([subtransaction_id])
+}
+
+model core_suppliers {
+  id          String        @id
+  name        String
+  document    String?
+  email       String?
+  whatsapp    String?
+  is_active   Boolean       @default(true)
+  metadata    Json?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime
+  core_orders core_orders[]
+}
+
+model core_transaction_reasons {
+  id          String                @id
+  code        String                @unique
+  name        String
+  active      Boolean               @default(true)
+  description String?
+  created_at  DateTime              @default(now())
+  updated_at  DateTime
+  type        TransactionReasonType @default(both)
+  is_internal Boolean               @default(false)
+
+  @@index([active])
+  @@index([is_internal, active])
+  @@index([type, active])
+  @@index([type, is_internal, active])
 }
 
 enum CustomerType {
@@ -402,4 +465,25 @@ enum TransactionType {
 enum WhatsGroupType {
   outgoing
   incoming
+}
+
+enum OrderKind {
+  OTC
+  SUPPLIER
+  BULK
+}
+
+enum ReceiptStatus {
+  RECEIVED
+  PROCESSING
+  LIQUIDATED
+  FAILED
+  CANCELED
+  UNKNOWN
+}
+
+enum TransactionReasonType {
+  credit
+  debit
+  both
 }

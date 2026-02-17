@@ -2,10 +2,22 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "The AWS CloudFormation template for this Serverless application",
   "Resources": {
-    "CreateOrderLogGroup": {
+    "CreateSupplierOrderLogGroup": {
       "Type": "AWS::Logs::LogGroup",
       "Properties": {
-        "LogGroupName": "/aws/lambda/order-service-dev-createOrder"
+        "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrder"
+      }
+    },
+    "CreateOtcOrderLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/order-service-dev-createOtcOrder"
+      }
+    },
+    "CreateBulkOrderLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/order-service-dev-createBulkOrder"
       }
     },
     "GetOrderByIdLogGroup": {
@@ -118,16 +130,16 @@
         ]
       }
     },
-    "CreateOrderLambdaFunction": {
+    "CreateSupplierOrderLambdaFunction": {
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-createOrder.zip"
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-createSupplierOrder.zip"
         },
-        "Handler": "src/handlers/orders/create.create",
+        "Handler": "src/handlers/orders/createSupplier.createSupplier",
         "Runtime": "nodejs18.x",
-        "FunctionName": "order-service-dev-createOrder",
+        "FunctionName": "order-service-dev-createSupplierOrder",
         "MemorySize": 1024,
         "Timeout": 6,
         "Environment": {
@@ -158,7 +170,93 @@
         }
       },
       "DependsOn": [
-        "CreateOrderLogGroup"
+        "CreateSupplierOrderLogGroup"
+      ]
+    },
+    "CreateOtcOrderLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-createOtcOrder.zip"
+        },
+        "Handler": "src/handlers/orders/createOtc.createOtc",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "order-service-dev-createOtcOrder",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+            "JWT_SECRET": "uma-super-chave-secreta",
+            "NODE_OPTIONS": "--enable-source-maps"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            "sg-0c53a9fdbac3c3f1d"
+          ],
+          "SubnetIds": [
+            "subnet-0db66bddd09cf4ea4",
+            "subnet-0025ce174e80dbd39",
+            "subnet-0b3d786ce9758f63d",
+            "subnet-04db367d4eefcbc92",
+            "subnet-044f588274a69635f",
+            "subnet-09be2de009329d2a1"
+          ]
+        }
+      },
+      "DependsOn": [
+        "CreateOtcOrderLogGroup"
+      ]
+    },
+    "CreateBulkOrderLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-createBulkOrder.zip"
+        },
+        "Handler": "src/handlers/orders/createBulk.createBulk",
+        "Runtime": "nodejs18.x",
+        "FunctionName": "order-service-dev-createBulkOrder",
+        "MemorySize": 1024,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+            "JWT_SECRET": "uma-super-chave-secreta",
+            "NODE_OPTIONS": "--enable-source-maps"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "IamRoleLambdaExecution",
+            "Arn"
+          ]
+        },
+        "VpcConfig": {
+          "SecurityGroupIds": [
+            "sg-0c53a9fdbac3c3f1d"
+          ],
+          "SubnetIds": [
+            "subnet-0db66bddd09cf4ea4",
+            "subnet-0025ce174e80dbd39",
+            "subnet-0b3d786ce9758f63d",
+            "subnet-04db367d4eefcbc92",
+            "subnet-044f588274a69635f",
+            "subnet-09be2de009329d2a1"
+          ]
+        }
+      },
+      "DependsOn": [
+        "CreateBulkOrderLogGroup"
       ]
     },
     "GetOrderByIdLambdaFunction": {
@@ -166,7 +264,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-getOrderById.zip"
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-getOrderById.zip"
         },
         "Handler": "src/handlers/orders/getById.getById",
         "Runtime": "nodejs18.x",
@@ -209,7 +307,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-getOrders.zip"
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-getOrders.zip"
         },
         "Handler": "src/handlers/orders/getAll.getAll",
         "Runtime": "nodejs18.x",
@@ -252,7 +350,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-          "S3Key": "serverless/order-service/dev/1770674217227-2026-02-09T21:56:57.227Z/order-service-retryOrder.zip"
+          "S3Key": "serverless/order-service/dev/1771008745452-2026-02-13T18:52:25.452Z/order-service-retryOrder.zip"
         },
         "Handler": "src/handlers/orders/retry.retry",
         "Runtime": "nodejs18.x",
@@ -290,44 +388,64 @@
         "RetryOrderLogGroup"
       ]
     },
-    "GetOrderByIdLambdaVersionWgUNv040g6BcJBCM79bTDPh7PN4CSOHWwJYXmWCv8": {
-      "Type": "AWS::Lambda::Version",
-      "DeletionPolicy": "Retain",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "GetOrderByIdLambdaFunction"
-        },
-        "CodeSha256": "4HSpmCtTu1JYEC/3eQDTHy2HotT9idMff5EP9wmrxVA="
-      }
-    },
-    "RetryOrderLambdaVersionPnOwxwfLzO5tLCzGuMt1RcwTxtDijGAz2aeUXGatDU": {
+    "RetryOrderLambdaVersionzFoTHYmeTcdyazdiqSH9PD7ywA0tOVf6nzb5x9A": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "RetryOrderLambdaFunction"
         },
-        "CodeSha256": "2OddRmtfB0AmsRSyUTL66bAykGEs7wXMMQD2QXjJIQc="
+        "CodeSha256": "EdHE48LcnVBaMIMCUdPKCcppl1DqshknjDbJWezNhho="
       }
     },
-    "CreateOrderLambdaVersion8ITHkxm1PKhA3UcIcu7OX6prfU0wFmpolkGMOodDnM": {
+    "GetOrderByIdLambdaVersionITGrMDJGw9qSkkhjcClcY4iEWVII6qQ9RoUF54rgo": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
-          "Ref": "CreateOrderLambdaFunction"
+          "Ref": "GetOrderByIdLambdaFunction"
         },
-        "CodeSha256": "M8kEHyVpYrfA0sEEAuvHeP61M8hW2ELSUCT0C/0C0A4="
+        "CodeSha256": "4v2p+ccUmwe3AEx21ya4cGEb6ojOnjIP5FkRWZdkC+I="
       }
     },
-    "GetOrdersLambdaVersionJEf6SUOOkSv8ihCu8dACMqkC0JB4GlSqYUFKGR7UI": {
+    "CreateOtcOrderLambdaVersioniUIuW9d0xR8P2QLVpxNGOxs3VvyeM5h6xSeJmUAoH4": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CreateOtcOrderLambdaFunction"
+        },
+        "CodeSha256": "7sqBQSH95fG46GeU7ajXAZPviNrjEVFgDTftBEjtKIY="
+      }
+    },
+    "CreateSupplierOrderLambdaVersionOqCOnx91Ae4U202nVsmP1GVZ2K6XDnpO4hFMn4hlbA": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CreateSupplierOrderLambdaFunction"
+        },
+        "CodeSha256": "waVUdaOA/0u3jQXR2Otgiv3e5k/5ByShXyAXXXlA/MI="
+      }
+    },
+    "CreateBulkOrderLambdaVersion86QmYo3p0RpOCQSn1l6vaURFFiZAv7yajVoirgnQD9I": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "CreateBulkOrderLambdaFunction"
+        },
+        "CodeSha256": "M371TEPPnkuVEphMthdmLRUm5GsDKdZZ/U6tYaP6mOM="
+      }
+    },
+    "GetOrdersLambdaVersionoBLOuCFkY9m3QkMNUewsI1Dci3bpben7225ZV6ripTA": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetOrdersLambdaFunction"
         },
-        "CodeSha256": "/v0SBYWzGQJldghDUFsdzn000jXAnWZumZDpZJliZYk="
+        "CodeSha256": "XsrP+j2r68uws4OJUOzky7AViYkQudvvSOz145U7l1U="
       }
     },
     "HttpApi": {
@@ -366,12 +484,12 @@
         }
       }
     },
-    "CreateOrderLambdaPermissionHttpApi": {
+    "CreateSupplierOrderLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
       "Properties": {
         "FunctionName": {
           "Fn::GetAtt": [
-            "CreateOrderLambdaFunction",
+            "CreateSupplierOrderLambdaFunction",
             "Arn"
           ]
         },
@@ -403,7 +521,7 @@
         }
       }
     },
-    "HttpApiIntegrationCreateOrder": {
+    "HttpApiIntegrationCreateSupplierOrder": {
       "Type": "AWS::ApiGatewayV2::Integration",
       "Properties": {
         "ApiId": {
@@ -412,7 +530,7 @@
         "IntegrationType": "AWS_PROXY",
         "IntegrationUri": {
           "Fn::GetAtt": [
-            "CreateOrderLambdaFunction",
+            "CreateSupplierOrderLambdaFunction",
             "Arn"
           ]
         },
@@ -420,26 +538,176 @@
         "TimeoutInMillis": 30000
       }
     },
-    "HttpApiRoutePostOrders": {
+    "HttpApiRoutePostOrdersSupplier": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "POST /orders",
+        "RouteKey": "POST /orders/supplier",
         "Target": {
           "Fn::Join": [
             "/",
             [
               "integrations",
               {
-                "Ref": "HttpApiIntegrationCreateOrder"
+                "Ref": "HttpApiIntegrationCreateSupplierOrder"
               }
             ]
           ]
         }
       },
-      "DependsOn": "HttpApiIntegrationCreateOrder"
+      "DependsOn": "HttpApiIntegrationCreateSupplierOrder"
+    },
+    "CreateOtcOrderLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CreateOtcOrderLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationCreateOtcOrder": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "CreateOtcOrderLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePostOrdersOtc": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /orders/otc",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationCreateOtcOrder"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationCreateOtcOrder"
+    },
+    "CreateBulkOrderLambdaPermissionHttpApi": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "CreateBulkOrderLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:",
+              {
+                "Ref": "AWS::Region"
+              },
+              ":",
+              {
+                "Ref": "AWS::AccountId"
+              },
+              ":",
+              {
+                "Ref": "HttpApi"
+              },
+              "/*"
+            ]
+          ]
+        }
+      }
+    },
+    "HttpApiIntegrationCreateBulkOrder": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": [
+            "CreateBulkOrderLambdaFunction",
+            "Arn"
+          ]
+        },
+        "PayloadFormatVersion": "2.0",
+        "TimeoutInMillis": 30000
+      }
+    },
+    "HttpApiRoutePostOrdersBulk": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "HttpApi"
+        },
+        "RouteKey": "POST /orders/bulk",
+        "Target": {
+          "Fn::Join": [
+            "/",
+            [
+              "integrations",
+              {
+                "Ref": "HttpApiIntegrationCreateBulkOrder"
+              }
+            ]
+          ]
+        }
+      },
+      "DependsOn": "HttpApiIntegrationCreateBulkOrder"
     },
     "GetOrderByIdLambdaPermissionHttpApi": {
       "Type": "AWS::Lambda::Permission",
@@ -674,37 +942,55 @@
         "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
       }
     },
-    "GetOrderByIdLambdaFunctionQualifiedArn": {
-      "Description": "Current Lambda function version",
-      "Value": {
-        "Ref": "GetOrderByIdLambdaVersionWgUNv040g6BcJBCM79bTDPh7PN4CSOHWwJYXmWCv8"
-      },
-      "Export": {
-        "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
-      }
-    },
     "RetryOrderLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "RetryOrderLambdaVersionPnOwxwfLzO5tLCzGuMt1RcwTxtDijGAz2aeUXGatDU"
+        "Ref": "RetryOrderLambdaVersionzFoTHYmeTcdyazdiqSH9PD7ywA0tOVf6nzb5x9A"
       },
       "Export": {
         "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
       }
     },
-    "CreateOrderLambdaFunctionQualifiedArn": {
+    "GetOrderByIdLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "CreateOrderLambdaVersion8ITHkxm1PKhA3UcIcu7OX6prfU0wFmpolkGMOodDnM"
+        "Ref": "GetOrderByIdLambdaVersionITGrMDJGw9qSkkhjcClcY4iEWVII6qQ9RoUF54rgo"
       },
       "Export": {
-        "Name": "sls-order-service-dev-CreateOrderLambdaFunctionQualifiedArn"
+        "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
+      }
+    },
+    "CreateOtcOrderLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CreateOtcOrderLambdaVersioniUIuW9d0xR8P2QLVpxNGOxs3VvyeM5h6xSeJmUAoH4"
+      },
+      "Export": {
+        "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
+      }
+    },
+    "CreateSupplierOrderLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CreateSupplierOrderLambdaVersionOqCOnx91Ae4U202nVsmP1GVZ2K6XDnpO4hFMn4hlbA"
+      },
+      "Export": {
+        "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
+      }
+    },
+    "CreateBulkOrderLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "CreateBulkOrderLambdaVersion86QmYo3p0RpOCQSn1l6vaURFFiZAv7yajVoirgnQD9I"
+      },
+      "Export": {
+        "Name": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
       }
     },
     "GetOrdersLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetOrdersLambdaVersionJEf6SUOOkSv8ihCu8dACMqkC0JB4GlSqYUFKGR7UI"
+        "Ref": "GetOrdersLambdaVersionoBLOuCFkY9m3QkMNUewsI1Dci3bpben7225ZV6ripTA"
       },
       "Export": {
         "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"

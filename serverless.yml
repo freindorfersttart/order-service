@@ -41,16 +41,75 @@ package:
   individually: true
 
 functions:
-  createOrder:
-    handler: src/handlers/orders/create.create
+  createSupplierOrder:
+    handler: src/handlers/orders/createSupplier.createSupplier
     events:
       - httpApi:
-          path: /orders
+          path: /orders/supplier
           method: POST
     package:
       patterns:
         - '!**'
-        - 'src/handlers/orders/create.ts'
+        - 'src/handlers/orders/createSupplier.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        # ✅ Prisma Client + engine
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        # ✅ deps usadas no handler
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
+
+  createOtcOrder:
+    handler: src/handlers/orders/createOtc.createOtc
+    events:
+      - httpApi:
+          path: /orders/otc
+          method: POST
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/createOtc.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+
+        # ✅ Prisma Client + engine
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+
+        # ✅ deps usadas no handler
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
+
+  createBulkOrder:
+    handler: src/handlers/orders/createBulk.createBulk
+    events:
+      - httpApi:
+          path: /orders/bulk
+          method: POST
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/createBulk.ts'
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
