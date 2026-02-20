@@ -14940,7 +14940,7 @@ var require_client = __commonJS({
           "value": "prisma-client-js"
         },
         "output": {
-          "value": "/Users/tecnologia01/sttartpay/order-service/node_modules/@prisma/client",
+          "value": "/Users/tecnologia01/sttartpay/report-service/node_modules/@prisma/client",
           "fromEnvVar": null
         },
         "config": {
@@ -14958,7 +14958,7 @@ var require_client = __commonJS({
           }
         ],
         "previewFeatures": [],
-        "sourceFilePath": "/Users/tecnologia01/sttartpay/order-service/prisma/schema.prisma"
+        "sourceFilePath": "/Users/tecnologia01/sttartpay/report-service/prisma/schema.prisma"
       },
       "relativeEnvPaths": {
         "rootEnvPath": null,

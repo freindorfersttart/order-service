@@ -1,4 +1,4 @@
-service: order-service
+service: report-service
 
 provider:
   name: aws
@@ -7,7 +7,7 @@ provider:
   stage: dev
 
   httpApi:
-    name: order-service-httpapi-dev
+    name: report-service-httpapi-dev
     payload: '2.0'
     cors:
       allowedOrigins:

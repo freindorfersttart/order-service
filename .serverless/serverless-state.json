@@ -1,8 +1,8 @@
 {
   "service": {
-    "service": "order-service",
+    "service": "report-service",
     "serviceObject": {
-      "name": "order-service"
+      "name": "report-service"
     },
     "provider": {
       "name": "aws",
@@ -10,7 +10,7 @@
       "region": "us-east-1",
       "stage": "dev",
       "httpApi": {
-        "name": "order-service-httpapi-dev",
+        "name": "report-service-httpapi-dev",
         "payload": "2.0",
         "cors": {
           "allowedOrigins": [
@@ -54,49 +54,49 @@
           "CreateSupplierOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrder"
+              "LogGroupName": "/aws/lambda/report-service-dev-createSupplierOrder"
             }
           },
           "CreateOtcOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-createOtcOrder"
+              "LogGroupName": "/aws/lambda/report-service-dev-createOtcOrder"
             }
           },
           "CreateBulkOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-createBulkOrder"
+              "LogGroupName": "/aws/lambda/report-service-dev-createBulkOrder"
             }
           },
           "CreateAdhocOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-createAdhocOrder"
+              "LogGroupName": "/aws/lambda/report-service-dev-createAdhocOrder"
             }
           },
           "GetOrderByIdLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-getOrderById"
+              "LogGroupName": "/aws/lambda/report-service-dev-getOrderById"
             }
           },
           "GetOrdersLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-getOrders"
+              "LogGroupName": "/aws/lambda/report-service-dev-getOrders"
             }
           },
           "GetOrderReceiptsLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-getOrderReceipts"
+              "LogGroupName": "/aws/lambda/report-service-dev-getOrderReceipts"
             }
           },
           "RetryOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/order-service-dev-retryOrder"
+              "LogGroupName": "/aws/lambda/report-service-dev-retryOrder"
             }
           },
           "IamRoleLambdaExecution": {
@@ -124,7 +124,7 @@
                     "Fn::Join": [
                       "-",
                       [
-                        "order-service",
+                        "report-service",
                         "dev",
                         "lambda"
                       ]
@@ -142,7 +142,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/order-service-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/report-service-dev*:*"
                           }
                         ]
                       },
@@ -153,7 +153,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/order-service-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/report-service-dev*:*:*"
                           }
                         ]
                       }
@@ -166,7 +166,7 @@
                 "Fn::Join": [
                   "-",
                   [
-                    "order-service",
+                    "report-service",
                     "dev",
                     {
                       "Ref": "AWS::Region"
@@ -196,11 +196,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-createSupplierOrder.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-createSupplierOrder.zip"
               },
               "Handler": "src/handlers/orders/createSupplier.createSupplier",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-createSupplierOrder",
+              "FunctionName": "report-service-dev-createSupplierOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -234,11 +234,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-createOtcOrder.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-createOtcOrder.zip"
               },
               "Handler": "src/handlers/orders/createOtc.createOtc",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-createOtcOrder",
+              "FunctionName": "report-service-dev-createOtcOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -272,11 +272,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-createBulkOrder.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-createBulkOrder.zip"
               },
               "Handler": "src/handlers/orders/createBulk.createBulk",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-createBulkOrder",
+              "FunctionName": "report-service-dev-createBulkOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -310,11 +310,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-createAdhocOrder.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-createAdhocOrder.zip"
               },
               "Handler": "src/handlers/orders/createAdhoc.createAdhoc",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-createAdhocOrder",
+              "FunctionName": "report-service-dev-createAdhocOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -348,11 +348,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-getOrderById.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-getOrderById.zip"
               },
               "Handler": "src/handlers/orders/getById.getById",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-getOrderById",
+              "FunctionName": "report-service-dev-getOrderById",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -386,11 +386,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-getOrders.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-getOrders.zip"
               },
               "Handler": "src/handlers/orders/getAll.getAll",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-getOrders",
+              "FunctionName": "report-service-dev-getOrders",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -424,11 +424,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-getOrderReceipts.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-getOrderReceipts.zip"
               },
               "Handler": "src/handlers/orders/getOrderReceipts.getOrderReceipts",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-getOrderReceipts",
+              "FunctionName": "report-service-dev-getOrderReceipts",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -462,11 +462,11 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z/order-service-retryOrder.zip"
+                "S3Key": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z/report-service-retryOrder.zip"
               },
               "Handler": "src/handlers/orders/retry.retry",
               "Runtime": "nodejs18.x",
-              "FunctionName": "order-service-dev-retryOrder",
+              "FunctionName": "report-service-dev-retryOrder",
               "MemorySize": 1024,
               "Timeout": 6,
               "Environment": {
@@ -578,7 +578,7 @@
           "HttpApi": {
             "Type": "AWS::ApiGatewayV2::Api",
             "Properties": {
-              "Name": "order-service-httpapi-dev",
+              "Name": "report-service-httpapi-dev",
               "ProtocolType": "HTTP",
               "CorsConfiguration": {
                 "AllowHeaders": [
@@ -1192,7 +1192,7 @@
           "ServerlessDeploymentBucketName": {
             "Value": "serverless-framework-deployments-us-east-1-450298af-2cc9",
             "Export": {
-              "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-report-service-dev-ServerlessDeploymentBucketName"
             }
           },
           "GetOrderByIdLambdaFunctionQualifiedArn": {
@@ -1201,7 +1201,7 @@
               "Ref": "GetOrderByIdLambdaVersiontzMdy7jfMa1KRJbF5ymHzg6PRxQ7w6gDsL8kCLWMk"
             },
             "Export": {
-              "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
             }
           },
           "RetryOrderLambdaFunctionQualifiedArn": {
@@ -1210,7 +1210,7 @@
               "Ref": "RetryOrderLambdaVersion2srX6Qcp9SNjtRKyUCotX7AOH9JCjn98PAwQlUNzWQ"
             },
             "Export": {
-              "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-RetryOrderLambdaFunctionQualifiedArn"
             }
           },
           "CreateBulkOrderLambdaFunctionQualifiedArn": {
@@ -1219,7 +1219,7 @@
               "Ref": "CreateBulkOrderLambdaVersion2Jkvv2pG5F2KRDPo6B0LsxBCXfNyJVpxwxTbYGLto"
             },
             "Export": {
-              "Name": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
             }
           },
           "CreateAdhocOrderLambdaFunctionQualifiedArn": {
@@ -1228,7 +1228,7 @@
               "Ref": "CreateAdhocOrderLambdaVersion8bUHPW1EQ58y8u8byi44pu1koWX6jJbUDQ9TA4eU"
             },
             "Export": {
-              "Name": "sls-order-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
             }
           },
           "CreateSupplierOrderLambdaFunctionQualifiedArn": {
@@ -1237,7 +1237,7 @@
               "Ref": "CreateSupplierOrderLambdaVersioncC68dvRl17q9WX3O7eVT3hybcpNsuMPksFh8iOKPdM"
             },
             "Export": {
-              "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
             }
           },
           "CreateOtcOrderLambdaFunctionQualifiedArn": {
@@ -1246,7 +1246,7 @@
               "Ref": "CreateOtcOrderLambdaVersionoPAiMSf30t9EsyljtGWy57r4AKY2RV0LPRUVws12I"
             },
             "Export": {
-              "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
             }
           },
           "GetOrdersLambdaFunctionQualifiedArn": {
@@ -1255,7 +1255,7 @@
               "Ref": "GetOrdersLambdaVersionfoXxd4wypG0bvCB2Ez5YB55lJSGc1IY6veUYPXiek8E"
             },
             "Export": {
-              "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-GetOrdersLambdaFunctionQualifiedArn"
             }
           },
           "GetOrderReceiptsLambdaFunctionQualifiedArn": {
@@ -1264,7 +1264,7 @@
               "Ref": "GetOrderReceiptsLambdaVersionf611lsmATwt7j49KYq7BxzZ4xRA3HFtEM7hRl8DSRpc"
             },
             "Export": {
-              "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
+              "Name": "sls-report-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -1273,7 +1273,7 @@
               "Ref": "HttpApi"
             },
             "Export": {
-              "Name": "sls-order-service-dev-HttpApiId"
+              "Name": "sls-report-service-dev-HttpApiId"
             }
           },
           "HttpApiUrl": {
@@ -1298,7 +1298,7 @@
               ]
             },
             "Export": {
-              "Name": "sls-order-service-dev-HttpApiUrl"
+              "Name": "sls-report-service-dev-HttpApiUrl"
             }
           }
         }
@@ -1319,9 +1319,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createSupplierOrder.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-createSupplierOrder.zip"
         },
-        "name": "order-service-dev-createSupplierOrder",
+        "name": "report-service-dev-createSupplierOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1344,9 +1344,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createOtcOrder.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-createOtcOrder.zip"
         },
-        "name": "order-service-dev-createOtcOrder",
+        "name": "report-service-dev-createOtcOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1369,9 +1369,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createBulkOrder.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-createBulkOrder.zip"
         },
-        "name": "order-service-dev-createBulkOrder",
+        "name": "report-service-dev-createBulkOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1394,9 +1394,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createAdhocOrder.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-createAdhocOrder.zip"
         },
-        "name": "order-service-dev-createAdhocOrder",
+        "name": "report-service-dev-createAdhocOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1419,9 +1419,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getOrderById.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-getOrderById.zip"
         },
-        "name": "order-service-dev-getOrderById",
+        "name": "report-service-dev-getOrderById",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1444,9 +1444,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getOrders.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-getOrders.zip"
         },
-        "name": "order-service-dev-getOrders",
+        "name": "report-service-dev-getOrders",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1469,9 +1469,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getOrderReceipts.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-getOrderReceipts.zip"
         },
-        "name": "order-service-dev-getOrderReceipts",
+        "name": "report-service-dev-getOrderReceipts",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1494,9 +1494,9 @@
           }
         ],
         "package": {
-          "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-retryOrder.zip"
+          "artifact": "/Users/tecnologia01/sttartpay/report-service/.serverless/build/report-service-retryOrder.zip"
         },
-        "name": "order-service-dev-retryOrder",
+        "name": "report-service-dev-retryOrder",
         "environment": {
           "NODE_OPTIONS": "--enable-source-maps"
         },
@@ -1510,15 +1510,15 @@
     "configValidationMode": "warn",
     "serviceFilename": "serverless",
     "initialServerlessConfig": {
-      "service": "order-service",
+      "service": "report-service",
       "provider": {
         "$ref": "$[\"service\"][\"provider\"]"
       },
       "package": {
         "individually": true,
-        "artifactsS3KeyDirname": "serverless/order-service/dev/code-artifacts",
+        "artifactsS3KeyDirname": "serverless/report-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-        "artifactDirectoryName": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z"
+        "artifactDirectoryName": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z"
       },
       "functions": {
         "$ref": "$[\"service\"][\"functions\"]"
@@ -1530,7 +1530,7 @@
   },
   "package": {
     "individually": true,
-    "artifactDirectoryName": "serverless/order-service/dev/1771452995927-2026-02-18T22:16:35.927Z",
+    "artifactDirectoryName": "serverless/report-service/dev/1771452995927-2026-02-18T22:16:35.927Z",
     "artifact": ""
   }
 }

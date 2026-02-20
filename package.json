@@ -1,5 +1,5 @@
 {
-  "name": "order-service",
+  "name": "report-service",
   "version": "1.0.0",
   "description": "Serviço de autenticação da SttartPay",
   "main": "index.js",
