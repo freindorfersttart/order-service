@@ -99,13 +99,15 @@ model core_bank_accounts {
 }
 
 model core_balances {
-  id               String         @id
-  customer_id      String         @unique
-  available_amount Decimal        @default(0) @db.Decimal(14, 2)
-  locked_amount    Decimal        @default(0) @db.Decimal(14, 2)
-  updated_at       DateTime
-  credit_limit     Decimal        @default(0) @db.Decimal(14, 2)
-  core_customers   core_customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  id                   String         @id
+  customer_id          String         @unique
+  available_amount     Decimal        @default(0) @db.Decimal(14, 2)
+  locked_amount        Decimal        @default(0) @db.Decimal(14, 2)
+  updated_at           DateTime
+  credit_limit         Decimal        @default(0) @db.Decimal(14, 2)
+  locked_cash_amount   Decimal        @default(0) @db.Decimal(14, 2)
+  locked_credit_amount Decimal        @default(0) @db.Decimal(14, 2)
+  core_customers       core_customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 }
 
 model core_bank_account_integrations {
@@ -189,34 +191,39 @@ model core_order_destinations {
 }
 
 model core_order_subtransactions {
-  id                      String                   @id @default(uuid())
-  order_id                String
-  status                  SubStatus                @default(PENDING)
-  amount                  Decimal                  @db.Decimal(14, 2)
-  index                   Int
-  created_at              DateTime                 @default(now())
-  executed_at             DateTime?
-  attempts                Int                      @default(0)
-  bank_account_id         String?
-  destination_pix_key     String?
-  idempotency_key         String?                  @unique
-  last_error              String?
-  provider_ref            String?
-  destination             String?
-  destination_id          String?
-  execution_metadata      Json?
-  next_retry_at           DateTime?
-  updated_at              DateTime                 @default(now()) @db.Timestamp(6)
-  beneficiary_document    String?
-  beneficiary_name        String?
-  end_to_end_id           String?
-  provider_status         String?
-  settled_at              DateTime?
-  settlement_status       String?
-  core_bank_accounts      core_bank_accounts?      @relation(fields: [bank_account_id], references: [id])
-  core_order_destinations core_order_destinations? @relation(fields: [destination_id], references: [id])
-  core_orders             core_orders              @relation(fields: [order_id], references: [id], onDelete: Cascade)
-  core_payment_receipts   core_payment_receipts[]
+  id                              String                   @id @default(uuid())
+  order_id                        String
+  status                          SubStatus                @default(PENDING)
+  amount                          Decimal                  @db.Decimal(14, 2)
+  index                           Int
+  created_at                      DateTime                 @default(now())
+  executed_at                     DateTime?
+  attempts                        Int                      @default(0)
+  bank_account_id                 String?
+  destination_pix_key             String?
+  idempotency_key                 String?                  @unique
+  last_error                      String?
+  provider_ref                    String?
+  destination                     String?
+  destination_id                  String?
+  execution_metadata              Json?
+  next_retry_at                   DateTime?
+  updated_at                      DateTime                 @default(now()) @db.Timestamp(6)
+  beneficiary_document            String?
+  beneficiary_name                String?
+  end_to_end_id                   String?
+  provider_status                 String?
+  settled_at                      DateTime?
+  settlement_status               String?
+  financial_settled_at            DateTime?
+  financial_settlement_receipt_id String?
+  financial_settlement_status     String?
+  locked_from_available           Decimal                  @default(0) @db.Decimal(14, 2)
+  locked_from_credit              Decimal                  @default(0) @db.Decimal(14, 2)
+  core_bank_accounts              core_bank_accounts?      @relation(fields: [bank_account_id], references: [id])
+  core_order_destinations         core_order_destinations? @relation(fields: [destination_id], references: [id])
+  core_orders                     core_orders              @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  core_payment_receipts           core_payment_receipts[]
 
   @@index([bank_account_id, status])
   @@index([order_id])
@@ -471,6 +478,7 @@ enum OrderKind {
   OTC
   SUPPLIER
   BULK
+  ADHOC
 }
 
 enum ReceiptStatus {

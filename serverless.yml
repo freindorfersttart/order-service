@@ -54,12 +54,10 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         # ✅ Prisma Client + engine
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
-
         # ✅ deps usadas no handler
         - 'node_modules/zod/**'
         - 'node_modules/jsonwebtoken/**'
@@ -83,19 +81,16 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         # ✅ Prisma Client + engine
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
-
         # ✅ deps usadas no handler
         - 'node_modules/zod/**'
         - 'node_modules/jsonwebtoken/**'
         - 'node_modules/jwa/**'
         - 'node_modules/jws/**'
         - 'node_modules/ms/**'
-        - 'node_modules/jws/**'
         - 'node_modules/ecdsa-sig-formatter/**'
         - 'node_modules/safe-buffer/**'
         - 'node_modules/buffer-equal-constant-time/**'
@@ -113,12 +108,37 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         # ✅ Prisma Client + engine
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
+        # ✅ deps usadas no handler
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
 
+  createAdhocOrder:
+    handler: src/handlers/orders/createAdhoc.createAdhoc
+    events:
+      - httpApi:
+          path: /orders/adhoc
+          method: POST
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/createAdhoc.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+        # ✅ Prisma Client + engine
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
         # ✅ deps usadas no handler
         - 'node_modules/zod/**'
         - 'node_modules/jsonwebtoken/**'
@@ -142,11 +162,9 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
-
         - 'node_modules/jsonwebtoken/**'
         - 'node_modules/jwa/**'
         - 'node_modules/jws/**'
@@ -168,11 +186,37 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
+        - 'node_modules/zod/**'
+        - 'node_modules/jsonwebtoken/**'
+        - 'node_modules/jwa/**'
+        - 'node_modules/jws/**'
+        - 'node_modules/ms/**'
+        - 'node_modules/ecdsa-sig-formatter/**'
+        - 'node_modules/safe-buffer/**'
+        - 'node_modules/buffer-equal-constant-time/**'
 
+  # ✅ listar comprovantes/receipts de uma order (via subtransactions)
+  getOrderReceipts:
+    handler: src/handlers/orders/getOrderReceipts.getOrderReceipts
+    events:
+      - httpApi:
+          path: /orders/{id}/receipts
+          method: GET
+    package:
+      patterns:
+        - '!**'
+        - 'src/handlers/orders/getOrderReceipts.ts'
+        - 'src/lib/prisma.ts'
+        - 'src/middleware/authMiddleware.ts'
+        - 'prisma/schema.prisma'
+        # ✅ Prisma Client + engine
+        - 'node_modules/@prisma/client/**'
+        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
+        - 'node_modules/.prisma/client/schema.prisma'
+        # ✅ deps usadas no handler
         - 'node_modules/zod/**'
         - 'node_modules/jsonwebtoken/**'
         - 'node_modules/jwa/**'
@@ -195,11 +239,9 @@ functions:
         - 'src/lib/prisma.ts'
         - 'src/middleware/authMiddleware.ts'
         - 'prisma/schema.prisma'
-
         - 'node_modules/@prisma/client/**'
         - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
         - 'node_modules/.prisma/client/schema.prisma'
-
         - 'node_modules/jsonwebtoken/**'
         - 'node_modules/jwa/**'
         - 'node_modules/jws/**'

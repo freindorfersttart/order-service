@@ -27,7 +27,10 @@ export const getAll: APIGatewayProxyHandler = async (event) => {
     });
 
     if (!parsed.success) {
-      return { statusCode: 400, body: JSON.stringify({ error: "Invalid query params", details: parsed.error.flatten() }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid query params", details: parsed.error.flatten() }),
+      };
     }
 
     const { page, pageSize, status, type, customer_id } = parsed.data;
@@ -89,16 +92,44 @@ export const getAll: APIGatewayProxyHandler = async (event) => {
 
     const subs = await prisma.core_order_subtransactions.findMany({
       where: { order_id: { in: orderIds } },
-      select: { order_id: true, status: true },
+      select: {
+        order_id: true,
+        status: true,
+        settlement_status: true, // ✅ novo (vem do webhook OnlyUp)
+      },
     });
 
-    const statsByOrder: Record<
-      string,
-      { totalSubs: number; success: number; failed: number; pending: number; processing: number; progress: number }
-    > = {};
+    type Stats = {
+      totalSubs: number;
+      success: number;
+      failed: number;
+      pending: number;
+      processing: number;
+
+      // ✅ settlement
+      liquidated: number;
+      hasSettlement: boolean; // existe qualquer settlement_status preenchido?
+      progress: number;
+      isSettled: boolean; // liquidated == totalSubs (quando totalSubs>0)
+      hasReceipts: boolean; // alias pro front
+    };
+
+    const statsByOrder: Record<string, Stats> = {};
 
     for (const id of orderIds) {
-      statsByOrder[id] = { totalSubs: 0, success: 0, failed: 0, pending: 0, processing: 0, progress: 0 };
+      statsByOrder[id] = {
+        totalSubs: 0,
+        success: 0,
+        failed: 0,
+        pending: 0,
+        processing: 0,
+
+        liquidated: 0,
+        hasSettlement: false,
+        progress: 0,
+        isSettled: false,
+        hasReceipts: false,
+      };
     }
 
     for (const s of subs) {
@@ -106,15 +137,32 @@ export const getAll: APIGatewayProxyHandler = async (event) => {
       if (!st) continue;
 
       st.totalSubs += 1;
+
       if (s.status === "SUCCESS") st.success += 1;
       else if (s.status === "FAILED") st.failed += 1;
       else if (s.status === "PENDING") st.pending += 1;
       else if (s.status === "PROCESSING") st.processing += 1;
+
+      // ✅ settlement stats
+      const settlement = (s.settlement_status || "").toUpperCase();
+      if (settlement) {
+        st.hasSettlement = true;
+        st.hasReceipts = true;
+      }
+      if (settlement === "LIQUIDATED") {
+        st.liquidated += 1;
+      }
     }
 
     for (const id of orderIds) {
       const st = statsByOrder[id];
-      st.progress = st.totalSubs === 0 ? 0 : Math.round((st.success / st.totalSubs) * 100);
+
+      // ✅ progress: se já temos settlement, usa liquidated; senão mantém comportamento antigo (success)
+      const numerator = st.hasSettlement ? st.liquidated : st.success;
+      st.progress = st.totalSubs === 0 ? 0 : Math.round((numerator / st.totalSubs) * 100);
+
+      // ✅ concluído real: tudo liquidado
+      st.isSettled = st.totalSubs > 0 && st.liquidated === st.totalSubs;
     }
 
     const items = orders.map((o) => ({
@@ -125,7 +173,11 @@ export const getAll: APIGatewayProxyHandler = async (event) => {
         failed: 0,
         pending: 0,
         processing: 0,
+        liquidated: 0,
+        hasSettlement: false,
         progress: 0,
+        isSettled: false,
+        hasReceipts: false,
       },
     }));
 
@@ -141,6 +193,9 @@ export const getAll: APIGatewayProxyHandler = async (event) => {
     };
   } catch (err: any) {
     console.error("getOrders error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) }),
+    };
   }
 };

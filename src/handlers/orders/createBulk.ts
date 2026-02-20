@@ -10,10 +10,7 @@ const bulkItemSchema = z.object({
   amount: z.number().positive(),
   destination_pix_key: z.string().min(3).optional(),
   pix_key: z.string().min(3).optional(), // alias
-
   label: z.string().optional(),
-
-  // snapshots para receipt/OnlyUp
   beneficiary_name: z.string().min(2).optional(),
   beneficiary_document: z.string().min(11).optional(),
   key_type: pixKeyTypeSchema,
@@ -24,29 +21,27 @@ const createBulkSchema = z.object({
   customer_id: z.string().min(6),
   customer_type: z.string().min(1),
   bank_name: z.string().min(1),
-
   bank_account_id: z.string().min(6),
-
-  // chunk (ex 14900)
   sub_amount: z.number().positive(),
-
-  // se não vier, somamos dos items
   total_amount: z.number().positive().optional(),
-
   idempotency_key: z.string().optional(),
   metadata: z.any().optional(),
-
   items: z.array(bulkItemSchema).min(1),
 });
 
+function toMoney(n: number) {
+  return Number(Number(n).toFixed(2));
+}
+
 function chunkAmount(total: number, chunk: number): number[] {
   const res: number[] = [];
-  let remaining = Number(total.toFixed(2));
-  const c = Number(chunk.toFixed(2));
+  let remaining = toMoney(total);
+  const c = toMoney(chunk);
+
   while (remaining > 0) {
     const part = remaining >= c ? c : remaining;
-    res.push(Number(part.toFixed(2)));
-    remaining = Number((remaining - part).toFixed(2));
+    res.push(toMoney(part));
+    remaining = toMoney(remaining - part);
   }
   return res;
 }
@@ -63,15 +58,48 @@ function ensureCpfCnpjDigits(doc: string) {
   return d;
 }
 
-// ✅ NOVO: normaliza PIX key (remove prefixos tipo "cnpj:" e ajusta conforme key_type)
+type LockResult = {
+  total: number;
+  fromCash: number;
+  fromCredit: number;
+};
+
+function calcLockSplit(params: {
+  amount: number;
+  available: number;
+  creditLimit: number;
+  lockedCredit: number;
+}): LockResult {
+  const { amount, available, creditLimit, lockedCredit } = params;
+
+  const total = toMoney(amount);
+  const av = toMoney(available);
+
+  // crédito livre = limite - já travado em crédito
+  const creditFree = toMoney(creditLimit - lockedCredit);
+
+  const utilizable = toMoney(av + creditFree);
+  if (utilizable < total) {
+    throw new Error(`Saldo insuficiente. Utilizável: ${utilizable} < Total: ${total}`);
+  }
+
+  const fromCash = toMoney(Math.min(av, total));
+  const fromCredit = toMoney(total - fromCash);
+
+  if (fromCredit > creditFree) {
+    throw new Error(`Limite insuficiente. Crédito livre: ${creditFree} < Necessário: ${fromCredit}`);
+  }
+
+  return { total, fromCash, fromCredit };
+}
+
+// ✅ normaliza PIX key (remove prefixos tipo "cnpj:" e ajusta conforme key_type)
 function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phone" | "random") {
   const v = String(raw || "").trim();
   if (!v) throw new Error("pix_key vazia");
 
-  // remove prefixos comuns: "cnpj:", "cpf:", "email:", "phone:", "random:" (case-insensitive)
   const noPrefix = v.replace(/^(cpf|cnpj|email|phone|random)\s*:\s*/i, "").trim();
 
-  // se o caller informou key_type, respeita
   if (keyType === "cpf" || keyType === "cnpj") {
     const d = digitsOnly(noPrefix);
     if (keyType === "cpf" && d.length !== 11) throw new Error(`PIX CPF inválida: ${raw}`);
@@ -91,17 +119,13 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
     return e;
   }
 
-  if (keyType === "random") {
-    // EVP costuma vir com hífens; mantém como está (só tira espaços/prefixo)
-    return noPrefix;
-  }
+  if (keyType === "random") return noPrefix;
 
-  // fallback por heurística (quando key_type não vier)
   const maybeDigits = digitsOnly(noPrefix);
-  if (maybeDigits.length === 11 || maybeDigits.length === 14) return maybeDigits; // cpf/cnpj
-  if (noPrefix.includes("@")) return noPrefix.toLowerCase(); // email
-  if (maybeDigits.length >= 10 && maybeDigits.length <= 13) return maybeDigits; // phone
-  return noPrefix; // random/evp
+  if (maybeDigits.length === 11 || maybeDigits.length === 14) return maybeDigits;
+  if (noPrefix.includes("@")) return noPrefix.toLowerCase();
+  if (maybeDigits.length >= 10 && maybeDigits.length <= 13) return maybeDigits;
+  return noPrefix;
 }
 
 export const createBulk: APIGatewayProxyHandler = async (event) => {
@@ -120,7 +144,6 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
 
     const data = parsed.data;
 
-    // valida conta pagadora PAYOUT
     const payer = await prisma.core_bank_accounts.findUnique({
       where: { id: data.bank_account_id },
       select: { id: true, active: true, purpose: true, provider: true },
@@ -134,7 +157,7 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
 
     const total_amount =
       data.total_amount ??
-      Number(data.items.reduce((sum, it) => sum + Number(it.amount), 0).toFixed(2));
+      toMoney(data.items.reduce((sum, it) => sum + Number(it.amount), 0));
 
     const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
 
@@ -148,7 +171,79 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
     }
 
     const created = await prisma.$transaction(async (tx) => {
-      // cria order BULK
+      // =========================================================
+      // ✅ trava saldo do customer usando saldo + limite
+      // =========================================================
+      const bal = await tx.core_balances.findUnique({
+        where: { customer_id: data.customer_id },
+        select: {
+          id: true,
+          available_amount: true,
+          credit_limit: true,
+          locked_amount: true,
+          locked_cash_amount: true,
+          locked_credit_amount: true,
+        },
+      });
+
+      if (!bal) throw new Error("Saldo do customer não encontrado (core_balances).");
+
+      const available = Number(bal.available_amount);
+      const creditLimit = Number(bal.credit_limit);
+      const lockedCash = Number((bal as any).locked_cash_amount ?? 0);
+      const lockedCredit = Number((bal as any).locked_credit_amount ?? 0);
+
+      const split = calcLockSplit({
+        amount: total_amount,
+        available,
+        creditLimit,
+        lockedCredit,
+      });
+
+      const newAvailable = toMoney(available - split.fromCash);
+      const newLockedCash = toMoney(lockedCash + split.fromCash);
+      const newLockedCredit = toMoney(lockedCredit + split.fromCredit);
+      const newLockedTotal = toMoney(newLockedCash + newLockedCredit);
+
+      await tx.core_balances.update({
+        where: { customer_id: data.customer_id },
+        data: {
+          available_amount: newAvailable as any,
+          locked_cash_amount: newLockedCash as any,
+          locked_credit_amount: newLockedCredit as any,
+          locked_amount: newLockedTotal as any,
+        },
+      });
+
+      // registra transações lock (cash e/ou credit)
+      if (split.fromCash > 0) {
+        await tx.core_transactions.create({
+          data: {
+            id: crypto.randomUUID(),
+            customer_id: data.customer_id,
+            type: "lock" as any,
+            amount: split.fromCash as any,
+            description: `BULK - lock saldo`,
+            metadata: { order_id: data.id, kind: "BULK", source: "cash" },
+          },
+        });
+      }
+      if (split.fromCredit > 0) {
+        await tx.core_transactions.create({
+          data: {
+            id: crypto.randomUUID(),
+            customer_id: data.customer_id,
+            type: "lock" as any,
+            amount: split.fromCredit as any,
+            description: `BULK - lock limite`,
+            metadata: { order_id: data.id, kind: "BULK", source: "credit" },
+          },
+        });
+      }
+
+      // =========================================================
+      // cria order BULK (continua PENDING; só COMPLETED com baixa financeira)
+      // =========================================================
       const order = await tx.core_orders.create({
         data: {
           id: data.id,
@@ -171,8 +266,15 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
 
           status: "PENDING",
           idempotency_key: orderIdempotency,
-          metadata: data.metadata ?? null,
-          locked_amount_snapshot: null,
+          metadata: {
+            ...(data.metadata ?? {}),
+            locks: {
+              total: split.total,
+              cash: split.fromCash,
+              credit: split.fromCredit,
+            },
+          },
+          locked_amount_snapshot: newLockedTotal as any, // snapshot pós-lock
           started_at: null,
           completed_at: null,
           last_error: null,
@@ -180,20 +282,24 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
         },
       });
 
-      // index global das subtransactions
+      // =========================================================
+      // cria destinations + subtransactions
+      // ✅ e já distribui o lock cash/credit por subtransaction (locked_from_*)
+      // =========================================================
       let globalIndex = 1;
+
+      let remainingCash = toMoney(split.fromCash);
+      let remainingCredit = toMoney(split.fromCredit);
 
       for (const item of data.items) {
         const pixKeyRaw = item.destination_pix_key ?? item.pix_key;
         if (!pixKeyRaw) throw new Error("Item inválido: precisa destination_pix_key ou pix_key.");
 
-        // ✅ aplica normalização (remove "cnpj:" etc)
         const pixKey = normalizePixKey(pixKeyRaw, item.key_type as any);
 
         const benDoc = item.beneficiary_document ? ensureCpfCnpjDigits(item.beneficiary_document) : null;
         const benName = item.beneficiary_name ?? null;
 
-        // cria destination por linha da planilha (com amount permitido)
         const dest = await tx.core_order_destinations.create({
           data: {
             id: crypto.randomUUID(),
@@ -211,16 +317,29 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
           },
         });
 
-        // cria subtransactions (se item.amount > sub_amount, fraciona por linha)
         const parts = chunkAmount(item.amount, data.sub_amount);
 
         for (const part of parts) {
+          const partMoney = toMoney(part);
+
+          // ✅ aloca lock primeiro do cash, depois do crédito
+          const fromCash = toMoney(Math.min(remainingCash, partMoney));
+          const fromCredit = toMoney(partMoney - fromCash);
+
+          remainingCash = toMoney(remainingCash - fromCash);
+          remainingCredit = toMoney(remainingCredit - fromCredit);
+
+          // sanity check (não pode ficar negativo)
+          if (remainingCash < -0.0001 || remainingCredit < -0.0001) {
+            throw new Error("Erro ao alocar lock por subtransaction (saldo/limite ficou negativo).");
+          }
+
           await tx.core_order_subtransactions.create({
             data: {
               id: crypto.randomUUID(),
               order_id: order.id,
               status: "PENDING",
-              amount: part as any,
+              amount: partMoney as any,
               index: globalIndex++,
               bank_account_id: data.bank_account_id,
 
@@ -240,9 +359,25 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
               provider_ref: null,
               executed_at: null,
               updated_at: new Date() as any,
+
+              // ✅ NOVO: rastreio financeiro do lock
+              locked_from_available: fromCash as any,
+              locked_from_credit: fromCredit as any,
+              financial_settled_at: null,
+              financial_settlement_receipt_id: null,
+              financial_settlement_status: null,
             },
           });
         }
+      }
+
+      // ✅ sanity final: sobras devem ser ~0 (podem ter 0.01 de arredondamento)
+      const cashAbs = Math.abs(toMoney(remainingCash));
+      const creditAbs = Math.abs(toMoney(remainingCredit));
+      if (cashAbs > 0.01 || creditAbs > 0.01) {
+        throw new Error(
+          `Erro de alocação do lock. Sobra cash=${remainingCash} credit=${remainingCredit} (tolerância 0.01)`
+        );
       }
 
       const full = await tx.core_orders.findUnique({
