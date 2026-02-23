@@ -23,8 +23,8 @@ const createOtcSchema = z.object({
   // OTC manual: tipo da operação (USDT, WIRE, TRX etc)
   type: orderTypeSchema.default("USDT"),
 
-  base_amount: z.number().positive(),         // ex: 100000 (USD)
-  rate: z.number().positive(),                // ex: 1.5
+  base_amount: z.number().positive(), // ex: 100000 (USD)
+  rate: z.number().positive(), // ex: 1.5
   fees_amount: z.number().nonnegative().default(0),
   base_currency: z.string().default("USD"),
   settlement_currency: z.string().default("BRL"),
@@ -43,9 +43,41 @@ function toMoney(n: number) {
   return Number(n.toFixed(2));
 }
 
+function pickOperator(metadata: any) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email || null };
+}
+
+function buildAudit(event: any, auth?: any) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+
+  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
+
+  return {
+    actor: actorUserId ? { type: "user", user_id: actorUserId } : { type: "unknown", user_id: null },
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId,
+      },
+      context: {
+        ip,
+        user_agent: ua,
+      },
+      at: new Date().toISOString(),
+    },
+  };
+}
+
 export const createOtc: APIGatewayProxyHandler = async (event) => {
   try {
-    verifyToken(event);
+    const auth = (verifyToken(event) as any) || undefined;
 
     const body = JSON.parse(event.body || "{}");
     const parsed = createOtcSchema.safeParse(body);
@@ -56,7 +88,7 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
 
     const data = parsed.data;
 
-    const computedTotal = toMoney((data.total_amount ?? (data.base_amount * data.rate + data.fees_amount)));
+    const computedTotal = toMoney(data.total_amount ?? data.base_amount * data.rate + data.fees_amount);
 
     const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
 
@@ -68,6 +100,21 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
     if (existing) {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
+
+    // ✅ operador vindo do lovable
+    const operator = pickOperator(data.metadata);
+    // ✅ audit/actor (actor só se o token retornar algo)
+    const auditMeta = buildAudit(event, auth);
+
+    // ✅ metadata final padronizado
+    const finalMetadata =
+      data.metadata == null
+        ? { operator, ...auditMeta }
+        : {
+            ...(data.metadata ?? {}),
+            operator,
+            ...auditMeta,
+          };
 
     const created = await prisma.$transaction(async (tx) => {
       // carrega saldo
@@ -112,7 +159,7 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
           status: "COMPLETED",
           idempotency_key: orderIdempotency,
           metadata: {
-            ...(data.metadata ?? {}),
+            ...(finalMetadata as any),
             description: data.description ?? null,
             calculation: {
               base_amount: data.base_amount,
@@ -135,7 +182,7 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
         data: { available_amount: (available - computedTotal) as any },
       });
 
-      // registra transação
+      // registra transação (✅ agora com operator + audit também)
       await tx.core_transactions.create({
         data: {
           id: crypto.randomUUID(),
@@ -152,6 +199,16 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
             fees_amount: data.fees_amount,
             base_currency: data.base_currency,
             settlement_currency: data.settlement_currency,
+
+            // ✅ importante pro relatório
+            operator,
+            ...auditMeta,
+
+            // opcional, ajuda o Lovable
+            notes: data.metadata?.notes ?? null,
+            pair: data.metadata?.pair ?? null,
+            screen: data.metadata?.screen ?? null,
+            source: data.metadata?.source ?? null,
           },
         },
       });

@@ -128,9 +128,41 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
   return noPrefix;
 }
 
+function pickOperator(metadata: any) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email || null };
+}
+
+function buildAudit(event: any, auth?: any) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+
+  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
+
+  return {
+    actor: actorUserId ? { type: "user", user_id: actorUserId } : { type: "unknown", user_id: null },
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId,
+      },
+      context: {
+        ip,
+        user_agent: ua,
+      },
+      at: new Date().toISOString(),
+    },
+  };
+}
+
 export const createBulk: APIGatewayProxyHandler = async (event) => {
   try {
-    verifyToken(event);
+    const auth = (verifyToken(event) as any) || undefined;
 
     const body = JSON.parse(event.body || "{}");
     const parsed = createBulkSchema.safeParse(body);
@@ -156,8 +188,7 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
     }
 
     const total_amount =
-      data.total_amount ??
-      toMoney(data.items.reduce((sum, it) => sum + Number(it.amount), 0));
+      data.total_amount ?? toMoney(data.items.reduce((sum, it) => sum + Number(it.amount), 0));
 
     const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
 
@@ -169,6 +200,9 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
     if (existing) {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
+
+    const operator = pickOperator(data.metadata);
+    const auditMeta = buildAudit(event, auth);
 
     const created = await prisma.$transaction(async (tx) => {
       // =========================================================
@@ -224,7 +258,13 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
             type: "lock" as any,
             amount: split.fromCash as any,
             description: `BULK - lock saldo`,
-            metadata: { order_id: data.id, kind: "BULK", source: "cash" },
+            metadata: {
+              order_id: data.id,
+              kind: "BULK",
+              source: "cash",
+              operator,
+              ...auditMeta,
+            },
           },
         });
       }
@@ -236,7 +276,13 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
             type: "lock" as any,
             amount: split.fromCredit as any,
             description: `BULK - lock limite`,
-            metadata: { order_id: data.id, kind: "BULK", source: "credit" },
+            metadata: {
+              order_id: data.id,
+              kind: "BULK",
+              source: "credit",
+              operator,
+              ...auditMeta,
+            },
           },
         });
       }
@@ -268,6 +314,8 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
           idempotency_key: orderIdempotency,
           metadata: {
             ...(data.metadata ?? {}),
+            operator,
+            ...auditMeta,
             locks: {
               total: split.total,
               cash: split.fromCash,
@@ -360,7 +408,7 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
               executed_at: null,
               updated_at: new Date() as any,
 
-              // ✅ NOVO: rastreio financeiro do lock
+              // ✅ rastreio financeiro do lock
               locked_from_available: fromCash as any,
               locked_from_credit: fromCredit as any,
               financial_settled_at: null,

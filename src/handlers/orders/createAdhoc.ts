@@ -125,9 +125,49 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
   return noPrefix;
 }
 
+function pickOperator(metadata: any) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return {
+    name: name || null,
+    email: email || null,
+  };
+}
+
+function buildAudit(event: any, auth?: any) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+
+  // auth pode não existir (se verifyToken não retornar payload)
+  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
+
+  return {
+    actor: actorUserId
+      ? { type: "user", user_id: actorUserId }
+      : { type: "unknown", user_id: null },
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId,
+      },
+      context: {
+        ip,
+        user_agent: ua,
+      },
+      at: new Date().toISOString(),
+    },
+  };
+}
+
 export const createAdhoc: APIGatewayProxyHandler = async (event) => {
   try {
-    verifyToken(event);
+    // ✅ garante auth válido
+    // OBS: pode retornar payload ou só validar
+    const auth = (verifyToken(event) as any) || undefined;
 
     const body = JSON.parse(event.body || "{}");
     const parsed = createAdhocSchema.safeParse(body);
@@ -163,6 +203,11 @@ export const createAdhoc: APIGatewayProxyHandler = async (event) => {
     if (existing) {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
+
+    // ✅ operador vindo do lovable
+    const operator = pickOperator(data.metadata);
+    // ✅ audit básico (inclui actor.user_id se disponível via token)
+    const auditMeta = buildAudit(event, auth);
 
     const created = await prisma.$transaction(async (tx) => {
       // =========================================================
@@ -218,7 +263,13 @@ export const createAdhoc: APIGatewayProxyHandler = async (event) => {
             type: "lock" as any,
             amount: split.fromCash as any,
             description: `ADHOC - lock saldo`,
-            metadata: { order_id: data.id, kind: "ADHOC", source: "cash" },
+            metadata: {
+              order_id: data.id,
+              kind: "ADHOC",
+              source: "cash",
+              operator,
+              ...auditMeta,
+            },
           },
         });
       }
@@ -230,7 +281,13 @@ export const createAdhoc: APIGatewayProxyHandler = async (event) => {
             type: "lock" as any,
             amount: split.fromCredit as any,
             description: `ADHOC - lock limite`,
-            metadata: { order_id: data.id, kind: "ADHOC", source: "credit" },
+            metadata: {
+              order_id: data.id,
+              kind: "ADHOC",
+              source: "credit",
+              operator,
+              ...auditMeta,
+            },
           },
         });
       }
@@ -262,6 +319,8 @@ export const createAdhoc: APIGatewayProxyHandler = async (event) => {
           idempotency_key: orderIdempotency,
           metadata: {
             ...(data.metadata ?? {}),
+            operator, // ✅ operador do lovable salvo aqui
+            ...auditMeta, // ✅ audit/actor salvo aqui
             locks: {
               total: split.total,
               cash: split.fromCash,

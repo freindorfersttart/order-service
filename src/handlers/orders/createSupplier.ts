@@ -90,9 +90,42 @@ function ensureCpfCnpjDigits(doc: string) {
   return d;
 }
 
+function pickOperator(metadata: any) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email || null };
+}
+
+function buildAudit(event: any, auth?: any) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+
+  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
+
+  return {
+    actor: actorUserId ? { type: "user", user_id: actorUserId } : { type: "unknown", user_id: null },
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId,
+      },
+      context: {
+        ip,
+        user_agent: ua,
+      },
+      at: new Date().toISOString(),
+    },
+  };
+}
+
 export const createSupplier: APIGatewayProxyHandler = async (event) => {
   try {
-    verifyToken(event);
+    // ✅ garante auth válido (pode retornar payload ou só validar)
+    const auth = (verifyToken(event) as any) || undefined;
 
     const body = JSON.parse(event.body || "{}");
     const parsed = createSupplierOrderSchema.safeParse(body);
@@ -150,7 +183,10 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "Use destination_pix_key OU destination (não ambos)." }) };
     }
     if (!hasPix) {
-      return { statusCode: 400, body: JSON.stringify({ error: "TRANSFERENCIA exige destination_pix_key (ou beneficiary.pix_key)." }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "TRANSFERENCIA exige destination_pix_key (ou beneficiary.pix_key)." }),
+      };
     }
 
     // PIX exige beneficiário (id ou inline)
@@ -171,6 +207,21 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
     if (existing) {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
+
+    // ✅ operador vindo do lovable (fica salvo no metadata)
+    const operator = pickOperator(data.metadata);
+    // ✅ audit/actor (actor só se o token retornar algo)
+    const auditMeta = buildAudit(event, auth);
+
+    // ✅ metadata final padronizado
+    const finalMetadata =
+      data.metadata == null
+        ? { operator, ...auditMeta }
+        : {
+            ...(data.metadata ?? {}),
+            operator,
+            ...auditMeta,
+          };
 
     const created = await prisma.$transaction(async (tx) => {
       let beneficiaryId: string | null = d0.beneficiary_id ?? null;
@@ -251,7 +302,7 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
 
           status: "PENDING",
           idempotency_key: orderIdempotency,
-          metadata: data.metadata ?? null,
+          metadata: finalMetadata as any, // ✅ agora salva operador/audit
           locked_amount_snapshot: null,
           started_at: null,
           completed_at: null,
