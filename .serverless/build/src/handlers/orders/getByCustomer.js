@@ -18986,12 +18986,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/retry.ts
-var retry_exports = {};
-__export(retry_exports, {
-  retry: () => retry
+// src/handlers/orders/getByCustomer.ts
+var getByCustomer_exports = {};
+__export(getByCustomer_exports, {
+  getByCustomer: () => getByCustomer
 });
-module.exports = __toCommonJS(retry_exports);
+module.exports = __toCommonJS(getByCustomer_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -19019,85 +19019,127 @@ function verifyToken(event) {
   }
 }
 
-// src/handlers/orders/retry.ts
-var retry = async (event) => {
+// src/handlers/orders/getByCustomer.ts
+function toInt(v, def) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : def;
+}
+var getByCustomer = async (event) => {
   try {
     verifyToken(event);
-    const orderId = event.pathParameters?.id;
-    if (!orderId) {
-      return { statusCode: 400, body: JSON.stringify({ ok: false, error: "order_id \xE9 obrigat\xF3rio" }) };
+    const customerId = event.pathParameters?.customerId;
+    if (!customerId) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "customerId is required" })
+      };
     }
-    const order = await prisma.core_orders.findUnique({
-      where: { id: orderId },
-      select: { id: true, status: true }
-    });
-    if (!order) {
-      return { statusCode: 404, body: JSON.stringify({ ok: false, error: "Order not found", order_id: orderId }) };
-    }
-    const before = await prisma.core_order_subtransactions.groupBy({
-      by: ["status"],
-      where: { order_id: orderId },
+    const qs = event.queryStringParameters || {};
+    const page = Math.max(1, toInt(qs.page, 1));
+    const pageSize = Math.min(100, Math.max(1, toInt(qs.pageSize, 20)));
+    const skip2 = (page - 1) * pageSize;
+    const [total, orders] = await Promise.all([
+      prisma.core_orders.count({
+        where: { customer_id: customerId }
+      }),
+      prisma.core_orders.findMany({
+        where: { customer_id: customerId },
+        orderBy: { created_at: "desc" },
+        // mesmo padrão do getAll (ajuste se teu campo for outro)
+        skip: skip2,
+        take: pageSize,
+        include: {
+          core_order_destinations: true,
+          _count: { select: { core_order_subtransactions: true } }
+        }
+      })
+    ]);
+    const orderIds = orders.map((o) => o.id);
+    const grouped = orderIds.length === 0 ? [] : await prisma.core_order_subtransactions.groupBy({
+      by: ["order_id", "status"],
+      where: { order_id: { in: orderIds } },
       _count: { _all: true }
     });
-    const beforeCounts = before.reduce((acc, row) => {
-      acc[row.status] = row._count._all;
-      return acc;
-    }, {});
-    const updated = await prisma.core_order_subtransactions.updateMany({
-      where: {
-        order_id: orderId,
-        NOT: { status: "SUCCESS" }
-      },
-      data: {
-        status: "PENDING",
-        attempts: 0,
-        next_retry_at: null,
-        last_error: null,
-        executed_at: null,
-        provider_ref: null,
-        execution_metadata: null,
-        idempotency_key: null,
-        // ✅ importantíssimo pra não reusar idempotency
-        updated_at: /* @__PURE__ */ new Date()
+    const agg = {};
+    for (const row of grouped) {
+      const order_id = row.order_id;
+      const status = row.status;
+      const c = row._count?._all ?? 0;
+      if (!agg[order_id]) {
+        agg[order_id] = {
+          totalSubs: 0,
+          success: 0,
+          failed: 0,
+          pending: 0,
+          processing: 0
+        };
       }
-    });
-    const after = await prisma.core_order_subtransactions.groupBy({
-      by: ["status"],
-      where: { order_id: orderId },
-      _count: { _all: true }
-    });
-    const afterCounts = after.reduce((acc, row) => {
-      acc[row.status] = row._count._all;
-      return acc;
-    }, {});
-    if (order.status !== "COMPLETED") {
-      await prisma.core_orders.update({
-        where: { id: orderId },
-        data: { status: "IN_PROGRESS", updated_at: /* @__PURE__ */ new Date(), last_error: null }
-      });
+      agg[order_id].totalSubs += c;
+      if (status === "SUCCESS") agg[order_id].success += c;
+      else if (status === "FAILED") agg[order_id].failed += c;
+      else if (status === "PENDING") agg[order_id].pending += c;
+      else if (status === "PROCESSING") agg[order_id].processing += c;
     }
+    const items = orders.map((order) => {
+      const a = agg[order.id] || {
+        totalSubs: order._count?.core_order_subtransactions || 0,
+        success: 0,
+        failed: 0,
+        pending: 0,
+        processing: 0
+      };
+      const totalSubs = a.totalSubs;
+      const success = a.success;
+      const failed = a.failed;
+      const pending = a.pending;
+      const processing = a.processing;
+      const progress = totalSubs === 0 ? 0 : Math.round(success / totalSubs * 100);
+      const isCompleted = order.status === "COMPLETED";
+      const liquidated = isCompleted ? success : 0;
+      const hasSettlement = liquidated > 0;
+      const isSettled = totalSubs > 0 && isCompleted && success === totalSubs;
+      const hasReceipts = isSettled;
+      return {
+        ...order,
+        stats: {
+          totalSubs,
+          success,
+          failed,
+          pending,
+          processing,
+          liquidated,
+          hasSettlement,
+          progress,
+          isSettled,
+          hasReceipts
+        }
+      };
+    });
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
     return {
       statusCode: 200,
       body: JSON.stringify({
-        ok: true,
-        order_id: orderId,
-        before: beforeCounts,
-        after: afterCounts,
-        updated_subtransactions: updated.count,
-        reset_attempts: true,
-        message: "Subtransactions n\xE3o-SUCCESS voltaram para PENDING e ser\xE3o reprocessadas pelo worker."
+        page,
+        pageSize,
+        total,
+        totalPages,
+        items
       })
     };
   } catch (err) {
-    console.error("retryOrder error:", err);
-    const msg = err?.message || String(err);
-    const code = msg === "Unauthorized" ? 401 : 500;
-    return { statusCode: code, body: JSON.stringify({ ok: false, error: msg }) };
+    console.error("getOrdersByCustomer error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Internal error",
+        details: err?.message || String(err)
+      })
+    };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  retry
+  getByCustomer
 });
 /*! Bundled license information:
 
@@ -19123,4 +19165,4 @@ var retry = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=retry.js.map
+//# sourceMappingURL=getByCustomer.js.map

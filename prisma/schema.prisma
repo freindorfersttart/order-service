@@ -66,48 +66,59 @@ model core_pix_keys {
 }
 
 model core_bank_accounts {
-  id                             String                          @id @default(uuid())
-  bank_code                      String
-  bank_name                      String
-  account_number                 String
-  agency_number                  String
-  ispb                           String
-  cnpj                           String
-  pix_keys                       String[]                        @default([])
-  daily_limit                    Int
-  nightly_limit                  Int
-  per_operation_limit            Int
-  integration_status             String
-  active                         Boolean                         @default(true)
-  created_at                     DateTime                        @default(now())
-  updated_at                     DateTime                        @updatedAt
-  account_name                   String?
-  link_code                      String?
-  auto_credit_customer_id        String?
-  confirm_auto_credit            Boolean                         @default(false)
-  integration_id                 String?
-  provider                       BankProvider?
-  purpose                        BankAccountPurpose              @default(DEPOSIT)
-  core_bank_account_balances     core_bank_account_balances?
-  core_customers                 core_customers?                 @relation(fields: [auto_credit_customer_id], references: [id])
-  core_bank_account_integrations core_bank_account_integrations? @relation(fields: [integration_id], references: [id])
-  core_order_subtransactions     core_order_subtransactions[]
+  id                                                                                 String                          @id @default(uuid())
+  bank_code                                                                          String
+  bank_name                                                                          String
+  account_number                                                                     String
+  agency_number                                                                      String
+  ispb                                                                               String
+  cnpj                                                                               String
+  pix_keys                                                                           String[]                        @default([])
+  daily_limit                                                                        Int
+  nightly_limit                                                                      Int
+  per_operation_limit                                                                Int
+  integration_status                                                                 String
+  active                                                                             Boolean                         @default(true)
+  created_at                                                                         DateTime                        @default(now())
+  updated_at                                                                         DateTime                        @updatedAt
+  account_name                                                                       String?
+  link_code                                                                          String?
+  auto_credit_customer_id                                                            String?
+  confirm_auto_credit                                                                Boolean                         @default(false)
+  integration_id                                                                     String?
+  provider                                                                           BankProvider?
+  purpose                                                                            BankAccountPurpose              @default(DEPOSIT)
+  is_master                                                                          Boolean                         @default(false)
+  master_bank_account_id                                                             String?
+  core_bank_account_balances                                                         core_bank_account_balances?
+  core_customers                                                                     core_customers?                 @relation(fields: [auto_credit_customer_id], references: [id])
+  core_bank_account_integrations                                                     core_bank_account_integrations? @relation(fields: [integration_id], references: [id])
+  core_bank_accounts                                                                 core_bank_accounts?             @relation("core_bank_accountsTocore_bank_accounts", fields: [master_bank_account_id], references: [id])
+  other_core_bank_accounts                                                           core_bank_accounts[]            @relation("core_bank_accountsTocore_bank_accounts")
+  core_order_subtransactions                                                         core_order_subtransactions[]
+  core_sweep_transfers_core_sweep_transfers_from_bank_account_idTocore_bank_accounts core_sweep_transfers[]          @relation("core_sweep_transfers_from_bank_account_idTocore_bank_accounts")
+  core_sweep_transfers_core_sweep_transfers_to_bank_account_idTocore_bank_accounts   core_sweep_transfers[]          @relation("core_sweep_transfers_to_bank_account_idTocore_bank_accounts")
 
   @@index([integration_id])
   @@index([provider, active])
   @@index([purpose, active])
+  @@index([is_master, active])
+  @@index([master_bank_account_id])
 }
 
 model core_balances {
-  id                   String         @id
-  customer_id          String         @unique
-  available_amount     Decimal        @default(0) @db.Decimal(14, 2)
-  locked_amount        Decimal        @default(0) @db.Decimal(14, 2)
-  updated_at           DateTime
-  credit_limit         Decimal        @default(0) @db.Decimal(14, 2)
-  locked_cash_amount   Decimal        @default(0) @db.Decimal(14, 2)
-  locked_credit_amount Decimal        @default(0) @db.Decimal(14, 2)
-  core_customers       core_customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  id                     String         @id
+  customer_id            String         @unique
+  available_amount       Decimal        @default(0) @db.Decimal(14, 2)
+  locked_amount          Decimal        @default(0) @db.Decimal(14, 2)
+  updated_at             DateTime
+  credit_limit           Decimal        @default(0) @db.Decimal(14, 2)
+  locked_cash_amount     Decimal        @default(0) @db.Decimal(14, 2)
+  locked_credit_amount   Decimal        @default(0) @db.Decimal(14, 2)
+  opening_balance_amount Decimal?       @db.Decimal(14, 2)
+  opening_balance_at     DateTime?      @db.Timestamptz(6)
+  opening_balance_note   String?
+  core_customers         core_customers @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 }
 
 model core_bank_account_integrations {
@@ -272,15 +283,16 @@ model core_orders {
 }
 
 model core_transactions {
-  id             String          @id
-  customer_id    String
-  type           TransactionType
-  amount         Decimal         @db.Decimal(14, 2)
-  description    String?
-  metadata       Json?
-  created_at     DateTime        @default(now())
-  reason_code    String?
-  core_customers core_customers  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  id                String          @id
+  customer_id       String
+  type              TransactionType
+  amount            Decimal         @db.Decimal(14, 2)
+  description       String?
+  metadata          Json?
+  created_at        DateTime        @default(now())
+  reason_code       String?
+  subtransaction_id String?         @db.Uuid
+  core_customers    core_customers  @relation(fields: [customer_id], references: [id], onDelete: Cascade)
 
   @@index([customer_id])
   @@index([type, created_at])
@@ -400,6 +412,86 @@ model core_transaction_reasons {
   @@index([type, is_internal, active])
 }
 
+model core_sweep_jobs {
+  id                     String                 @id
+  status                 SweepJobStatus         @default(QUEUED)
+  requested_by_user_id   String?
+  master_bank_account_id String
+  scope                  SweepScope             @default(ALL)
+  customer_id            String?
+  from_bank_account_id   String?
+  note                   String?
+  totals                 Json?
+  created_at             DateTime               @default(now())
+  started_at             DateTime?
+  finished_at            DateTime?
+  updated_at             DateTime
+  core_sweep_transfers   core_sweep_transfers[]
+
+  @@index([customer_id, created_at])
+  @@index([master_bank_account_id, created_at])
+  @@index([status, created_at])
+}
+
+model core_sweep_transfers {
+  id                                                                               String              @id
+  sweep_job_id                                                                     String
+  from_bank_account_id                                                             String
+  to_bank_account_id                                                               String
+  amount                                                                           Decimal             @db.Decimal(14, 2)
+  status                                                                           SweepTransferStatus @default(QUEUED)
+  idempotency_key                                                                  String              @unique
+  provider_transfer_id                                                             String?
+  provider_status                                                                  String?
+  attempts                                                                         Int                 @default(0)
+  last_error                                                                       String?
+  raw_payload                                                                      Json?
+  created_at                                                                       DateTime            @default(now())
+  processed_at                                                                     DateTime?
+  updated_at                                                                       DateTime
+  core_bank_accounts_core_sweep_transfers_from_bank_account_idTocore_bank_accounts core_bank_accounts  @relation("core_sweep_transfers_from_bank_account_idTocore_bank_accounts", fields: [from_bank_account_id], references: [id])
+  core_sweep_jobs                                                                  core_sweep_jobs     @relation(fields: [sweep_job_id], references: [id], onDelete: Cascade)
+  core_bank_accounts_core_sweep_transfers_to_bank_account_idTocore_bank_accounts   core_bank_accounts  @relation("core_sweep_transfers_to_bank_account_idTocore_bank_accounts", fields: [to_bank_account_id], references: [id])
+
+  @@index([from_bank_account_id, status])
+  @@index([status, created_at])
+  @@index([sweep_job_id])
+  @@index([to_bank_account_id, status])
+}
+
+model migration_run_customers {
+  id                   String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  run_id               String         @db.Uuid
+  customer_id          String?
+  customer_name        String?
+  smartfin_balance     Decimal        @db.Decimal(14, 2)
+  credited_today       Decimal        @db.Decimal(14, 2)
+  target_available     Decimal        @db.Decimal(14, 2)
+  before_available     Decimal?       @db.Decimal(14, 2)
+  before_credit_limit  Decimal?       @db.Decimal(14, 2)
+  after_available      Decimal?       @db.Decimal(14, 2)
+  after_credit_limit   Decimal?       @db.Decimal(14, 2)
+  used_credit_needed   Decimal?       @db.Decimal(14, 2)
+  credit_limit_applied Decimal?       @db.Decimal(14, 2)
+  created_at           DateTime       @default(now()) @db.Timestamptz(6)
+  migration_runs       migration_runs @relation(fields: [run_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([run_id, customer_id])
+}
+
+model migration_runs {
+  id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  batch                   String
+  description             String?
+  cut_dt                  DateTime                  @db.Timestamptz(6)
+  started_at              DateTime                  @default(now()) @db.Timestamptz(6)
+  finished_at             DateTime?                 @db.Timestamptz(6)
+  status                  String                    @default("running")
+  notes                   String?
+  totals                  Json?
+  migration_run_customers migration_run_customers[]
+}
+
 enum CustomerType {
   pf
   pj
@@ -467,6 +559,10 @@ enum TransactionType {
   debit
   lock
   unlock
+  hide_credit
+  hide_debit
+  hide_lock
+  hide_unlock
 }
 
 enum WhatsGroupType {
@@ -494,4 +590,25 @@ enum TransactionReasonType {
   credit
   debit
   both
+}
+
+enum SweepJobStatus {
+  QUEUED
+  RUNNING
+  PARTIAL
+  SUCCESS
+  FAILED
+}
+
+enum SweepScope {
+  ALL
+  CUSTOMER
+  ACCOUNT
+}
+
+enum SweepTransferStatus {
+  QUEUED
+  PROCESSING
+  SUCCESS
+  FAILED
 }

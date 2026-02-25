@@ -90,6 +90,25 @@ function ensureCpfCnpjDigits(doc: string) {
   return d;
 }
 
+/**
+ * ✅ Normaliza pix key só para CPF/CNPJ (remove .-/ etc)
+ * - Se key_type for cpf/cnpj -> força dígitos
+ * - Se não tiver key_type, mas "parece" CPF/CNPJ (11/14 dígitos) e tiver pontuação -> normaliza também
+ */
+function normalizePixKey(key: string, keyType?: string | null) {
+  const raw = (key || "").trim();
+  if (!raw) return raw;
+
+  const d = digitsOnly(raw);
+
+  if (keyType === "cpf" || keyType === "cnpj") return d;
+
+  // fallback: se a key tem 11 ou 14 dígitos e veio com pontuação, normaliza
+  if ((d.length === 11 || d.length === 14) && d !== raw) return d;
+
+  return raw;
+}
+
 function pickOperator(metadata: any) {
   const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
   const email = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
@@ -124,7 +143,6 @@ function buildAudit(event: any, auth?: any) {
 
 export const createSupplier: APIGatewayProxyHandler = async (event) => {
   try {
-    // ✅ garante auth válido (pode retornar payload ou só validar)
     const auth = (verifyToken(event) as any) || undefined;
 
     const body = JSON.parse(event.body || "{}");
@@ -140,7 +158,6 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
     const data = parsed.data;
     const isPix = data.type === "TRANSFERENCIA";
 
-    // Supplier: força PIX
     if (!isPix) {
       return { statusCode: 400, body: JSON.stringify({ error: "SUPPLIER deve ser type TRANSFERENCIA (PIX)." }) };
     }
@@ -152,7 +169,6 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
     const base_currency = data.base_currency ?? "BRL";
     const settlement_currency = data.settlement_currency ?? "BRL";
 
-    // conta pagadora PAYOUT
     const payer = await prisma.core_bank_accounts.findUnique({
       where: { id: data.bank_account_id },
       select: { id: true, active: true, purpose: true, provider: true },
@@ -166,7 +182,6 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
 
     const d0 = data.destinations[0];
 
-    // proíbe amount no destino
     if (d0.amount != null) {
       return {
         statusCode: 400,
@@ -189,7 +204,6 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
       };
     }
 
-    // PIX exige beneficiário (id ou inline)
     if (!d0.beneficiary_id && !d0.beneficiary) {
       return {
         statusCode: 400,
@@ -208,12 +222,9 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
 
-    // ✅ operador vindo do lovable (fica salvo no metadata)
     const operator = pickOperator(data.metadata);
-    // ✅ audit/actor (actor só se o token retornar algo)
     const auditMeta = buildAudit(event, auth);
 
-    // ✅ metadata final padronizado
     const finalMetadata =
       data.metadata == null
         ? { operator, ...auditMeta }
@@ -233,6 +244,9 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
         const docDigits = ensureCpfCnpjDigits(d0.beneficiary.document);
         const newBenefId = crypto.randomUUID();
 
+        // ✅ normaliza pix key caso cpf/cnpj
+        const normalizedPixKey = normalizePixKey(d0.beneficiary.pix_key, d0.beneficiary.key_type ?? null);
+
         await tx.core_beneficiaries.create({
           data: { id: newBenefId, customer_id: data.customer_id, name: d0.beneficiary.name, document: docDigits },
         });
@@ -242,7 +256,7 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
             id: crypto.randomUUID(),
             beneficiary_id: newBenefId,
             key_type: (d0.beneficiary.key_type ?? "random") as any,
-            key_value: d0.beneficiary.pix_key,
+            key_value: normalizedPixKey, // ✅ salva já higienizado
             label: d0.beneficiary.label ?? d0.label ?? null,
             active: true,
           },
@@ -266,20 +280,28 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
 
       // resolve pix key
       let destinationPixKey: string | null = d0.destination_pix_key ?? null;
-      if (!destinationPixKey && d0.beneficiary?.pix_key) destinationPixKey = d0.beneficiary.pix_key;
+      let destinationPixKeyType: string | null = null;
+
+      if (!destinationPixKey && d0.beneficiary?.pix_key) {
+        destinationPixKey = d0.beneficiary.pix_key;
+        destinationPixKeyType = (d0.beneficiary.key_type as any) ?? null;
+      }
 
       if (!destinationPixKey && beneficiaryId) {
         const k = await tx.core_beneficiary_pix_keys.findFirst({
           where: { beneficiary_id: beneficiaryId, active: true },
           orderBy: { created_at: "desc" },
-          select: { key_value: true },
+          select: { key_value: true, key_type: true }, // ✅ pega tipo também
         });
         destinationPixKey = k?.key_value ?? null;
+        destinationPixKeyType = (k?.key_type as any) ?? null;
       }
 
       if (!destinationPixKey) throw new Error("Não foi possível resolver destination_pix_key para o beneficiário.");
 
-      // cria order (kind SUPPLIER)
+      // ✅ higieniza CPF/CNPJ (remove pontos e traços)
+      destinationPixKey = normalizePixKey(destinationPixKey, destinationPixKeyType);
+
       const order = await tx.core_orders.create({
         data: {
           id: data.id,
@@ -302,7 +324,7 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
 
           status: "PENDING",
           idempotency_key: orderIdempotency,
-          metadata: finalMetadata as any, // ✅ agora salva operador/audit
+          metadata: finalMetadata as any,
           locked_amount_snapshot: null,
           started_at: null,
           completed_at: null,
@@ -316,7 +338,7 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
           id: crypto.randomUUID(),
           order_id: order.id,
           destination: d0.destination ?? "",
-          destination_pix_key: destinationPixKey,
+          destination_pix_key: destinationPixKey, // ✅ já higienizado
           label: d0.label ?? null,
 
           beneficiary_id: beneficiaryId,
@@ -342,7 +364,7 @@ export const createSupplier: APIGatewayProxyHandler = async (event) => {
               bank_account_id: data.bank_account_id,
 
               destination_id: destination.id,
-              destination_pix_key: destination.destination_pix_key ?? null,
+              destination_pix_key: destination.destination_pix_key ?? null, // ✅ já higienizado
               destination: destination.destination ?? null,
 
               beneficiary_name: beneficiaryName,

@@ -8,10 +8,10 @@ provider:
 
   httpApi:
     name: order-service-httpapi-dev
-    payload: '2.0'
+    payload: "2.0"
     cors:
       allowedOrigins:
-        - '*'
+        - "*"
       allowedHeaders:
         - Authorization
         - Content-Type
@@ -49,24 +49,24 @@ functions:
           method: POST
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/createSupplier.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
+        - "!**"
+        - "src/handlers/orders/createSupplier.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
         # ✅ Prisma Client + engine
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         # ✅ deps usadas no handler
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   createOtcOrder:
     handler: src/handlers/orders/createOtc.createOtc
@@ -76,24 +76,24 @@ functions:
           method: POST
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/createOtc.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
+        - "!**"
+        - "src/handlers/orders/createOtc.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
         # ✅ Prisma Client + engine
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         # ✅ deps usadas no handler
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   createBulkOrder:
     handler: src/handlers/orders/createBulk.createBulk
@@ -103,24 +103,24 @@ functions:
           method: POST
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/createBulk.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
+        - "!**"
+        - "src/handlers/orders/createBulk.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
         # ✅ Prisma Client + engine
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         # ✅ deps usadas no handler
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   createAdhocOrder:
     handler: src/handlers/orders/createAdhoc.createAdhoc
@@ -130,24 +130,24 @@ functions:
           method: POST
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/createAdhoc.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
+        - "!**"
+        - "src/handlers/orders/createAdhoc.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
         # ✅ Prisma Client + engine
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         # ✅ deps usadas no handler
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   getOrderById:
     handler: src/handlers/orders/getById.getById
@@ -157,21 +157,21 @@ functions:
           method: GET
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/getById.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "!**"
+        - "src/handlers/orders/getById.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   getOrders:
     handler: src/handlers/orders/getAll.getAll
@@ -181,22 +181,48 @@ functions:
           method: GET
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/getAll.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "!**"
+        - "src/handlers/orders/getAll.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  # ✅ NOVO: listar ordens por customer_id
+  getOrdersByCustomer:
+    handler: src/handlers/orders/getByCustomer.getByCustomer
+    events:
+      - httpApi:
+          path: /customers/{customerId}/orders
+          method: GET
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/orders/getByCustomer.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   # ✅ listar comprovantes/receipts de uma order (via subtransactions)
   getOrderReceipts:
@@ -207,24 +233,24 @@ functions:
           method: GET
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/getOrderReceipts.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
+        - "!**"
+        - "src/handlers/orders/getOrderReceipts.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
         # ✅ Prisma Client + engine
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         # ✅ deps usadas no handler
-        - 'node_modules/zod/**'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
 
   retryOrder:
     handler: src/handlers/orders/retry.retry
@@ -234,18 +260,45 @@ functions:
           method: POST
     package:
       patterns:
-        - '!**'
-        - 'src/handlers/orders/retry.ts'
-        - 'src/lib/prisma.ts'
-        - 'src/middleware/authMiddleware.ts'
-        - 'prisma/schema.prisma'
-        - 'node_modules/@prisma/client/**'
-        - 'node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x'
-        - 'node_modules/.prisma/client/schema.prisma'
-        - 'node_modules/jsonwebtoken/**'
-        - 'node_modules/jwa/**'
-        - 'node_modules/jws/**'
-        - 'node_modules/ms/**'
-        - 'node_modules/ecdsa-sig-formatter/**'
-        - 'node_modules/safe-buffer/**'
-        - 'node_modules/buffer-equal-constant-time/**'
+        - "!**"
+        - "src/handlers/orders/retry.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  # ✅ NOVO: reconciliar debits (AUTO_PIX_DEBIT) a partir das subtransactions SUCCESS de uma order
+  registerDebitsFromSuccessSubs:
+    handler: src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs
+    events:
+      - httpApi:
+          path: /orders/{orderId}/reconcile-debits
+          method: POST
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/orders/registerDebitsFromSuccessSubs.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        # ✅ Prisma Client + engine
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        # ✅ deps usadas no handler
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"

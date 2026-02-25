@@ -23,17 +23,19 @@ const createOtcSchema = z.object({
   // OTC manual: tipo da operação (USDT, WIRE, TRX etc)
   type: orderTypeSchema.default("USDT"),
 
-  base_amount: z.number().positive(), // ex: 100000 (USD)
-  rate: z.number().positive(), // ex: 1.5
+  base_amount: z.number().positive(),
+  rate: z.number().positive(),
   fees_amount: z.number().nonnegative().default(0),
   base_currency: z.string().default("USD"),
   settlement_currency: z.string().default("BRL"),
 
-  // se vier, usamos. Se não vier, calculamos: base_amount*rate + fees
   total_amount: z.number().positive().optional(),
 
   description: z.string().optional(),
-  reason_code: z.string().optional(), // opcional p/ relatório
+  reason_code: z.string().optional(),
+
+  // ✅ novo: se vier, é retroativo pro relatório (não muda created_at)
+  completed_at: z.string().optional(),
 
   idempotency_key: z.string().optional(),
   metadata: z.any().optional(),
@@ -49,17 +51,22 @@ function pickOperator(metadata: any) {
   return { name: name || null, email: email || null };
 }
 
-function buildAudit(event: any, auth?: any) {
+function parseOptionalDate(v?: string) {
+  if (!v) return undefined;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return undefined;
+  return d;
+}
+
+// audit leve (não depende de JWT)
+function buildAudit(event: any) {
   const method = event?.requestContext?.http?.method || event?.httpMethod || null;
   const path = event?.requestContext?.http?.path || event?.path || null;
   const requestId = event?.requestContext?.requestId || null;
   const ip = event?.requestContext?.http?.sourceIp || null;
   const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
 
-  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
-
   return {
-    actor: actorUserId ? { type: "user", user_id: actorUserId } : { type: "unknown", user_id: null },
     audit: {
       source: {
         service: "order-service",
@@ -77,19 +84,38 @@ function buildAudit(event: any, auth?: any) {
 
 export const createOtc: APIGatewayProxyHandler = async (event) => {
   try {
-    const auth = (verifyToken(event) as any) || undefined;
+    verifyToken(event);
 
     const body = JSON.parse(event.body || "{}");
     const parsed = createOtcSchema.safeParse(body);
 
     if (!parsed.success) {
-      return { statusCode: 400, body: JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() }),
+      };
     }
 
     const data = parsed.data;
 
-    const computedTotal = toMoney(data.total_amount ?? data.base_amount * data.rate + data.fees_amount);
+    // ✅ completed_at retroativo (se vier)
+    const completedAt = parseOptionalDate(data.completed_at);
+    if (data.completed_at && !completedAt) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid completed_at (date parse failed)" }),
+      };
+    }
 
+    // ✅ (recomendo) bloquear futuro
+    if (completedAt && completedAt.getTime() > Date.now()) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "completed_at não pode ser no futuro" }),
+      };
+    }
+
+    const computedTotal = toMoney(data.total_amount ?? data.base_amount * data.rate + data.fees_amount);
     const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
 
     const existing = await prisma.core_orders.findFirst({
@@ -101,23 +127,28 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
     }
 
-    // ✅ operador vindo do lovable
+    // ✅ operador 100% do Lovable
     const operator = pickOperator(data.metadata);
-    // ✅ audit/actor (actor só se o token retornar algo)
-    const auditMeta = buildAudit(event, auth);
+    // ✅ audit leve
+    const auditMeta = buildAudit(event);
 
-    // ✅ metadata final padronizado
-    const finalMetadata =
-      data.metadata == null
-        ? { operator, ...auditMeta }
-        : {
-            ...(data.metadata ?? {}),
-            operator,
-            ...auditMeta,
-          };
+    // ✅ metadata final
+    const finalMetadata = {
+      ...(data.metadata ?? {}),
+
+      operator,
+      operator_name: operator.name,
+      operator_email: operator.email,
+
+      ...auditMeta,
+
+      // ✅ marca retroativo quando veio completed_at
+      backdated: Boolean(completedAt),
+      backdated_completed_at: completedAt ? completedAt.toISOString() : null,
+    };
 
     const created = await prisma.$transaction(async (tx) => {
-      // carrega saldo
+      // saldo
       const bal = await tx.core_balances.findUnique({
         where: { customer_id: data.customer_id },
         select: { id: true, available_amount: true, locked_amount: true, credit_limit: true },
@@ -129,13 +160,15 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
       const credit = Number(bal.credit_limit);
       const locked = Number(bal.locked_amount);
 
-      // regra mínima: disponível + limite >= total
-      const utilizable = toMoney(available + credit); // locked já está separado
+      const utilizable = toMoney(available + credit);
       if (utilizable < computedTotal) {
         throw new Error(`Saldo insuficiente. Utilizável: ${utilizable} < Total: ${computedTotal}`);
       }
 
-      // cria order COMPLETED (OTC manual não tem execução)
+      // ✅ carimbos do OTC: se veio completed_at, usamos ele
+      const now = new Date();
+      const stamp = completedAt ?? now;
+
       const order = await tx.core_orders.create({
         data: {
           id: data.id,
@@ -158,8 +191,9 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
 
           status: "COMPLETED",
           idempotency_key: orderIdempotency,
+
           metadata: {
-            ...(finalMetadata as any),
+            ...finalMetadata,
             description: data.description ?? null,
             calculation: {
               base_amount: data.base_amount,
@@ -168,21 +202,25 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
               total_amount: computedTotal,
             },
           },
+
           locked_amount_snapshot: locked as any,
-          started_at: new Date() as any,
-          completed_at: new Date() as any,
+
+          // ✅ aqui é o ponto:
+          started_at: stamp as any,
+          completed_at: stamp as any,
+
           last_error: null,
-          updated_at: new Date() as any,
+          updated_at: now as any,
         },
       });
 
-      // debita saldo (direto no available_amount)
+      // debita saldo
       await tx.core_balances.update({
         where: { customer_id: data.customer_id },
         data: { available_amount: (available - computedTotal) as any },
       });
 
-      // registra transação (✅ agora com operator + audit também)
+      // transação
       await tx.core_transactions.create({
         data: {
           id: crypto.randomUUID(),
@@ -200,15 +238,20 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
             base_currency: data.base_currency,
             settlement_currency: data.settlement_currency,
 
-            // ✅ importante pro relatório
             operator,
+            operator_name: operator.name,
+            operator_email: operator.email,
+
             ...auditMeta,
 
-            // opcional, ajuda o Lovable
             notes: data.metadata?.notes ?? null,
             pair: data.metadata?.pair ?? null,
             screen: data.metadata?.screen ?? null,
             source: data.metadata?.source ?? null,
+
+            // ✅ espelha retroativo na transação também (pra relatórios)
+            backdated: Boolean(completedAt),
+            completed_at: completedAt ? completedAt.toISOString() : null,
           },
         },
       });
@@ -224,6 +267,9 @@ export const createOtc: APIGatewayProxyHandler = async (event) => {
     return { statusCode: 201, body: JSON.stringify({ ok: true, order: created }) };
   } catch (err: any) {
     console.error("createOtc error:", err);
-    return { statusCode: 500, body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) }),
+    };
   }
 };

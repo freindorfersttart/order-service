@@ -15429,14 +15429,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto2.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto3.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -15526,17 +15526,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto2.createHmac("sha" + bits, secret);
+        var hmac = crypto3.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto2 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto3 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto2.timingSafeEqual(a, b);
+      return crypto3.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -15553,7 +15553,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -15563,7 +15563,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -15572,11 +15572,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -15586,12 +15586,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -18986,12 +18986,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/retry.ts
-var retry_exports = {};
-__export(retry_exports, {
-  retry: () => retry
+// src/handlers/orders/registerDebitsFromSuccessSubs.ts
+var registerDebitsFromSuccessSubs_exports = {};
+__export(registerDebitsFromSuccessSubs_exports, {
+  registerDebitsFromSuccessSubs: () => registerDebitsFromSuccessSubs
 });
-module.exports = __toCommonJS(retry_exports);
+module.exports = __toCommonJS(registerDebitsFromSuccessSubs_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -19019,85 +19019,148 @@ function verifyToken(event) {
   }
 }
 
-// src/handlers/orders/retry.ts
-var retry = async (event) => {
+// src/handlers/orders/registerDebitsFromSuccessSubs.ts
+var import_crypto = __toESM(require("crypto"));
+function asObject(v) {
+  if (!v) return void 0;
+  if (typeof v === "object") return v;
+  try {
+    return JSON.parse(v);
+  } catch {
+    return void 0;
+  }
+}
+var registerDebitsFromSuccessSubs = async (event) => {
   try {
     verifyToken(event);
-    const orderId = event.pathParameters?.id;
+    const orderId = event.pathParameters?.orderId || event.pathParameters?.id || event.pathParameters?.order_id;
     if (!orderId) {
-      return { statusCode: 400, body: JSON.stringify({ ok: false, error: "order_id \xE9 obrigat\xF3rio" }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ message: "Missing path param: orderId" })
+      };
     }
     const order = await prisma.core_orders.findUnique({
       where: { id: orderId },
-      select: { id: true, status: true }
+      select: { id: true, customer_id: true }
     });
     if (!order) {
-      return { statusCode: 404, body: JSON.stringify({ ok: false, error: "Order not found", order_id: orderId }) };
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Order not found", orderId })
+      };
     }
-    const before = await prisma.core_order_subtransactions.groupBy({
-      by: ["status"],
-      where: { order_id: orderId },
-      _count: { _all: true }
-    });
-    const beforeCounts = before.reduce((acc, row) => {
-      acc[row.status] = row._count._all;
-      return acc;
-    }, {});
-    const updated = await prisma.core_order_subtransactions.updateMany({
-      where: {
-        order_id: orderId,
-        NOT: { status: "SUCCESS" }
+    const successSubs = await prisma.core_order_subtransactions.findMany({
+      where: { order_id: orderId, status: "SUCCESS" },
+      select: {
+        id: true,
+        amount: true,
+        bank_account_id: true,
+        destination_pix_key: true,
+        provider_ref: true,
+        execution_metadata: true
       },
-      data: {
-        status: "PENDING",
-        attempts: 0,
-        next_retry_at: null,
-        last_error: null,
-        executed_at: null,
-        provider_ref: null,
-        execution_metadata: null,
-        idempotency_key: null,
-        // ✅ importantíssimo pra não reusar idempotency
-        updated_at: /* @__PURE__ */ new Date()
-      }
+      orderBy: [{ created_at: "asc" }]
     });
-    const after = await prisma.core_order_subtransactions.groupBy({
-      by: ["status"],
-      where: { order_id: orderId },
-      _count: { _all: true }
-    });
-    const afterCounts = after.reduce((acc, row) => {
-      acc[row.status] = row._count._all;
-      return acc;
-    }, {});
-    if (order.status !== "COMPLETED") {
-      await prisma.core_orders.update({
-        where: { id: orderId },
-        data: { status: "IN_PROGRESS", updated_at: /* @__PURE__ */ new Date(), last_error: null }
-      });
+    if (successSubs.length === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          orderId,
+          customer_id: order.customer_id,
+          successSubs: 0,
+          created: 0,
+          skippedExisting: 0,
+          message: "No SUCCESS subtransactions to reconcile"
+        })
+      };
     }
+    const subIds = successSubs.map((s) => s.id);
+    const existing = await prisma.core_transactions.findMany({
+      where: {
+        customer_id: order.customer_id,
+        type: "debit",
+        reason_code: "AUTO_PIX_DEBIT",
+        subtransaction_id: { in: subIds }
+      },
+      select: { subtransaction_id: true }
+    });
+    const existingSet = new Set(
+      existing.map((e) => String(e.subtransaction_id || ""))
+    );
+    const missing = successSubs.filter((s) => !existingSet.has(s.id));
+    if (missing.length === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({
+          orderId,
+          customer_id: order.customer_id,
+          successSubs: successSubs.length,
+          created: 0,
+          skippedExisting: successSubs.length,
+          message: "All SUCCESS subtransactions already have AUTO_PIX_DEBIT"
+        })
+      };
+    }
+    const createdIds = [];
+    await prisma.$transaction(
+      async (tx) => {
+        for (const sub of missing) {
+          const id = import_crypto.default.randomUUID();
+          const execMeta = asObject(sub.execution_metadata);
+          const rawData = execMeta?.data ?? execMeta ?? void 0;
+          const metadata = {
+            raw: rawData ? { data: rawData } : void 0,
+            source: { service: "order-service", operation: "debit_reconcile" },
+            order_id: orderId,
+            provider: "ONLYUP",
+            provider_ref: sub.provider_ref ?? void 0,
+            bank_account_id: sub.bank_account_id ?? void 0,
+            subtransaction_id: sub.id,
+            destination_pix_key: sub.destination_pix_key ?? void 0
+          };
+          await tx.core_transactions.create({
+            data: {
+              id,
+              customer_id: order.customer_id,
+              type: "debit",
+              amount: sub.amount,
+              description: `SttartPay payout ${orderId} sub=${sub.id}`,
+              reason_code: "AUTO_PIX_DEBIT",
+              subtransaction_id: sub.id,
+              metadata
+            }
+          });
+          createdIds.push(id);
+        }
+      }
+      // isolamento padrão ok; se quiser travar mais contra corrida, dá pra subir pra Serializable depois
+    );
     return {
       statusCode: 200,
       body: JSON.stringify({
-        ok: true,
-        order_id: orderId,
-        before: beforeCounts,
-        after: afterCounts,
-        updated_subtransactions: updated.count,
-        reset_attempts: true,
-        message: "Subtransactions n\xE3o-SUCCESS voltaram para PENDING e ser\xE3o reprocessadas pelo worker."
+        orderId,
+        customer_id: order.customer_id,
+        successSubs: successSubs.length,
+        created: createdIds.length,
+        skippedExisting: successSubs.length - missing.length,
+        created_transaction_ids: createdIds
       })
     };
   } catch (err) {
-    console.error("retryOrder error:", err);
-    const msg = err?.message || String(err);
-    const code = msg === "Unauthorized" ? 401 : 500;
-    return { statusCode: code, body: JSON.stringify({ ok: false, error: msg }) };
+    console.error("registerDebitsFromSuccessSubs error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        message: "Internal error",
+        error: err?.message || String(err)
+      })
+    };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  retry
+  registerDebitsFromSuccessSubs
 });
 /*! Bundled license information:
 
@@ -19123,4 +19186,4 @@ var retry = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=retry.js.map
+//# sourceMappingURL=registerDebitsFromSuccessSubs.js.map
