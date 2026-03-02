@@ -105,9 +105,12 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
   }
 
   if (keyType === "phone") {
+    // ✅ objetivo: sempre persistir com "+" no banco
+    // - se vier com "+", mantém
+    // - se vier sem "+", adiciona
     const d = digitsOnly(noPrefix);
-    if (d.length < 10 || d.length > 13) throw new Error(`PIX phone inválida: ${raw}`);
-    return d;
+    if (d.length < 10 || d.length > 15) throw new Error(`PIX phone inválida: ${raw}`);
+    return `+${d}`;
   }
 
   if (keyType === "email") {
@@ -121,7 +124,7 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
   const maybeDigits = digitsOnly(noPrefix);
   if (maybeDigits.length === 11 || maybeDigits.length === 14) return maybeDigits;
   if (noPrefix.includes("@")) return noPrefix.toLowerCase();
-  if (maybeDigits.length >= 10 && maybeDigits.length <= 13) return maybeDigits;
+  if (maybeDigits.length >= 10 && maybeDigits.length <= 15) return `+${maybeDigits}`; // ✅ phone inferido: salva com "+"
   return noPrefix;
 }
 

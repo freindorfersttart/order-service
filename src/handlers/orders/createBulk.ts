@@ -94,6 +94,7 @@ function calcLockSplit(params: {
 }
 
 // ✅ normaliza PIX key (remove prefixos tipo "cnpj:" e ajusta conforme key_type)
+// ✅ phone: sempre persistir com "+" no banco
 function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phone" | "random") {
   const v = String(raw || "").trim();
   if (!v) throw new Error("pix_key vazia");
@@ -109,8 +110,8 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
 
   if (keyType === "phone") {
     const d = digitsOnly(noPrefix);
-    if (d.length < 10 || d.length > 13) throw new Error(`PIX phone inválida: ${raw}`);
-    return d;
+    if (d.length < 10 || d.length > 15) throw new Error(`PIX phone inválida: ${raw}`);
+    return `+${d}`;
   }
 
   if (keyType === "email") {
@@ -124,7 +125,10 @@ function normalizePixKey(raw: string, keyType?: "cpf" | "cnpj" | "email" | "phon
   const maybeDigits = digitsOnly(noPrefix);
   if (maybeDigits.length === 11 || maybeDigits.length === 14) return maybeDigits;
   if (noPrefix.includes("@")) return noPrefix.toLowerCase();
-  if (maybeDigits.length >= 10 && maybeDigits.length <= 13) return maybeDigits;
+
+  // ✅ phone inferido: salva com "+"
+  if (maybeDigits.length >= 10 && maybeDigits.length <= 15) return `+${maybeDigits}`;
+
   return noPrefix;
 }
 
@@ -187,8 +191,7 @@ export const createBulk: APIGatewayProxyHandler = async (event) => {
       return { statusCode: 400, body: JSON.stringify({ error: "bank_account_id precisa ser uma conta PAYOUT" }) };
     }
 
-    const total_amount =
-      data.total_amount ?? toMoney(data.items.reduce((sum, it) => sum + Number(it.amount), 0));
+    const total_amount = data.total_amount ?? toMoney(data.items.reduce((sum, it) => sum + Number(it.amount), 0));
 
     const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
 

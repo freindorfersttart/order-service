@@ -103,6 +103,14 @@ function normalizePixKey(key: string, keyType?: string | null) {
 
   if (keyType === "cpf" || keyType === "cnpj") return d;
 
+  // ✅ phone: sempre persistir com "+" no banco (se vier sem, adiciona; se vier com, mantém)
+  if (keyType === "phone") {
+    if (d.length < 10 || d.length > 15) {
+      throw new Error(`beneficiary.pix_key phone inválida: ${key}`);
+    }
+    return `+${d}`;
+  }
+
   // fallback: se a key tem 11 ou 14 dígitos e veio com pontuação, normaliza
   if ((d.length === 11 || d.length === 14) && d !== raw) return d;
 

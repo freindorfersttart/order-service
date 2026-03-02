@@ -52,6 +52,8 @@ export const registerDebitsFromSuccessSubs: APIGatewayProxyHandler = async (
         destination_pix_key: true,
         provider_ref: true,
         execution_metadata: true,
+        executed_at: true, // ✅ precisa pra setar created_at da transaction
+        created_at: true,  // ✅ fallback caso executed_at esteja null
       },
       orderBy: [{ created_at: "asc" }],
     });
@@ -139,6 +141,7 @@ export const registerDebitsFromSuccessSubs: APIGatewayProxyHandler = async (
               reason_code: "AUTO_PIX_DEBIT",
               subtransaction_id: sub.id,
               metadata,
+              created_at: (sub.executed_at ?? sub.created_at) as any, // ✅ igual executed_at da sub
             },
           });
 
