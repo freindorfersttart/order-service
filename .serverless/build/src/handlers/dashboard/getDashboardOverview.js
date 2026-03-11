@@ -19043,12 +19043,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/getOrderReceipts.ts
-var getOrderReceipts_exports = {};
-__export(getOrderReceipts_exports, {
-  getOrderReceipts: () => getOrderReceipts
+// src/handlers/dashboard/getDashboardOverview.ts
+var getDashboardOverview_exports = {};
+__export(getDashboardOverview_exports, {
+  getDashboardOverview: () => getDashboardOverview
 });
-module.exports = __toCommonJS(getOrderReceipts_exports);
+module.exports = __toCommonJS(getDashboardOverview_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -32844,154 +32844,215 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
-// src/handlers/orders/getOrderReceipts.ts
-var pathSchema = external_exports.object({
-  id: external_exports.string().min(6)
-});
+// src/handlers/dashboard/getDashboardOverview.ts
 var querySchema = external_exports.object({
-  page: external_exports.coerce.number().int().min(1).default(1),
-  pageSize: external_exports.coerce.number().int().min(1).max(200).default(50),
-  // filtros opcionais
-  status: external_exports.enum(["RECEIVED", "PROCESSING", "LIQUIDATED", "FAILED", "CANCELED", "UNKNOWN"]).optional(),
-  subtransaction_id: external_exports.string().optional()
+  limit: external_exports.string().optional()
+  // limite de "últimas transações"
 });
-var getOrderReceipts = async (event) => {
+function toInt(v, def) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : def;
+}
+function toMoney(n) {
+  return Number(n.toFixed(2));
+}
+function getSaoPauloDayRange(offsetDays) {
+  const now = /* @__PURE__ */ new Date();
+  const offsetMs = 3 * 60 * 60 * 1e3;
+  const localNow = new Date(now.getTime() - offsetMs);
+  const y = localNow.getUTCFullYear();
+  const m = localNow.getUTCMonth();
+  const d = localNow.getUTCDate() + offsetDays;
+  const start = new Date(Date.UTC(y, m, d, 3, 0, 0, 0));
+  const end = new Date(Date.UTC(y, m, d + 1, 3, 0, 0, 0));
+  return { start, end };
+}
+function pctChange(today, yesterday) {
+  if (!Number.isFinite(today) || !Number.isFinite(yesterday)) return null;
+  if (yesterday === 0) return today === 0 ? 0 : 100;
+  return Number(((today - yesterday) / yesterday * 100).toFixed(1));
+}
+var getDashboardOverview = async (event) => {
   try {
     verifyToken(event);
-    const parsedPath = pathSchema.safeParse({
-      id: event.pathParameters?.id
-    });
-    if (!parsedPath.success) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid path params", details: parsedPath.error.flatten() })
-      };
+    const q = event.queryStringParameters || {};
+    const parsedQ = querySchema.safeParse(q);
+    if (!parsedQ.success) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Invalid query", details: parsedQ.error.flatten() }) };
     }
-    const parsedQuery = querySchema.safeParse({
-      page: event.queryStringParameters?.page,
-      pageSize: event.queryStringParameters?.pageSize,
-      status: event.queryStringParameters?.status,
-      subtransaction_id: event.queryStringParameters?.subtransaction_id
-    });
-    if (!parsedQuery.success) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid query params", details: parsedQuery.error.flatten() })
-      };
-    }
-    const { id: orderId } = parsedPath.data;
-    const { page, pageSize, status, subtransaction_id } = parsedQuery.data;
-    const orderExists = await prisma.core_orders.findUnique({
-      where: { id: orderId },
-      select: { id: true, kind: true, type: true, status: true, created_at: true }
-    });
-    if (!orderExists) {
-      return { statusCode: 404, body: JSON.stringify({ error: "Order not found" }) };
-    }
-    const where = {
-      // ✅ FIX: relation field no Prisma Client é core_order_subtransactions
-      core_order_subtransactions: {
-        order_id: orderId
-      }
-    };
-    if (status) where.status = status;
-    if (subtransaction_id) where.subtransaction_id = subtransaction_id;
-    const skip2 = (page - 1) * pageSize;
-    const take = pageSize;
-    const [total, receipts] = await Promise.all([
-      prisma.core_payment_receipts.count({ where }),
-      prisma.core_payment_receipts.findMany({
-        where,
-        orderBy: [{ received_at: "desc" }],
-        skip: skip2,
-        take,
+    const limit = Math.min(Math.max(toInt(parsedQ.data.limit, 8), 5), 20);
+    const today = getSaoPauloDayRange(0);
+    const yesterday = getSaoPauloDayRange(-1);
+    const [
+      // Saldo disponível total
+      sumBalances,
+      // Clientes ativos
+      activeCustomers,
+      activeCustomersNoSupplier,
+      // Recebimentos hoje/ontem (por status)
+      incomingToday,
+      incomingYesterday,
+      // Ordens hoje/ontem
+      ordersToday,
+      ordersYesterday,
+      // Últimas transações + customer name
+      lastTransactions
+    ] = await prisma.$transaction([
+      prisma.core_balances.aggregate({
+        _sum: { available_amount: true }
+      }),
+      prisma.core_customers.count({
+        where: { is_active: true }
+      }),
+      prisma.core_customers.count({
+        where: { is_active: true, type: { in: ["pf", "pj"] } }
+      }),
+      prisma.core_incoming_pix.groupBy({
+        by: ["status"],
+        where: { created_at: { gte: today.start, lt: today.end } },
+        _sum: { amount: true },
+        _count: { _all: true }
+      }),
+      prisma.core_incoming_pix.groupBy({
+        by: ["status"],
+        where: { created_at: { gte: yesterday.start, lt: yesterday.end } },
+        _sum: { amount: true },
+        _count: { _all: true }
+      }),
+      prisma.core_orders.groupBy({
+        by: ["kind", "status"],
+        where: {
+          created_at: { gte: today.start, lt: today.end },
+          // opcional: no dashboard "Orders Hoje" normalmente é saída, então exclui OTC
+          kind: { in: ["BULK", "ADHOC", "SUPPLIER"] }
+        },
+        _sum: { total_amount: true },
+        _count: { _all: true }
+      }),
+      prisma.core_orders.groupBy({
+        by: ["kind", "status"],
+        where: {
+          created_at: { gte: yesterday.start, lt: yesterday.end },
+          kind: { in: ["BULK", "ADHOC", "SUPPLIER"] }
+        },
+        _sum: { total_amount: true },
+        _count: { _all: true }
+      }),
+      prisma.core_transactions.findMany({
+        orderBy: { created_at: "desc" },
+        take: limit,
         select: {
           id: true,
-          provider: true,
-          webhook_type: true,
-          provider_payment_id: true,
-          provider_status: true,
-          status: true,
-          idempotency_key: true,
-          end_to_end_id: true,
-          remittance_information: true,
-          pix_key: true,
+          customer_id: true,
+          type: true,
           amount: true,
-          currency: true,
-          debtor_document: true,
-          debtor_name: true,
-          creditor_document: true,
-          creditor_name: true,
-          subtransaction_id: true,
-          received_at: true,
+          description: true,
+          reason_code: true,
           created_at: true,
-          updated_at: true,
-          // ajuda muito no UI: index/amount/status da sub
-          // ✅ FIX: mesmo nome aqui
-          core_order_subtransactions: {
-            select: {
-              id: true,
-              index: true,
-              amount: true,
-              status: true,
-              settlement_status: true,
-              provider_status: true,
-              end_to_end_id: true,
-              destination_pix_key: true,
-              beneficiary_name: true,
-              beneficiary_document: true,
-              executed_at: true,
-              settled_at: true
-            }
-          }
+          metadata: true,
+          subtransaction_id: true,
+          core_customers: { select: { name: true } }
         }
       })
     ]);
-    const summary = receipts.reduce(
+    const saldoDisponivel = toMoney(Number(sumBalances?._sum?.available_amount ?? 0));
+    const mapGroup = (rows) => rows.reduce(
       (acc, r) => {
-        const st = String(r.status || "").toUpperCase();
-        acc.total += 1;
-        if (st === "LIQUIDATED") acc.liquidated += 1;
-        else if (st === "FAILED") acc.failed += 1;
-        else if (st === "CANCELED") acc.canceled += 1;
-        else if (st === "PROCESSING") acc.processing += 1;
-        else if (st === "RECEIVED") acc.received += 1;
-        else acc.unknown += 1;
+        const key = String(r.status);
+        acc.byStatus[key] = {
+          count: r._count?._all ?? 0,
+          amount: toMoney(Number(r._sum?.amount ?? 0))
+        };
+        acc.totalCount += r._count?._all ?? 0;
+        acc.totalAmount = toMoney(acc.totalAmount + Number(r._sum?.amount ?? 0));
         return acc;
       },
-      {
-        total: 0,
-        liquidated: 0,
-        failed: 0,
-        canceled: 0,
-        processing: 0,
-        received: 0,
-        unknown: 0
-      }
+      { totalCount: 0, totalAmount: 0, byStatus: {} }
     );
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        order: orderExists,
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-        summary,
-        items: receipts
-      })
+    const incT = mapGroup(incomingToday);
+    const incY = mapGroup(incomingYesterday);
+    const mapOrders = (rows) => rows.reduce(
+      (acc, r) => {
+        const kind = String(r.kind);
+        const status = String(r.status);
+        const amount = toMoney(Number(r._sum?.total_amount ?? 0));
+        const count = r._count?._all ?? 0;
+        if (!acc.byKind[kind]) acc.byKind[kind] = { totalAmount: 0, totalCount: 0, byStatus: {} };
+        acc.byKind[kind].byStatus[status] = { count, amount };
+        acc.byKind[kind].totalAmount = toMoney(acc.byKind[kind].totalAmount + amount);
+        acc.byKind[kind].totalCount += count;
+        acc.totalAmount = toMoney(acc.totalAmount + amount);
+        acc.totalCount += count;
+        return acc;
+      },
+      { totalAmount: 0, totalCount: 0, byKind: {} }
+    );
+    const ordT = mapOrders(ordersToday);
+    const ordY = mapOrders(ordersYesterday);
+    const txs = lastTransactions.map((t) => {
+      const customerName = t.core_customers?.name ?? "\u2014";
+      const amount = toMoney(Number(t.amount ?? 0));
+      const direction = t.type === "credit" || t.type === "hide_credit" ? "IN" : "OUT";
+      const meta3 = t.metadata ?? {};
+      const bankLabel = meta3?.bank_name || meta3?.bank || meta3?.provider || meta3?.integration || (direction === "IN" ? "Recebimento" : "Sa\xEDda");
+      const uiStatus = meta3?.provider_status || meta3?.settlement_status || meta3?.status || (t.type === "debit" ? "Confirmado" : "Confirmado");
+      return {
+        id: t.id,
+        customer_id: t.customer_id,
+        customer_name: customerName,
+        direction,
+        // IN | OUT
+        amount,
+        created_at: t.created_at,
+        description: t.description ?? null,
+        reason_code: t.reason_code ?? null,
+        bank_label: bankLabel,
+        status_label: uiStatus
+      };
+    });
+    const payload = {
+      ok: true,
+      generated_at: (/* @__PURE__ */ new Date()).toISOString(),
+      ranges: {
+        today: { start: today.start.toISOString(), end: today.end.toISOString() },
+        yesterday: { start: yesterday.start.toISOString(), end: yesterday.end.toISOString() }
+      },
+      cards: {
+        saldo_disponivel_total: {
+          value: saldoDisponivel,
+          vs_yesterday_pct: null
+          // saldo não faz sentido vs ontem sem snapshot; deixa null
+        },
+        clientes_ativos: {
+          value: activeCustomersNoSupplier,
+          value_including_suppliers: activeCustomers,
+          vs_yesterday_pct: null
+          // opcional implementar se quiser (count ontem)
+        },
+        recebimentos_hoje: {
+          value: incT.totalAmount,
+          count: incT.totalCount,
+          by_status: incT.byStatus,
+          vs_ontem_pct: pctChange(incT.totalAmount, incY.totalAmount)
+        },
+        ordens_hoje: {
+          value: ordT.totalAmount,
+          count: ordT.totalCount,
+          by_kind: ordT.byKind,
+          vs_ontem_pct: pctChange(ordT.totalAmount, ordY.totalAmount)
+        }
+      },
+      last_transactions: txs
     };
+    return { statusCode: 200, body: JSON.stringify(payload) };
   } catch (err) {
-    console.error("getOrderReceipts error:", err);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) })
-    };
+    console.error("getDashboardOverview error:", err);
+    return { statusCode: 500, body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) }) };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getOrderReceipts
+  getDashboardOverview
 });
 /*! Bundled license information:
 
@@ -33017,4 +33078,4 @@ var getOrderReceipts = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=getOrderReceipts.js.map
+//# sourceMappingURL=getDashboardOverview.js.map

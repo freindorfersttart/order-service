@@ -19043,12 +19043,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/getOrderReceipts.ts
-var getOrderReceipts_exports = {};
-__export(getOrderReceipts_exports, {
-  getOrderReceipts: () => getOrderReceipts
+// src/handlers/orders/deleteOrderOtc.ts
+var deleteOrderOtc_exports = {};
+__export(deleteOrderOtc_exports, {
+  deleteOrderOtc: () => deleteOrderOtc
 });
-module.exports = __toCommonJS(getOrderReceipts_exports);
+module.exports = __toCommonJS(deleteOrderOtc_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -19058,23 +19058,6 @@ var prisma = globalForPrisma.prisma ?? new import_client.PrismaClient({
   // pode remover ou ajustar
 });
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-// src/middleware/authMiddleware.ts
-var import_jsonwebtoken = __toESM(require_jsonwebtoken());
-var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
-function verifyToken(event) {
-  const authHeader = event.headers.Authorization || event.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Token ausente ou malformado");
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
-    return decoded;
-  } catch (error48) {
-    throw new Error("Token inv\xE1lido");
-  }
-}
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -19220,7 +19203,7 @@ __export(external_exports, {
   ipv6: () => ipv62,
   iso: () => iso_exports,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31052,7 +31035,7 @@ __export(schemas_exports2, {
   ipv4: () => ipv42,
   ipv6: () => ipv62,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31536,7 +31519,7 @@ var ZodJWT = /* @__PURE__ */ $constructor("ZodJWT", (inst, def) => {
   $ZodJWT.init(inst, def);
   ZodStringFormat.init(inst, def);
 });
-function jwt2(params) {
+function jwt(params) {
   return _jwt(ZodJWT, params);
 }
 var ZodCustomStringFormat = /* @__PURE__ */ $constructor("ZodCustomStringFormat", (inst, def) => {
@@ -32844,154 +32827,169 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
-// src/handlers/orders/getOrderReceipts.ts
-var pathSchema = external_exports.object({
-  id: external_exports.string().min(6)
+// src/middleware/authMiddleware.ts
+var import_jsonwebtoken = __toESM(require_jsonwebtoken());
+var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
+function verifyToken(event) {
+  const authHeader = event.headers.Authorization || event.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Token ausente ou malformado");
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
+    return decoded;
+  } catch (error48) {
+    throw new Error("Token inv\xE1lido");
+  }
+}
+
+// src/handlers/orders/deleteOrderOtc.ts
+var deleteOtcSchema = external_exports.object({
+  id: external_exports.string().min(6),
+  // order id
+  reason: external_exports.string().optional(),
+  // motivo do "delete" (vai pra metadata)
+  metadata: external_exports.any().optional()
+  // operador/audit do lovable
 });
-var querySchema = external_exports.object({
-  page: external_exports.coerce.number().int().min(1).default(1),
-  pageSize: external_exports.coerce.number().int().min(1).max(200).default(50),
-  // filtros opcionais
-  status: external_exports.enum(["RECEIVED", "PROCESSING", "LIQUIDATED", "FAILED", "CANCELED", "UNKNOWN"]).optional(),
-  subtransaction_id: external_exports.string().optional()
-});
-var getOrderReceipts = async (event) => {
+function toMoney(n) {
+  return Number(n.toFixed(2));
+}
+function pickOperator(metadata) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email3 = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email3 || null };
+}
+function buildAudit(event) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+  return {
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId
+      },
+      context: { ip, user_agent: ua },
+      at: (/* @__PURE__ */ new Date()).toISOString()
+    }
+  };
+}
+var deleteOrderOtc = async (event) => {
   try {
     verifyToken(event);
-    const parsedPath = pathSchema.safeParse({
-      id: event.pathParameters?.id
-    });
-    if (!parsedPath.success) {
+    const body = JSON.parse(event.body || "{}");
+    const parsed = deleteOtcSchema.safeParse(body);
+    if (!parsed.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Invalid path params", details: parsedPath.error.flatten() })
+        body: JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() })
       };
     }
-    const parsedQuery = querySchema.safeParse({
-      page: event.queryStringParameters?.page,
-      pageSize: event.queryStringParameters?.pageSize,
-      status: event.queryStringParameters?.status,
-      subtransaction_id: event.queryStringParameters?.subtransaction_id
-    });
-    if (!parsedQuery.success) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid query params", details: parsedQuery.error.flatten() })
-      };
-    }
-    const { id: orderId } = parsedPath.data;
-    const { page, pageSize, status, subtransaction_id } = parsedQuery.data;
-    const orderExists = await prisma.core_orders.findUnique({
-      where: { id: orderId },
-      select: { id: true, kind: true, type: true, status: true, created_at: true }
-    });
-    if (!orderExists) {
-      return { statusCode: 404, body: JSON.stringify({ error: "Order not found" }) };
-    }
-    const where = {
-      // ✅ FIX: relation field no Prisma Client é core_order_subtransactions
-      core_order_subtransactions: {
-        order_id: orderId
+    const data = parsed.data;
+    const auditMeta = buildAudit(event);
+    const operator = pickOperator(data.metadata);
+    const result = await prisma.$transaction(async (tx) => {
+      const order = await tx.core_orders.findUnique({
+        where: { id: data.id },
+        include: { core_order_destinations: true, core_order_subtransactions: true }
+      });
+      if (!order) {
+        const e = new Error("Order n\xE3o encontrada.");
+        e.statusCode = 404;
+        throw e;
       }
-    };
-    if (status) where.status = status;
-    if (subtransaction_id) where.subtransaction_id = subtransaction_id;
-    const skip2 = (page - 1) * pageSize;
-    const take = pageSize;
-    const [total, receipts] = await Promise.all([
-      prisma.core_payment_receipts.count({ where }),
-      prisma.core_payment_receipts.findMany({
-        where,
-        orderBy: [{ received_at: "desc" }],
-        skip: skip2,
-        take,
-        select: {
-          id: true,
-          provider: true,
-          webhook_type: true,
-          provider_payment_id: true,
-          provider_status: true,
-          status: true,
-          idempotency_key: true,
-          end_to_end_id: true,
-          remittance_information: true,
-          pix_key: true,
-          amount: true,
-          currency: true,
-          debtor_document: true,
-          debtor_name: true,
-          creditor_document: true,
-          creditor_name: true,
-          subtransaction_id: true,
-          received_at: true,
-          created_at: true,
-          updated_at: true,
-          // ajuda muito no UI: index/amount/status da sub
-          // ✅ FIX: mesmo nome aqui
-          core_order_subtransactions: {
-            select: {
-              id: true,
-              index: true,
-              amount: true,
-              status: true,
-              settlement_status: true,
-              provider_status: true,
-              end_to_end_id: true,
-              destination_pix_key: true,
-              beneficiary_name: true,
-              beneficiary_document: true,
-              executed_at: true,
-              settled_at: true
-            }
+      if (order.kind !== "OTC") {
+        const e = new Error("Order n\xE3o \xE9 OTC.");
+        e.statusCode = 400;
+        throw e;
+      }
+      const trx = await tx.core_transactions.findFirst({
+        where: {
+          type: "debit",
+          customer_id: order.customer_id,
+          AND: [
+            { metadata: { path: ["order_id"], equals: order.id } },
+            { metadata: { path: ["kind"], equals: "OTC" } }
+          ]
+        },
+        orderBy: { created_at: "desc" }
+      });
+      if (!trx) {
+        const e = new Error("Transa\xE7\xE3o debit da OTC n\xE3o encontrada (metadata.order_id).");
+        e.statusCode = 404;
+        throw e;
+      }
+      const bal = await tx.core_balances.findUnique({
+        where: { customer_id: order.customer_id },
+        select: { available_amount: true }
+      });
+      if (!bal) throw new Error("Saldo do customer n\xE3o encontrado (core_balances).");
+      const available = Number(bal.available_amount);
+      const total = toMoney(Number(order.total_amount));
+      await tx.core_balances.update({
+        where: { customer_id: order.customer_id },
+        data: { available_amount: toMoney(available + total) }
+      });
+      await tx.core_transactions.delete({
+        where: { id: trx.id }
+      });
+      const prevMeta = order.metadata ?? {};
+      const nowIso = (/* @__PURE__ */ new Date()).toISOString();
+      await tx.core_orders.update({
+        where: { id: order.id },
+        data: {
+          updated_at: /* @__PURE__ */ new Date(),
+          metadata: {
+            ...prevMeta,
+            ...auditMeta,
+            voided: true,
+            voided_at: nowIso,
+            void_reason: data.reason ?? null,
+            operator,
+            operator_name: operator.name,
+            operator_email: operator.email,
+            // pra rastrear o que foi removido
+            voided_transaction_id: trx.id,
+            voided_amount: total
           }
         }
-      })
-    ]);
-    const summary = receipts.reduce(
-      (acc, r) => {
-        const st = String(r.status || "").toUpperCase();
-        acc.total += 1;
-        if (st === "LIQUIDATED") acc.liquidated += 1;
-        else if (st === "FAILED") acc.failed += 1;
-        else if (st === "CANCELED") acc.canceled += 1;
-        else if (st === "PROCESSING") acc.processing += 1;
-        else if (st === "RECEIVED") acc.received += 1;
-        else acc.unknown += 1;
-        return acc;
-      },
-      {
-        total: 0,
-        liquidated: 0,
-        failed: 0,
-        canceled: 0,
-        processing: 0,
-        received: 0,
-        unknown: 0
-      }
-    );
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        order: orderExists,
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-        summary,
-        items: receipts
-      })
-    };
+      });
+      const newBal = await tx.core_balances.findUnique({
+        where: { customer_id: order.customer_id },
+        select: { available_amount: true, credit_limit: true, locked_amount: true }
+      });
+      const full = await tx.core_orders.findUnique({
+        where: { id: order.id },
+        include: { core_order_destinations: true, core_order_subtransactions: true }
+      });
+      return {
+        order: full,
+        deleted_transaction_id: trx.id,
+        refunded_amount: total,
+        balance: newBal
+      };
+    });
+    return { statusCode: 200, body: JSON.stringify({ ok: true, ...result }) };
   } catch (err) {
-    console.error("getOrderReceipts error:", err);
+    const statusCode = err?.statusCode && Number.isFinite(err.statusCode) ? err.statusCode : 500;
+    console.error("deleteOrderOtc error:", err);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) })
+      statusCode,
+      body: JSON.stringify({
+        error: statusCode === 500 ? "Internal error" : "Request error",
+        details: err?.message || String(err)
+      })
     };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getOrderReceipts
+  deleteOrderOtc
 });
 /*! Bundled license information:
 
@@ -33017,4 +33015,4 @@ var getOrderReceipts = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=getOrderReceipts.js.map
+//# sourceMappingURL=deleteOrderOtc.js.map

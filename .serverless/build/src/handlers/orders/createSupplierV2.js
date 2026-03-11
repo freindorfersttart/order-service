@@ -15486,14 +15486,14 @@ var require_buffer_equal_constant_time = __commonJS({
 var require_jwa = __commonJS({
   "node_modules/jwa/index.js"(exports2, module2) {
     var Buffer2 = require_safe_buffer().Buffer;
-    var crypto2 = require("crypto");
+    var crypto3 = require("crypto");
     var formatEcdsa = require_ecdsa_sig_formatter();
     var util = require("util");
     var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".';
     var MSG_INVALID_SECRET = "secret must be a string or buffer";
     var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
     var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-    var supportsKeyObjects = typeof crypto2.createPublicKey === "function";
+    var supportsKeyObjects = typeof crypto3.createPublicKey === "function";
     if (supportsKeyObjects) {
       MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
       MSG_INVALID_SECRET += "or a KeyObject";
@@ -15583,17 +15583,17 @@ var require_jwa = __commonJS({
       return function sign(thing, secret) {
         checkIsSecretKey(secret);
         thing = normalizeInput(thing);
-        var hmac = crypto2.createHmac("sha" + bits, secret);
+        var hmac = crypto3.createHmac("sha" + bits, secret);
         var sig = (hmac.update(thing), hmac.digest("base64"));
         return fromBase64(sig);
       };
     }
     var bufferEqual;
-    var timingSafeEqual = "timingSafeEqual" in crypto2 ? function timingSafeEqual2(a, b) {
+    var timingSafeEqual = "timingSafeEqual" in crypto3 ? function timingSafeEqual2(a, b) {
       if (a.byteLength !== b.byteLength) {
         return false;
       }
-      return crypto2.timingSafeEqual(a, b);
+      return crypto3.timingSafeEqual(a, b);
     } : function timingSafeEqual2(a, b) {
       if (!bufferEqual) {
         bufferEqual = require_buffer_equal_constant_time();
@@ -15610,7 +15610,7 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign(privateKey, "base64"));
         return fromBase64(sig);
       };
@@ -15620,7 +15620,7 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify(publicKey, signature, "base64");
       };
@@ -15629,11 +15629,11 @@ var require_jwa = __commonJS({
       return function sign(thing, privateKey) {
         checkIsPrivateKey(privateKey);
         thing = normalizeInput(thing);
-        var signer = crypto2.createSign("RSA-SHA" + bits);
+        var signer = crypto3.createSign("RSA-SHA" + bits);
         var sig = (signer.update(thing), signer.sign({
           key: privateKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, "base64"));
         return fromBase64(sig);
       };
@@ -15643,12 +15643,12 @@ var require_jwa = __commonJS({
         checkIsPublicKey(publicKey);
         thing = normalizeInput(thing);
         signature = toBase64(signature);
-        var verifier = crypto2.createVerify("RSA-SHA" + bits);
+        var verifier = crypto3.createVerify("RSA-SHA" + bits);
         verifier.update(thing);
         return verifier.verify({
           key: publicKey,
-          padding: crypto2.constants.RSA_PKCS1_PSS_PADDING,
-          saltLength: crypto2.constants.RSA_PSS_SALTLEN_DIGEST
+          padding: crypto3.constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: crypto3.constants.RSA_PSS_SALTLEN_DIGEST
         }, signature, "base64");
       };
     }
@@ -19043,12 +19043,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/getOrderReceipts.ts
-var getOrderReceipts_exports = {};
-__export(getOrderReceipts_exports, {
-  getOrderReceipts: () => getOrderReceipts
+// src/handlers/orders/createSupplierV2.ts
+var createSupplierV2_exports = {};
+__export(createSupplierV2_exports, {
+  createSupplierV2: () => createSupplierV2
 });
-module.exports = __toCommonJS(getOrderReceipts_exports);
+module.exports = __toCommonJS(createSupplierV2_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -19058,23 +19058,6 @@ var prisma = globalForPrisma.prisma ?? new import_client.PrismaClient({
   // pode remover ou ajustar
 });
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-// src/middleware/authMiddleware.ts
-var import_jsonwebtoken = __toESM(require_jsonwebtoken());
-var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
-function verifyToken(event) {
-  const authHeader = event.headers.Authorization || event.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Token ausente ou malformado");
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
-    return decoded;
-  } catch (error48) {
-    throw new Error("Token inv\xE1lido");
-  }
-}
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -19220,7 +19203,7 @@ __export(external_exports, {
   ipv6: () => ipv62,
   iso: () => iso_exports,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31052,7 +31035,7 @@ __export(schemas_exports2, {
   ipv4: () => ipv42,
   ipv6: () => ipv62,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31536,7 +31519,7 @@ var ZodJWT = /* @__PURE__ */ $constructor("ZodJWT", (inst, def) => {
   $ZodJWT.init(inst, def);
   ZodStringFormat.init(inst, def);
 });
-function jwt2(params) {
+function jwt(params) {
   return _jwt(ZodJWT, params);
 }
 var ZodCustomStringFormat = /* @__PURE__ */ $constructor("ZodCustomStringFormat", (inst, def) => {
@@ -32844,145 +32827,496 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
-// src/handlers/orders/getOrderReceipts.ts
-var pathSchema = external_exports.object({
-  id: external_exports.string().min(6)
-});
-var querySchema = external_exports.object({
-  page: external_exports.coerce.number().int().min(1).default(1),
-  pageSize: external_exports.coerce.number().int().min(1).max(200).default(50),
-  // filtros opcionais
-  status: external_exports.enum(["RECEIVED", "PROCESSING", "LIQUIDATED", "FAILED", "CANCELED", "UNKNOWN"]).optional(),
-  subtransaction_id: external_exports.string().optional()
-});
-var getOrderReceipts = async (event) => {
+// src/handlers/orders/createSupplierV2.ts
+var import_crypto = __toESM(require("crypto"));
+
+// src/middleware/authMiddleware.ts
+var import_jsonwebtoken = __toESM(require_jsonwebtoken());
+var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
+function verifyToken(event) {
+  const authHeader = event.headers.Authorization || event.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Token ausente ou malformado");
+  }
+  const token = authHeader.split(" ")[1];
   try {
-    verifyToken(event);
-    const parsedPath = pathSchema.safeParse({
-      id: event.pathParameters?.id
-    });
-    if (!parsedPath.success) {
+    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
+    return decoded;
+  } catch (error48) {
+    throw new Error("Token inv\xE1lido");
+  }
+}
+
+// src/handlers/orders/createSupplierV2.ts
+var orderTypeSchema = external_exports.enum([
+  "TRX",
+  "WIRE",
+  "USDT",
+  "EFETIVO",
+  "TRANSFERENCIA",
+  "AJUSTE_SALDO",
+  "ACERTO_IMPOSTO"
+]);
+var destinationTypeSchema = external_exports.enum(["AUTO", "PIX", "WALLET", "IBAN", "ACCOUNT"]).optional();
+var pixKeyTypeSchema = external_exports.enum(["cpf", "cnpj", "email", "phone", "random"]).optional();
+var beneficiaryInlineSchema = external_exports.object({
+  name: external_exports.string().min(2),
+  document: external_exports.string().min(11),
+  pix_key: external_exports.string().min(3),
+  key_type: pixKeyTypeSchema,
+  label: external_exports.string().optional()
+});
+var createSupplierOrderV2Schema = external_exports.object({
+  id: external_exports.string().min(6),
+  supplier_id: external_exports.string().min(6),
+  bank_name: external_exports.string().min(1),
+  bank_account_id: external_exports.string().min(6),
+  type: orderTypeSchema.default("TRANSFERENCIA"),
+  total_amount: external_exports.number().positive(),
+  sub_amount: external_exports.number().positive(),
+  base_amount: external_exports.number().nonnegative().optional(),
+  rate: external_exports.number().positive().optional(),
+  fees_amount: external_exports.number().nonnegative().optional(),
+  base_currency: external_exports.string().optional(),
+  settlement_currency: external_exports.string().optional(),
+  idempotency_key: external_exports.string().optional(),
+  metadata: external_exports.any().optional(),
+  destinations: external_exports.array(
+    external_exports.object({
+      destination: external_exports.string().optional(),
+      destination_pix_key: external_exports.string().optional(),
+      label: external_exports.string().optional(),
+      beneficiary_id: external_exports.string().optional(),
+      beneficiary: beneficiaryInlineSchema.optional(),
+      amount: external_exports.number().positive().optional(),
+      // proibido aqui
+      destination_type: destinationTypeSchema
+    })
+  ).length(1)
+}).strict();
+function toMoney(n) {
+  return Number(Number(n).toFixed(2));
+}
+function chunkAmount(total, chunk) {
+  const res = [];
+  let remaining = toMoney(total);
+  const c = toMoney(chunk);
+  while (remaining > 0) {
+    const part = remaining >= c ? c : remaining;
+    res.push(toMoney(part));
+    remaining = toMoney(remaining - part);
+  }
+  return res;
+}
+function digitsOnly(v) {
+  return (v || "").replace(/\D/g, "");
+}
+function ensureCpfCnpjDigits(doc) {
+  const d = digitsOnly(doc);
+  if (!(d.length === 11 || d.length === 14)) {
+    throw new Error(`beneficiary.document deve ser CPF(11) ou CNPJ(14). Recebido: ${doc}`);
+  }
+  return d;
+}
+function calcLockSplit(params) {
+  const { amount, available, creditLimit, lockedCredit } = params;
+  const total = toMoney(amount);
+  const av = toMoney(available);
+  const creditFree = toMoney(creditLimit - lockedCredit);
+  const utilizable = toMoney(av + creditFree);
+  if (utilizable < total) {
+    throw new Error(`Saldo insuficiente. Utiliz\xE1vel: ${utilizable} < Total: ${total}`);
+  }
+  const fromCash = toMoney(Math.min(av, total));
+  const fromCredit = toMoney(total - fromCash);
+  if (fromCredit > creditFree) {
+    throw new Error(`Limite insuficiente. Cr\xE9dito livre: ${creditFree} < Necess\xE1rio: ${fromCredit}`);
+  }
+  return { total, fromCash, fromCredit };
+}
+function normalizePixKey(key, keyType) {
+  const raw2 = (key || "").trim();
+  if (!raw2) return raw2;
+  const d = digitsOnly(raw2);
+  if (keyType === "cpf" || keyType === "cnpj") return d;
+  if (keyType === "phone") {
+    if (d.length < 10 || d.length > 15) {
+      throw new Error(`beneficiary.pix_key phone inv\xE1lida: ${key}`);
+    }
+    return `+${d}`;
+  }
+  if ((d.length === 11 || d.length === 14) && d !== raw2) return d;
+  return raw2;
+}
+function pickOperator(metadata) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email3 = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email3 || null };
+}
+function buildAudit(event, auth) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+  const actorUserId = auth?.sub || auth?.user_id || auth?.id || null;
+  return {
+    actor: actorUserId ? { type: "user", user_id: actorUserId } : { type: "unknown", user_id: null },
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId
+      },
+      context: {
+        ip,
+        user_agent: ua
+      },
+      at: (/* @__PURE__ */ new Date()).toISOString()
+    }
+  };
+}
+var createSupplierV2 = async (event) => {
+  try {
+    const auth = verifyToken(event) || void 0;
+    const body = JSON.parse(event.body || "{}");
+    const parsed = createSupplierOrderV2Schema.safeParse(body);
+    if (!parsed.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Invalid path params", details: parsedPath.error.flatten() })
+        body: JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() })
       };
     }
-    const parsedQuery = querySchema.safeParse({
-      page: event.queryStringParameters?.page,
-      pageSize: event.queryStringParameters?.pageSize,
-      status: event.queryStringParameters?.status,
-      subtransaction_id: event.queryStringParameters?.subtransaction_id
+    const data = parsed.data;
+    if (data.type !== "TRANSFERENCIA") {
+      return { statusCode: 400, body: JSON.stringify({ error: "SUPPLIER deve ser type TRANSFERENCIA (PIX)." }) };
+    }
+    const payer = await prisma.core_bank_accounts.findUnique({
+      where: { id: data.bank_account_id },
+      select: { id: true, active: true, purpose: true, provider: true }
     });
-    if (!parsedQuery.success) {
+    if (!payer) return { statusCode: 404, body: JSON.stringify({ error: "bank_account_id n\xE3o encontrado" }) };
+    if (!payer.active) return { statusCode: 400, body: JSON.stringify({ error: "Conta pagadora est\xE1 inativa" }) };
+    if (payer.purpose !== "PAYOUT") {
+      return { statusCode: 400, body: JSON.stringify({ error: "bank_account_id precisa ser uma conta PAYOUT" }) };
+    }
+    let supplier = await prisma.core_suppliers.findUnique({
+      where: { id: data.supplier_id },
+      select: { id: true, name: true, customer_id: true, is_active: true }
+    });
+    if (!supplier) {
+      supplier = await prisma.core_suppliers.findFirst({
+        where: { customer_id: data.supplier_id },
+        select: { id: true, name: true, customer_id: true, is_active: true }
+      });
+    }
+    if (!supplier) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ error: "supplier_id n\xE3o encontrado (nem por id nem por customer_id)" })
+      };
+    }
+    if (!supplier.is_active) return { statusCode: 400, body: JSON.stringify({ error: "Fornecedor est\xE1 inativo" }) };
+    if (!supplier.customer_id) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Invalid query params", details: parsedQuery.error.flatten() })
+        body: JSON.stringify({ error: "Fornecedor sem customer_id vinculado (rode update supplier para curar)" })
       };
     }
-    const { id: orderId } = parsedPath.data;
-    const { page, pageSize, status, subtransaction_id } = parsedQuery.data;
-    const orderExists = await prisma.core_orders.findUnique({
-      where: { id: orderId },
-      select: { id: true, kind: true, type: true, status: true, created_at: true }
+    const customerId = supplier.customer_id;
+    const supplierCustomer = await prisma.core_customers.findUnique({
+      where: { id: customerId },
+      select: { id: true, type: true, is_active: true }
     });
-    if (!orderExists) {
-      return { statusCode: 404, body: JSON.stringify({ error: "Order not found" }) };
+    if (!supplierCustomer) {
+      return { statusCode: 400, body: JSON.stringify({ error: "customer_id vinculado ao fornecedor n\xE3o existe" }) };
     }
-    const where = {
-      // ✅ FIX: relation field no Prisma Client é core_order_subtransactions
-      core_order_subtransactions: {
-        order_id: orderId
-      }
-    };
-    if (status) where.status = status;
-    if (subtransaction_id) where.subtransaction_id = subtransaction_id;
-    const skip2 = (page - 1) * pageSize;
-    const take = pageSize;
-    const [total, receipts] = await Promise.all([
-      prisma.core_payment_receipts.count({ where }),
-      prisma.core_payment_receipts.findMany({
-        where,
-        orderBy: [{ received_at: "desc" }],
-        skip: skip2,
-        take,
+    if (supplierCustomer.type !== "supplier") {
+      return { statusCode: 400, body: JSON.stringify({ error: "customer vinculado n\xE3o \xE9 do tipo supplier" }) };
+    }
+    if (!supplierCustomer.is_active) {
+      return { statusCode: 400, body: JSON.stringify({ error: "customer (supplier) est\xE1 inativo" }) };
+    }
+    const d0 = data.destinations[0];
+    if (d0.amount != null) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({
+          error: "Nesta vers\xE3o n\xE3o use amount em destinations. Use total_amount + sub_amount (fracionamento autom\xE1tico)."
+        })
+      };
+    }
+    const hasPix = !!d0.destination_pix_key || !!d0.beneficiary?.pix_key;
+    const hasGeneric = !!d0.destination;
+    if (hasPix && hasGeneric) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Use destination_pix_key OU destination (n\xE3o ambos)." }) };
+    }
+    if (!hasPix) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "TRANSFERENCIA exige destination_pix_key (ou beneficiary.pix_key)." })
+      };
+    }
+    if (!d0.beneficiary_id && !d0.beneficiary) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "TRANSFERENCIA exige beneficiary_id OU beneficiary {name, document, pix_key}." })
+      };
+    }
+    const total_amount = toMoney(data.total_amount);
+    const orderIdempotency = data.idempotency_key ?? `order_${data.id}`;
+    const existing = await prisma.core_orders.findFirst({
+      where: { OR: [{ id: data.id }, { idempotency_key: orderIdempotency }] },
+      include: { core_order_destinations: true, core_order_subtransactions: true }
+    });
+    if (existing) {
+      return { statusCode: 200, body: JSON.stringify({ ok: true, order: existing, idempotent: true }) };
+    }
+    const operator = pickOperator(data.metadata);
+    const auditMeta = buildAudit(event, auth);
+    const base_amount = data.base_amount ?? total_amount;
+    const rate = data.rate ?? 1;
+    const fees_amount = data.fees_amount ?? 0;
+    const base_currency = data.base_currency ?? "BRL";
+    const settlement_currency = data.settlement_currency ?? "BRL";
+    const created = await prisma.$transaction(async (tx) => {
+      const bal = await tx.core_balances.findUnique({
+        where: { customer_id: customerId },
         select: {
           id: true,
-          provider: true,
-          webhook_type: true,
-          provider_payment_id: true,
-          provider_status: true,
-          status: true,
-          idempotency_key: true,
-          end_to_end_id: true,
-          remittance_information: true,
-          pix_key: true,
-          amount: true,
-          currency: true,
-          debtor_document: true,
-          debtor_name: true,
-          creditor_document: true,
-          creditor_name: true,
-          subtransaction_id: true,
-          received_at: true,
-          created_at: true,
-          updated_at: true,
-          // ajuda muito no UI: index/amount/status da sub
-          // ✅ FIX: mesmo nome aqui
-          core_order_subtransactions: {
-            select: {
-              id: true,
-              index: true,
-              amount: true,
-              status: true,
-              settlement_status: true,
-              provider_status: true,
-              end_to_end_id: true,
-              destination_pix_key: true,
-              beneficiary_name: true,
-              beneficiary_document: true,
-              executed_at: true,
-              settled_at: true
+          available_amount: true,
+          credit_limit: true,
+          locked_cash_amount: true,
+          locked_credit_amount: true
+        }
+      });
+      if (!bal) throw new Error("Saldo do supplier (customer) n\xE3o encontrado (core_balances).");
+      const available = Number(bal.available_amount);
+      const creditLimit = Number(bal.credit_limit);
+      const lockedCash = Number(bal.locked_cash_amount ?? 0);
+      const lockedCredit = Number(bal.locked_credit_amount ?? 0);
+      const split = calcLockSplit({
+        amount: total_amount,
+        available,
+        creditLimit,
+        lockedCredit
+      });
+      const newAvailable = toMoney(available - split.fromCash);
+      const newLockedCash = toMoney(lockedCash + split.fromCash);
+      const newLockedCredit = toMoney(lockedCredit + split.fromCredit);
+      const newLockedTotal = toMoney(newLockedCash + newLockedCredit);
+      await tx.core_balances.update({
+        where: { customer_id: customerId },
+        data: {
+          available_amount: newAvailable,
+          locked_cash_amount: newLockedCash,
+          locked_credit_amount: newLockedCredit,
+          locked_amount: newLockedTotal,
+          updated_at: /* @__PURE__ */ new Date()
+        }
+      });
+      if (split.fromCash > 0) {
+        await tx.core_transactions.create({
+          data: {
+            id: import_crypto.default.randomUUID(),
+            customer_id: customerId,
+            type: "lock",
+            amount: split.fromCash,
+            description: `SUPPLIER - lock saldo`,
+            metadata: {
+              order_id: data.id,
+              kind: "SUPPLIER",
+              source: "cash",
+              supplier_id: supplier.id,
+              supplier_name: supplier.name,
+              operator,
+              ...auditMeta
             }
           }
-        }
-      })
-    ]);
-    const summary = receipts.reduce(
-      (acc, r) => {
-        const st = String(r.status || "").toUpperCase();
-        acc.total += 1;
-        if (st === "LIQUIDATED") acc.liquidated += 1;
-        else if (st === "FAILED") acc.failed += 1;
-        else if (st === "CANCELED") acc.canceled += 1;
-        else if (st === "PROCESSING") acc.processing += 1;
-        else if (st === "RECEIVED") acc.received += 1;
-        else acc.unknown += 1;
-        return acc;
-      },
-      {
-        total: 0,
-        liquidated: 0,
-        failed: 0,
-        canceled: 0,
-        processing: 0,
-        received: 0,
-        unknown: 0
+        });
       }
-    );
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        order: orderExists,
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-        summary,
-        items: receipts
-      })
-    };
+      if (split.fromCredit > 0) {
+        await tx.core_transactions.create({
+          data: {
+            id: import_crypto.default.randomUUID(),
+            customer_id: customerId,
+            type: "lock",
+            amount: split.fromCredit,
+            description: `SUPPLIER - lock limite`,
+            metadata: {
+              order_id: data.id,
+              kind: "SUPPLIER",
+              source: "credit",
+              supplier_id: supplier.id,
+              supplier_name: supplier.name,
+              operator,
+              ...auditMeta
+            }
+          }
+        });
+      }
+      let beneficiaryId = d0.beneficiary_id ?? null;
+      let beneficiaryName = null;
+      let beneficiaryDocument = null;
+      if (!beneficiaryId && d0.beneficiary) {
+        const docDigits = ensureCpfCnpjDigits(d0.beneficiary.document);
+        const newBenefId = import_crypto.default.randomUUID();
+        const normalizedPixKey = normalizePixKey(d0.beneficiary.pix_key, d0.beneficiary.key_type ?? null);
+        await tx.core_beneficiaries.create({
+          data: { id: newBenefId, customer_id: customerId, name: d0.beneficiary.name, document: docDigits }
+        });
+        await tx.core_beneficiary_pix_keys.create({
+          data: {
+            id: import_crypto.default.randomUUID(),
+            beneficiary_id: newBenefId,
+            key_type: d0.beneficiary.key_type ?? "random",
+            key_value: normalizedPixKey,
+            label: d0.beneficiary.label ?? d0.label ?? null,
+            active: true
+          }
+        });
+        beneficiaryId = newBenefId;
+      }
+      if (beneficiaryId) {
+        const b = await tx.core_beneficiaries.findFirst({
+          where: { id: beneficiaryId, customer_id: customerId },
+          select: { id: true, name: true, document: true }
+        });
+        if (!b) throw new Error(`beneficiary_id inv\xE1lido (n\xE3o encontrado ou n\xE3o pertence ao supplier): ${beneficiaryId}`);
+        beneficiaryName = b.name;
+        beneficiaryDocument = ensureCpfCnpjDigits(b.document);
+      }
+      let destinationPixKey = d0.destination_pix_key ?? null;
+      let destinationPixKeyType = null;
+      if (!destinationPixKey && d0.beneficiary?.pix_key) {
+        destinationPixKey = d0.beneficiary.pix_key;
+        destinationPixKeyType = d0.beneficiary.key_type ?? null;
+      }
+      if (!destinationPixKey && beneficiaryId) {
+        const k = await tx.core_beneficiary_pix_keys.findFirst({
+          where: { beneficiary_id: beneficiaryId, active: true },
+          orderBy: { created_at: "desc" },
+          select: { key_value: true, key_type: true }
+        });
+        destinationPixKey = k?.key_value ?? null;
+        destinationPixKeyType = k?.key_type ?? null;
+      }
+      if (!destinationPixKey) throw new Error("N\xE3o foi poss\xEDvel resolver destination_pix_key para o benefici\xE1rio.");
+      destinationPixKey = normalizePixKey(destinationPixKey, destinationPixKeyType);
+      const order = await tx.core_orders.create({
+        data: {
+          id: data.id,
+          customer_id: customerId,
+          customer_type: "supplier",
+          bank_name: data.bank_name,
+          type: "TRANSFERENCIA",
+          kind: "SUPPLIER",
+          supplier_id: supplier.id,
+          total_amount,
+          sub_amount: data.sub_amount,
+          base_amount,
+          rate,
+          fees_amount,
+          base_currency,
+          settlement_currency,
+          status: "PENDING",
+          idempotency_key: orderIdempotency,
+          metadata: {
+            ...data.metadata ?? {},
+            operator,
+            ...auditMeta,
+            locks: {
+              total: split.total,
+              cash: split.fromCash,
+              credit: split.fromCredit
+            },
+            supplier: {
+              supplier_id: supplier.id,
+              supplier_name: supplier.name
+            }
+          },
+          locked_amount_snapshot: newLockedTotal,
+          started_at: null,
+          completed_at: null,
+          last_error: null,
+          updated_at: /* @__PURE__ */ new Date()
+        }
+      });
+      const destination = await tx.core_order_destinations.create({
+        data: {
+          id: import_crypto.default.randomUUID(),
+          order_id: order.id,
+          destination: d0.destination ?? "",
+          destination_pix_key: destinationPixKey,
+          label: d0.label ?? null,
+          beneficiary_id: beneficiaryId,
+          beneficiary_name: beneficiaryName,
+          beneficiary_document: beneficiaryDocument,
+          amount: total_amount,
+          destination_type: d0.destination_type ?? "PIX"
+        }
+      });
+      const parts = chunkAmount(total_amount, data.sub_amount);
+      let globalIndex = 1;
+      let remainingCash = toMoney(split.fromCash);
+      let remainingCredit = toMoney(split.fromCredit);
+      for (const part of parts) {
+        const partMoney = toMoney(part);
+        const fromCash = toMoney(Math.min(remainingCash, partMoney));
+        const fromCredit = toMoney(partMoney - fromCash);
+        remainingCash = toMoney(remainingCash - fromCash);
+        remainingCredit = toMoney(remainingCredit - fromCredit);
+        if (remainingCash < -1e-4 || remainingCredit < -1e-4) {
+          throw new Error("Erro ao alocar lock por subtransaction (saldo/limite ficou negativo).");
+        }
+        await tx.core_order_subtransactions.create({
+          data: {
+            id: import_crypto.default.randomUUID(),
+            order_id: order.id,
+            status: "PENDING",
+            amount: partMoney,
+            index: globalIndex++,
+            bank_account_id: data.bank_account_id,
+            destination_id: destination.id,
+            destination_pix_key: destination.destination_pix_key ?? null,
+            destination: destination.destination ?? null,
+            beneficiary_name: beneficiaryName,
+            beneficiary_document: beneficiaryDocument,
+            idempotency_key: import_crypto.default.randomUUID(),
+            attempts: 0,
+            next_retry_at: null,
+            execution_metadata: null,
+            last_error: null,
+            provider_ref: null,
+            executed_at: null,
+            updated_at: /* @__PURE__ */ new Date(),
+            locked_from_available: fromCash,
+            locked_from_credit: fromCredit,
+            financial_settled_at: null,
+            financial_settlement_receipt_id: null,
+            financial_settlement_status: null
+          }
+        });
+      }
+      const cashAbs = Math.abs(toMoney(remainingCash));
+      const creditAbs = Math.abs(toMoney(remainingCredit));
+      if (cashAbs > 0.01 || creditAbs > 0.01) {
+        throw new Error(
+          `Erro de aloca\xE7\xE3o do lock. Sobra cash=${remainingCash} credit=${remainingCredit} (toler\xE2ncia 0.01)`
+        );
+      }
+      const full = await tx.core_orders.findUnique({
+        where: { id: order.id },
+        include: {
+          core_order_destinations: true,
+          core_order_subtransactions: { orderBy: { index: "asc" } }
+        }
+      });
+      return full;
+    });
+    return { statusCode: 201, body: JSON.stringify({ ok: true, order: created }) };
   } catch (err) {
-    console.error("getOrderReceipts error:", err);
+    console.error("createSupplierV2 error:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) })
@@ -32991,7 +33325,7 @@ var getOrderReceipts = async (event) => {
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getOrderReceipts
+  createSupplierV2
 });
 /*! Bundled license information:
 
@@ -33017,4 +33351,4 @@ var getOrderReceipts = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=getOrderReceipts.js.map
+//# sourceMappingURL=createSupplierV2.js.map

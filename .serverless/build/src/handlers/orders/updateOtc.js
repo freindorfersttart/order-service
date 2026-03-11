@@ -19043,12 +19043,12 @@ var require_jsonwebtoken = __commonJS({
   }
 });
 
-// src/handlers/orders/getOrderReceipts.ts
-var getOrderReceipts_exports = {};
-__export(getOrderReceipts_exports, {
-  getOrderReceipts: () => getOrderReceipts
+// src/handlers/orders/updateOtc.ts
+var updateOtc_exports = {};
+__export(updateOtc_exports, {
+  updateOtc: () => updateOtc
 });
-module.exports = __toCommonJS(getOrderReceipts_exports);
+module.exports = __toCommonJS(updateOtc_exports);
 
 // src/lib/prisma.ts
 var import_client = __toESM(require_default2());
@@ -19058,23 +19058,6 @@ var prisma = globalForPrisma.prisma ?? new import_client.PrismaClient({
   // pode remover ou ajustar
 });
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
-// src/middleware/authMiddleware.ts
-var import_jsonwebtoken = __toESM(require_jsonwebtoken());
-var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
-function verifyToken(event) {
-  const authHeader = event.headers.Authorization || event.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new Error("Token ausente ou malformado");
-  }
-  const token = authHeader.split(" ")[1];
-  try {
-    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
-    return decoded;
-  } catch (error48) {
-    throw new Error("Token inv\xE1lido");
-  }
-}
 
 // node_modules/zod/v4/classic/external.js
 var external_exports = {};
@@ -19220,7 +19203,7 @@ __export(external_exports, {
   ipv6: () => ipv62,
   iso: () => iso_exports,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31052,7 +31035,7 @@ __export(schemas_exports2, {
   ipv4: () => ipv42,
   ipv6: () => ipv62,
   json: () => json,
-  jwt: () => jwt2,
+  jwt: () => jwt,
   keyof: () => keyof,
   ksuid: () => ksuid2,
   lazy: () => lazy,
@@ -31536,7 +31519,7 @@ var ZodJWT = /* @__PURE__ */ $constructor("ZodJWT", (inst, def) => {
   $ZodJWT.init(inst, def);
   ZodStringFormat.init(inst, def);
 });
-function jwt2(params) {
+function jwt(params) {
   return _jwt(ZodJWT, params);
 }
 var ZodCustomStringFormat = /* @__PURE__ */ $constructor("ZodCustomStringFormat", (inst, def) => {
@@ -32844,154 +32827,278 @@ function date4(params) {
 // node_modules/zod/v4/classic/external.js
 config(en_default());
 
-// src/handlers/orders/getOrderReceipts.ts
-var pathSchema = external_exports.object({
-  id: external_exports.string().min(6)
+// src/middleware/authMiddleware.ts
+var import_jsonwebtoken = __toESM(require_jsonwebtoken());
+var JWT_SECRET = process.env.JWT_SECRET || "secret-jwt-sttart";
+function verifyToken(event) {
+  const authHeader = event.headers.Authorization || event.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new Error("Token ausente ou malformado");
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const decoded = import_jsonwebtoken.default.verify(token, JWT_SECRET);
+    return decoded;
+  } catch (error48) {
+    throw new Error("Token inv\xE1lido");
+  }
+}
+
+// src/handlers/orders/updateOtc.ts
+var orderTypeSchema = external_exports.enum([
+  "TRX",
+  "WIRE",
+  "USDT",
+  "EFETIVO",
+  "TRANSFERENCIA",
+  "AJUSTE_SALDO",
+  "ACERTO_IMPOSTO"
+]);
+var updateOtcSchema = external_exports.object({
+  id: external_exports.string().min(6),
+  // order id
+  // campos editáveis
+  type: orderTypeSchema.optional(),
+  base_amount: external_exports.number().positive().optional(),
+  rate: external_exports.number().positive().optional(),
+  fees_amount: external_exports.number().nonnegative().optional(),
+  base_currency: external_exports.string().optional(),
+  settlement_currency: external_exports.string().optional(),
+  total_amount: external_exports.number().positive().optional(),
+  // se vier, sobrescreve cálculo
+  description: external_exports.string().optional(),
+  reason_code: external_exports.string().optional(),
+  // retroativo pro relatório
+  completed_at: external_exports.string().optional(),
+  // metadata extra do lovable
+  metadata: external_exports.any().optional()
 });
-var querySchema = external_exports.object({
-  page: external_exports.coerce.number().int().min(1).default(1),
-  pageSize: external_exports.coerce.number().int().min(1).max(200).default(50),
-  // filtros opcionais
-  status: external_exports.enum(["RECEIVED", "PROCESSING", "LIQUIDATED", "FAILED", "CANCELED", "UNKNOWN"]).optional(),
-  subtransaction_id: external_exports.string().optional()
-});
-var getOrderReceipts = async (event) => {
+function toMoney(n) {
+  return Number(n.toFixed(2));
+}
+function pickOperator(metadata) {
+  const name = metadata?.operator_name ? String(metadata.operator_name).trim() : null;
+  const email3 = metadata?.operator_email ? String(metadata.operator_email).trim() : null;
+  return { name: name || null, email: email3 || null };
+}
+function parseOptionalDate(v) {
+  if (!v) return void 0;
+  const d = new Date(v);
+  if (Number.isNaN(d.getTime())) return void 0;
+  return d;
+}
+function buildAudit(event) {
+  const method = event?.requestContext?.http?.method || event?.httpMethod || null;
+  const path = event?.requestContext?.http?.path || event?.path || null;
+  const requestId = event?.requestContext?.requestId || null;
+  const ip = event?.requestContext?.http?.sourceIp || null;
+  const ua = event?.headers?.["user-agent"] || event?.headers?.["User-Agent"] || null;
+  return {
+    audit: {
+      source: {
+        service: "order-service",
+        route: method && path ? `${method} ${path}` : null,
+        request_id: requestId
+      },
+      context: {
+        ip,
+        user_agent: ua
+      },
+      at: (/* @__PURE__ */ new Date()).toISOString()
+    }
+  };
+}
+var updateOtc = async (event) => {
   try {
     verifyToken(event);
-    const parsedPath = pathSchema.safeParse({
-      id: event.pathParameters?.id
-    });
-    if (!parsedPath.success) {
+    const body = JSON.parse(event.body || "{}");
+    const parsed = updateOtcSchema.safeParse(body);
+    if (!parsed.success) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Invalid path params", details: parsedPath.error.flatten() })
+        body: JSON.stringify({ error: "Invalid payload", details: parsed.error.flatten() })
       };
     }
-    const parsedQuery = querySchema.safeParse({
-      page: event.queryStringParameters?.page,
-      pageSize: event.queryStringParameters?.pageSize,
-      status: event.queryStringParameters?.status,
-      subtransaction_id: event.queryStringParameters?.subtransaction_id
-    });
-    if (!parsedQuery.success) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: "Invalid query params", details: parsedQuery.error.flatten() })
-      };
+    const data = parsed.data;
+    const completedAt = parseOptionalDate(data.completed_at);
+    if (data.completed_at && !completedAt) {
+      return { statusCode: 400, body: JSON.stringify({ error: "Invalid completed_at (date parse failed)" }) };
     }
-    const { id: orderId } = parsedPath.data;
-    const { page, pageSize, status, subtransaction_id } = parsedQuery.data;
-    const orderExists = await prisma.core_orders.findUnique({
-      where: { id: orderId },
-      select: { id: true, kind: true, type: true, status: true, created_at: true }
-    });
-    if (!orderExists) {
-      return { statusCode: 404, body: JSON.stringify({ error: "Order not found" }) };
+    if (completedAt && completedAt.getTime() > Date.now()) {
+      return { statusCode: 400, body: JSON.stringify({ error: "completed_at n\xE3o pode ser no futuro" }) };
     }
-    const where = {
-      // ✅ FIX: relation field no Prisma Client é core_order_subtransactions
-      core_order_subtransactions: {
-        order_id: orderId
+    const auditMeta = buildAudit(event);
+    const operator = pickOperator(data.metadata);
+    const updated = await prisma.$transaction(async (tx) => {
+      const order = await tx.core_orders.findUnique({
+        where: { id: data.id },
+        include: { core_order_destinations: true, core_order_subtransactions: true }
+      });
+      if (!order) {
+        const e = new Error("Order n\xE3o encontrada.");
+        e.statusCode = 404;
+        throw e;
       }
-    };
-    if (status) where.status = status;
-    if (subtransaction_id) where.subtransaction_id = subtransaction_id;
-    const skip2 = (page - 1) * pageSize;
-    const take = pageSize;
-    const [total, receipts] = await Promise.all([
-      prisma.core_payment_receipts.count({ where }),
-      prisma.core_payment_receipts.findMany({
-        where,
-        orderBy: [{ received_at: "desc" }],
-        skip: skip2,
-        take,
-        select: {
-          id: true,
-          provider: true,
-          webhook_type: true,
-          provider_payment_id: true,
-          provider_status: true,
-          status: true,
-          idempotency_key: true,
-          end_to_end_id: true,
-          remittance_information: true,
-          pix_key: true,
-          amount: true,
-          currency: true,
-          debtor_document: true,
-          debtor_name: true,
-          creditor_document: true,
-          creditor_name: true,
-          subtransaction_id: true,
-          received_at: true,
-          created_at: true,
-          updated_at: true,
-          // ajuda muito no UI: index/amount/status da sub
-          // ✅ FIX: mesmo nome aqui
-          core_order_subtransactions: {
-            select: {
-              id: true,
-              index: true,
-              amount: true,
-              status: true,
-              settlement_status: true,
-              provider_status: true,
-              end_to_end_id: true,
-              destination_pix_key: true,
-              beneficiary_name: true,
-              beneficiary_document: true,
-              executed_at: true,
-              settled_at: true
-            }
-          }
+      if (order.kind !== "OTC") {
+        const e = new Error("Order n\xE3o \xE9 OTC.");
+        e.statusCode = 400;
+        throw e;
+      }
+      const trx = await tx.core_transactions.findFirst({
+        where: {
+          type: "debit",
+          customer_id: order.customer_id,
+          // Prisma JSON filter: path depende do provider; mantendo simples via contains
+          // Se teu Prisma suporta path: { path: ["order_id"], equals: order.id }
+          AND: [
+            { metadata: { path: ["order_id"], equals: order.id } },
+            { metadata: { path: ["kind"], equals: "OTC" } }
+          ]
+        },
+        orderBy: { created_at: "desc" }
+      });
+      if (!trx) {
+        const e = new Error("Transa\xE7\xE3o debit da OTC n\xE3o encontrada (metadata.order_id).");
+        e.statusCode = 404;
+        throw e;
+      }
+      const bal = await tx.core_balances.findUnique({
+        where: { customer_id: order.customer_id },
+        select: { available_amount: true, credit_limit: true, locked_amount: true }
+      });
+      if (!bal) throw new Error("Saldo do customer n\xE3o encontrado (core_balances).");
+      const available = Number(bal.available_amount);
+      const credit = Number(bal.credit_limit);
+      const locked = Number(bal.locked_amount);
+      const oldTotal = toMoney(Number(order.total_amount));
+      const newBaseAmount = data.base_amount ?? (order.base_amount != null ? Number(order.base_amount) : void 0);
+      const newRate = data.rate ?? (order.rate != null ? Number(order.rate) : void 0);
+      const newFees = data.fees_amount ?? (order.fees_amount != null ? Number(order.fees_amount) : 0);
+      if (data.total_amount == null) {
+        if (newBaseAmount == null || newRate == null) {
+          const e = new Error("Para recalcular total, base_amount e rate precisam existir (no payload ou na ordem).");
+          e.statusCode = 400;
+          throw e;
         }
-      })
-    ]);
-    const summary = receipts.reduce(
-      (acc, r) => {
-        const st = String(r.status || "").toUpperCase();
-        acc.total += 1;
-        if (st === "LIQUIDATED") acc.liquidated += 1;
-        else if (st === "FAILED") acc.failed += 1;
-        else if (st === "CANCELED") acc.canceled += 1;
-        else if (st === "PROCESSING") acc.processing += 1;
-        else if (st === "RECEIVED") acc.received += 1;
-        else acc.unknown += 1;
-        return acc;
-      },
-      {
-        total: 0,
-        liquidated: 0,
-        failed: 0,
-        canceled: 0,
-        processing: 0,
-        received: 0,
-        unknown: 0
       }
-    );
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        order: orderExists,
-        page,
-        pageSize,
-        total,
-        totalPages: Math.ceil(total / pageSize),
-        summary,
-        items: receipts
-      })
-    };
+      const computedTotal = toMoney(
+        data.total_amount ?? Number(newBaseAmount) * Number(newRate) + Number(newFees)
+      );
+      const delta = toMoney(computedTotal - oldTotal);
+      if (delta > 0) {
+        const utilizable = toMoney(available + credit);
+        if (utilizable < delta) {
+          const e = new Error(`Saldo insuficiente para aumentar OTC. Utiliz\xE1vel: ${utilizable} < Delta: ${delta}`);
+          e.statusCode = 400;
+          throw e;
+        }
+        await tx.core_balances.update({
+          where: { customer_id: order.customer_id },
+          data: { available_amount: toMoney(available - delta) }
+        });
+      } else if (delta < 0) {
+        await tx.core_balances.update({
+          where: { customer_id: order.customer_id },
+          data: { available_amount: toMoney(available + Math.abs(delta)) }
+        });
+      }
+      const prevMeta = order.metadata ?? {};
+      const finalMetadata = {
+        ...prevMeta,
+        ...data.metadata ?? {},
+        operator,
+        operator_name: operator.name,
+        operator_email: operator.email,
+        ...auditMeta,
+        // marca retroativo quando veio completed_at
+        backdated: Boolean(completedAt),
+        backdated_completed_at: completedAt ? completedAt.toISOString() : prevMeta?.backdated_completed_at ?? null,
+        description: data.description ?? prevMeta?.description ?? null,
+        calculation: {
+          base_amount: newBaseAmount ?? prevMeta?.calculation?.base_amount ?? null,
+          rate: newRate ?? prevMeta?.calculation?.rate ?? null,
+          fees_amount: newFees ?? prevMeta?.calculation?.fees_amount ?? 0,
+          total_amount: computedTotal
+        }
+      };
+      const now = /* @__PURE__ */ new Date();
+      const stamp = completedAt ?? (order.completed_at ? new Date(order.completed_at) : now);
+      await tx.core_orders.update({
+        where: { id: order.id },
+        data: {
+          type: data.type ?? order.type,
+          total_amount: computedTotal,
+          base_amount: newBaseAmount ?? order.base_amount,
+          rate: newRate ?? order.rate,
+          fees_amount: newFees ?? order.fees_amount,
+          base_currency: data.base_currency ?? order.base_currency,
+          settlement_currency: data.settlement_currency ?? order.settlement_currency,
+          // ✅ opcional: manter started_at como estava; completed_at pode ser retroativo
+          completed_at: stamp,
+          updated_at: now,
+          locked_amount_snapshot: locked,
+          metadata: finalMetadata
+        }
+      });
+      const prevTrxMeta = trx.metadata ?? {};
+      const trxMeta = {
+        ...prevTrxMeta,
+        order_id: order.id,
+        kind: "OTC",
+        base_amount: newBaseAmount ?? prevTrxMeta?.base_amount ?? null,
+        rate: newRate ?? prevTrxMeta?.rate ?? null,
+        fees_amount: newFees ?? prevTrxMeta?.fees_amount ?? 0,
+        base_currency: data.base_currency ?? prevTrxMeta?.base_currency ?? order.base_currency ?? "USD",
+        settlement_currency: data.settlement_currency ?? prevTrxMeta?.settlement_currency ?? order.settlement_currency ?? "BRL",
+        operator,
+        operator_name: operator.name,
+        operator_email: operator.email,
+        ...auditMeta,
+        // retroativo p/ relatórios
+        backdated: Boolean(completedAt),
+        completed_at: completedAt ? completedAt.toISOString() : prevTrxMeta?.completed_at ?? null
+      };
+      await tx.core_transactions.update({
+        where: { id: trx.id },
+        data: {
+          amount: computedTotal,
+          description: data.description ?? trx.description ?? `OTC ${data.type ?? order.type} - d\xE9bito`,
+          reason_code: data.reason_code ?? trx.reason_code ?? null,
+          metadata: trxMeta
+          // opcional: se você usa created_at do trx pra relatório retroativo, NÃO mexa.
+          // se quiser um carimbo específico, dá pra guardar só em metadata.completed_at como já tá.
+        }
+      });
+      const full = await tx.core_orders.findUnique({
+        where: { id: order.id },
+        include: { core_order_destinations: true, core_order_subtransactions: true }
+      });
+      const newBal = await tx.core_balances.findUnique({
+        where: { customer_id: order.customer_id },
+        select: { available_amount: true, credit_limit: true, locked_amount: true }
+      });
+      return {
+        order: full,
+        delta,
+        old_total: oldTotal,
+        new_total: computedTotal,
+        balance: newBal,
+        transaction_id: trx.id
+      };
+    });
+    return { statusCode: 200, body: JSON.stringify({ ok: true, ...updated }) };
   } catch (err) {
-    console.error("getOrderReceipts error:", err);
+    const statusCode = err?.statusCode && Number.isFinite(err.statusCode) ? err.statusCode : 500;
+    console.error("updateOtc error:", err);
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Internal error", details: err?.message || String(err) })
+      statusCode,
+      body: JSON.stringify({ error: statusCode === 500 ? "Internal error" : "Request error", details: err?.message || String(err) })
     };
   }
 };
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getOrderReceipts
+  updateOtc
 });
 /*! Bundled license information:
 
@@ -33017,4 +33124,4 @@ var getOrderReceipts = async (event) => {
 safe-buffer/index.js:
   (*! safe-buffer. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> *)
 */
-//# sourceMappingURL=getOrderReceipts.js.map
+//# sourceMappingURL=updateOtc.js.map

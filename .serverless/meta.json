@@ -58,10 +58,28 @@
                 "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrder"
               }
             },
+            "CreateSupplierOrderV2LogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrderV2"
+              }
+            },
             "CreateOtcOrderLogGroup": {
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
                 "LogGroupName": "/aws/lambda/order-service-dev-createOtcOrder"
+              }
+            },
+            "UpdateOtcOrderLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/order-service-dev-updateOtcOrder"
+              }
+            },
+            "DeleteOrderOtcLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/order-service-dev-deleteOrderOtc"
               }
             },
             "CreateBulkOrderLogGroup": {
@@ -110,6 +128,12 @@
               "Type": "AWS::Logs::LogGroup",
               "Properties": {
                 "LogGroupName": "/aws/lambda/order-service-dev-registerDebitsFromSuccessSubs"
+              }
+            },
+            "GetDashboardOverviewLogGroup": {
+              "Type": "AWS::Logs::LogGroup",
+              "Properties": {
+                "LogGroupName": "/aws/lambda/order-service-dev-getDashboardOverview"
               }
             },
             "IamRoleLambdaExecution": {
@@ -209,7 +233,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createSupplierOrder.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrder.zip"
                 },
                 "Handler": "src/handlers/orders/createSupplier.createSupplier",
                 "Runtime": "nodejs18.x",
@@ -247,12 +271,55 @@
                 "CreateSupplierOrderLogGroup"
               ]
             },
+            "CreateSupplierOrderV2LambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrderV2.zip"
+                },
+                "Handler": "src/handlers/orders/createSupplierV2.createSupplierV2",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "order-service-dev-createSupplierOrderV2",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "CreateSupplierOrderV2LogGroup"
+              ]
+            },
             "CreateOtcOrderLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createOtcOrder.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createOtcOrder.zip"
                 },
                 "Handler": "src/handlers/orders/createOtc.createOtc",
                 "Runtime": "nodejs18.x",
@@ -290,12 +357,98 @@
                 "CreateOtcOrderLogGroup"
               ]
             },
+            "UpdateOtcOrderLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-updateOtcOrder.zip"
+                },
+                "Handler": "src/handlers/orders/updateOtc.updateOtc",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "order-service-dev-updateOtcOrder",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "UpdateOtcOrderLogGroup"
+              ]
+            },
+            "DeleteOrderOtcLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
+              "Properties": {
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-deleteOrderOtc.zip"
+                },
+                "Handler": "src/handlers/orders/deleteOrderOtc.deleteOrderOtc",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "order-service-dev-deleteOrderOtc",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "DeleteOrderOtcLogGroup"
+              ]
+            },
             "CreateBulkOrderLambdaFunction": {
               "Type": "AWS::Lambda::Function",
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createBulkOrder.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createBulkOrder.zip"
                 },
                 "Handler": "src/handlers/orders/createBulk.createBulk",
                 "Runtime": "nodejs18.x",
@@ -338,7 +491,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createAdhocOrder.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createAdhocOrder.zip"
                 },
                 "Handler": "src/handlers/orders/createAdhoc.createAdhoc",
                 "Runtime": "nodejs18.x",
@@ -381,7 +534,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderById.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderById.zip"
                 },
                 "Handler": "src/handlers/orders/getById.getById",
                 "Runtime": "nodejs18.x",
@@ -424,7 +577,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrders.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrders.zip"
                 },
                 "Handler": "src/handlers/orders/getAll.getAll",
                 "Runtime": "nodejs18.x",
@@ -467,7 +620,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrdersByCustomer.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrdersByCustomer.zip"
                 },
                 "Handler": "src/handlers/orders/getByCustomer.getByCustomer",
                 "Runtime": "nodejs18.x",
@@ -510,7 +663,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderReceipts.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderReceipts.zip"
                 },
                 "Handler": "src/handlers/orders/getOrderReceipts.getOrderReceipts",
                 "Runtime": "nodejs18.x",
@@ -553,7 +706,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-retryOrder.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-retryOrder.zip"
                 },
                 "Handler": "src/handlers/orders/retry.retry",
                 "Runtime": "nodejs18.x",
@@ -596,7 +749,7 @@
               "Properties": {
                 "Code": {
                   "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                  "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-registerDebitsFromSuccessSubs.zip"
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-registerDebitsFromSuccessSubs.zip"
                 },
                 "Handler": "src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs",
                 "Runtime": "nodejs18.x",
@@ -634,104 +787,187 @@
                 "RegisterDebitsFromSuccessSubsLogGroup"
               ]
             },
-            "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
+            "GetDashboardOverviewLambdaFunction": {
+              "Type": "AWS::Lambda::Function",
               "Properties": {
-                "FunctionName": {
-                  "Ref": "RetryOrderLambdaFunction"
+                "Code": {
+                  "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                  "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getDashboardOverview.zip"
                 },
-                "CodeSha256": "xKC78PkG9+M9qs/ij01ih1tLutTtBXjGeC6Y+81fHaQ="
-              }
+                "Handler": "src/handlers/dashboard/getDashboardOverview.getDashboardOverview",
+                "Runtime": "nodejs18.x",
+                "FunctionName": "order-service-dev-getDashboardOverview",
+                "MemorySize": 1024,
+                "Timeout": 6,
+                "Environment": {
+                  "Variables": {
+                    "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                    "JWT_SECRET": "<REDACTED>",
+                    "NODE_OPTIONS": "--enable-source-maps"
+                  }
+                },
+                "Role": {
+                  "Fn::GetAtt": [
+                    "IamRoleLambdaExecution",
+                    "Arn"
+                  ]
+                },
+                "VpcConfig": {
+                  "SecurityGroupIds": [
+                    "sg-0c53a9fdbac3c3f1d"
+                  ],
+                  "SubnetIds": [
+                    "subnet-0db66bddd09cf4ea4",
+                    "subnet-0025ce174e80dbd39",
+                    "subnet-0b3d786ce9758f63d",
+                    "subnet-04db367d4eefcbc92",
+                    "subnet-044f588274a69635f",
+                    "subnet-09be2de009329d2a1"
+                  ]
+                }
+              },
+              "DependsOn": [
+                "GetDashboardOverviewLogGroup"
+              ]
             },
-            "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo": {
+            "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "GetOrdersByCustomerLambdaFunction"
                 },
-                "CodeSha256": "TlgcQJFn6bA/bNQmLPp1xpt8Gm+uoKbumDZwtWODjfo="
+                "CodeSha256": "DRVLD3oQkFLxexBp9S7r+DkM2P7rC6+bLgEX5ZlI60M="
               }
             },
-            "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64": {
+            "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "RetryOrderLambdaFunction"
+                },
+                "CodeSha256": "qchgbPy0in2qNmODTZBh7HoSpPiL5/o/sVZR3B8Ln3Q="
+              }
+            },
+            "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "GetOrderByIdLambdaFunction"
                 },
-                "CodeSha256": "g3YiD2iFshgxmQZiUCd8mr3otC5ezjedAiIXu2b++E0="
+                "CodeSha256": "jUZoVHKDxd7YZHfZfZmO5GKdwWqdfkPdAuClF8oqJYI="
               }
             },
-            "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "GetOrdersLambdaFunction"
-                },
-                "CodeSha256": "1IBvsM+NJA4Ow6kBUzzPAUhpXEk4MJKSWuYX1FSRBmo="
-              }
-            },
-            "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "CreateSupplierOrderLambdaFunction"
-                },
-                "CodeSha256": "eTEpcY5TCiDYyOPdgorEMVyUKegZNC6KubGAlWdnmYQ="
-              }
-            },
-            "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "CreateOtcOrderLambdaFunction"
-                },
-                "CodeSha256": "zKjpzwqcqzxqgwlQ6lb8QxazMNKNmb4KTuV+5RibtKM="
-              }
-            },
-            "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw": {
-              "Type": "AWS::Lambda::Version",
-              "DeletionPolicy": "Retain",
-              "Properties": {
-                "FunctionName": {
-                  "Ref": "GetOrderReceiptsLambdaFunction"
-                },
-                "CodeSha256": "rcjDguP6snnbuGU9O6javkkijPWxodQpo8+0J7CkulY="
-              }
-            },
-            "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg": {
+            "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "RegisterDebitsFromSuccessSubsLambdaFunction"
                 },
-                "CodeSha256": "R/45Sx5vDoS6xT7DuETTGbHiaqIkFVmIsTckdflI8Jo="
+                "CodeSha256": "EDYtpCV1UHnG5NXDnO0nThULwFtxUDaOWqG+ZhxdEQ8="
               }
             },
-            "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI": {
+            "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "DeleteOrderOtcLambdaFunction"
+                },
+                "CodeSha256": "Ork/vOmPNhNoiwQBBMaBHjxNHQBktCky9CfJ4VbcMTc="
+              }
+            },
+            "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateSupplierOrderLambdaFunction"
+                },
+                "CodeSha256": "YTHvjusmCMXKjx7jQ7j+H5668W6SebNjzsnwDBZA6OI="
+              }
+            },
+            "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "CreateBulkOrderLambdaFunction"
                 },
-                "CodeSha256": "9dVr51hrf8hi4Bznjrc+mdIFFfxRqrR1SKpOsvrnL+M="
+                "CodeSha256": "Qi1qKFB45XURJHbrV9cNeJGzzTp1TekQFBtDN80JN5Y="
               }
             },
-            "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU": {
+            "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateOtcOrderLambdaFunction"
+                },
+                "CodeSha256": "1cpyaH4L1zA1GBW/J7Ju3l/mgdKtGTZiFVvLoZWrcrY="
+              }
+            },
+            "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "UpdateOtcOrderLambdaFunction"
+                },
+                "CodeSha256": "B1DeVA99NF2AlK02d+gxq/1D98M/oYHAPEJGOrmgXqY="
+              }
+            },
+            "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs": {
               "Type": "AWS::Lambda::Version",
               "DeletionPolicy": "Retain",
               "Properties": {
                 "FunctionName": {
                   "Ref": "CreateAdhocOrderLambdaFunction"
                 },
-                "CodeSha256": "2MjHEJbAahJc2WnfKH7LBZU67etzbxGipjlcVpuZSKs="
+                "CodeSha256": "lMJykZo+tBeQI3mhY57q8wFCN9eABYabYVCTAWlBT9I="
+              }
+            },
+            "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "CreateSupplierOrderV2LambdaFunction"
+                },
+                "CodeSha256": "K+Rv37qO3gnspQGSf3RXdju/+NcNCsVfOK+A2eCAxsU="
+              }
+            },
+            "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetOrderReceiptsLambdaFunction"
+                },
+                "CodeSha256": "eu0spD8IkpNYK4/Fgg3l58teHsLmI+gT574ewuxjlxA="
+              }
+            },
+            "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetDashboardOverviewLambdaFunction"
+                },
+                "CodeSha256": "Y7uSthqbypQAEDhHh7lHpBqOJbGPqKUnO6knxIruMCQ="
+              }
+            },
+            "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo": {
+              "Type": "AWS::Lambda::Version",
+              "DeletionPolicy": "Retain",
+              "Properties": {
+                "FunctionName": {
+                  "Ref": "GetOrdersLambdaFunction"
+                },
+                "CodeSha256": "Wp20GqDZ+uMTNDy9g5I408HWCOxl3rcinVaLyM4CPm0="
               }
             },
             "HttpApi": {
@@ -846,6 +1082,81 @@
               },
               "DependsOn": "HttpApiIntegrationCreateSupplierOrder"
             },
+            "CreateSupplierOrderV2LambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "CreateSupplierOrderV2LambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationCreateSupplierOrderV2": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "CreateSupplierOrderV2LambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostOrdersSupplierDashv2": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "POST /orders/supplier-v2",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationCreateSupplierOrderV2"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationCreateSupplierOrderV2"
+            },
             "CreateOtcOrderLambdaPermissionHttpApi": {
               "Type": "AWS::Lambda::Permission",
               "Properties": {
@@ -920,6 +1231,156 @@
                 }
               },
               "DependsOn": "HttpApiIntegrationCreateOtcOrder"
+            },
+            "UpdateOtcOrderLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "UpdateOtcOrderLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationUpdateOtcOrder": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "UpdateOtcOrderLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePatchOrdersOtc": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "PATCH /orders/otc",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationUpdateOtcOrder"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationUpdateOtcOrder"
+            },
+            "DeleteOrderOtcLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "DeleteOrderOtcLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationDeleteOrderOtc": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "DeleteOrderOtcLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRoutePostOrdersOtcDelete": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "POST /orders/otc/delete",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationDeleteOrderOtc"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationDeleteOrderOtc"
             },
             "CreateBulkOrderLambdaPermissionHttpApi": {
               "Type": "AWS::Lambda::Permission",
@@ -1520,6 +1981,81 @@
                 }
               },
               "DependsOn": "HttpApiIntegrationRegisterDebitsFromSuccessSubs"
+            },
+            "GetDashboardOverviewLambdaPermissionHttpApi": {
+              "Type": "AWS::Lambda::Permission",
+              "Properties": {
+                "FunctionName": {
+                  "Fn::GetAtt": [
+                    "GetDashboardOverviewLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":execute-api:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":",
+                      {
+                        "Ref": "AWS::AccountId"
+                      },
+                      ":",
+                      {
+                        "Ref": "HttpApi"
+                      },
+                      "/*"
+                    ]
+                  ]
+                }
+              }
+            },
+            "HttpApiIntegrationGetDashboardOverview": {
+              "Type": "AWS::ApiGatewayV2::Integration",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "IntegrationType": "AWS_PROXY",
+                "IntegrationUri": {
+                  "Fn::GetAtt": [
+                    "GetDashboardOverviewLambdaFunction",
+                    "Arn"
+                  ]
+                },
+                "PayloadFormatVersion": "2.0",
+                "TimeoutInMillis": 30000
+              }
+            },
+            "HttpApiRouteGetDashboardOverview": {
+              "Type": "AWS::ApiGatewayV2::Route",
+              "Properties": {
+                "ApiId": {
+                  "Ref": "HttpApi"
+                },
+                "RouteKey": "GET /dashboard/overview",
+                "Target": {
+                  "Fn::Join": [
+                    "/",
+                    [
+                      "integrations",
+                      {
+                        "Ref": "HttpApiIntegrationGetDashboardOverview"
+                      }
+                    ]
+                  ]
+                }
+              },
+              "DependsOn": "HttpApiIntegrationGetDashboardOverview"
             }
           },
           "Outputs": {
@@ -1529,94 +2065,130 @@
                 "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
               }
             },
-            "RetryOrderLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4"
-              },
-              "Export": {
-                "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
-              }
-            },
             "GetOrdersByCustomerLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo"
+                "Ref": "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8"
               },
               "Export": {
                 "Name": "sls-order-service-dev-GetOrdersByCustomerLambdaFunctionQualifiedArn"
               }
             },
+            "RetryOrderLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
+              }
+            },
             "GetOrderByIdLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64"
+                "Ref": "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0"
               },
               "Export": {
                 "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
               }
             },
-            "GetOrdersLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0"
-              },
-              "Export": {
-                "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
-              }
-            },
-            "CreateSupplierOrderLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo"
-              },
-              "Export": {
-                "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
-              }
-            },
-            "CreateOtcOrderLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY"
-              },
-              "Export": {
-                "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
-              }
-            },
-            "GetOrderReceiptsLambdaFunctionQualifiedArn": {
-              "Description": "Current Lambda function version",
-              "Value": {
-                "Ref": "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw"
-              },
-              "Export": {
-                "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
-              }
-            },
             "RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg"
+                "Ref": "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek"
               },
               "Export": {
                 "Name": "sls-order-service-dev-RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn"
               }
             },
+            "DeleteOrderOtcLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-DeleteOrderOtcLambdaFunctionQualifiedArn"
+              }
+            },
+            "CreateSupplierOrderLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
+              }
+            },
             "CreateBulkOrderLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI"
+                "Ref": "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc"
               },
               "Export": {
                 "Name": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
               }
             },
+            "CreateOtcOrderLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
+              }
+            },
+            "UpdateOtcOrderLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-UpdateOtcOrderLambdaFunctionQualifiedArn"
+              }
+            },
             "CreateAdhocOrderLambdaFunctionQualifiedArn": {
               "Description": "Current Lambda function version",
               "Value": {
-                "Ref": "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU"
+                "Ref": "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs"
               },
               "Export": {
                 "Name": "sls-order-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
+              }
+            },
+            "CreateSupplierOrderV2LambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-CreateSupplierOrderV2LambdaFunctionQualifiedArn"
+              }
+            },
+            "GetOrderReceiptsLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
+              }
+            },
+            "GetDashboardOverviewLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-GetDashboardOverviewLambdaFunctionQualifiedArn"
+              }
+            },
+            "GetOrdersLambdaFunctionQualifiedArn": {
+              "Description": "Current Lambda function version",
+              "Value": {
+                "Ref": "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo"
+              },
+              "Export": {
+                "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
               }
             },
             "HttpApiId": {
@@ -1660,7 +2232,7 @@
         "individually": true,
         "artifactsS3KeyDirname": "serverless/order-service/dev/code-artifacts",
         "deploymentBucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-        "artifactDirectoryName": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z"
+        "artifactDirectoryName": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z"
       },
       "functions": {
         "createSupplierOrder": {
@@ -1686,7 +2258,32 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo"
+          "versionLogicalId": "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo"
+        },
+        "createSupplierOrderV2": {
+          "handler": "src/handlers/orders/createSupplierV2.createSupplierV2",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/orders/supplier-v2",
+                "method": "POST"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/orders/supplier-v2"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-createSupplierOrderV2.zip"
+          },
+          "name": "order-service-dev-createSupplierOrderV2",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ"
         },
         "createOtcOrder": {
           "handler": "src/handlers/orders/createOtc.createOtc",
@@ -1711,7 +2308,57 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY"
+          "versionLogicalId": "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go"
+        },
+        "updateOtcOrder": {
+          "handler": "src/handlers/orders/updateOtc.updateOtc",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/orders/otc",
+                "method": "PATCH"
+              },
+              "resolvedMethod": "PATCH",
+              "resolvedPath": "/orders/otc"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-updateOtcOrder.zip"
+          },
+          "name": "order-service-dev-updateOtcOrder",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI"
+        },
+        "deleteOrderOtc": {
+          "handler": "src/handlers/orders/deleteOrderOtc.deleteOrderOtc",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/orders/otc/delete",
+                "method": "POST"
+              },
+              "resolvedMethod": "POST",
+              "resolvedPath": "/orders/otc/delete"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-deleteOrderOtc.zip"
+          },
+          "name": "order-service-dev-deleteOrderOtc",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0"
         },
         "createBulkOrder": {
           "handler": "src/handlers/orders/createBulk.createBulk",
@@ -1736,7 +2383,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI"
+          "versionLogicalId": "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc"
         },
         "createAdhocOrder": {
           "handler": "src/handlers/orders/createAdhoc.createAdhoc",
@@ -1761,7 +2408,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU"
+          "versionLogicalId": "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs"
         },
         "getOrderById": {
           "handler": "src/handlers/orders/getById.getById",
@@ -1786,7 +2433,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64"
+          "versionLogicalId": "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0"
         },
         "getOrders": {
           "handler": "src/handlers/orders/getAll.getAll",
@@ -1811,7 +2458,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0"
+          "versionLogicalId": "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo"
         },
         "getOrdersByCustomer": {
           "handler": "src/handlers/orders/getByCustomer.getByCustomer",
@@ -1836,7 +2483,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo"
+          "versionLogicalId": "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8"
         },
         "getOrderReceipts": {
           "handler": "src/handlers/orders/getOrderReceipts.getOrderReceipts",
@@ -1861,7 +2508,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw"
+          "versionLogicalId": "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI"
         },
         "retryOrder": {
           "handler": "src/handlers/orders/retry.retry",
@@ -1886,7 +2533,7 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4"
+          "versionLogicalId": "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI"
         },
         "registerDebitsFromSuccessSubs": {
           "handler": "src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs",
@@ -1911,7 +2558,32 @@
           "timeout": 6,
           "runtime": "nodejs18.x",
           "vpc": {},
-          "versionLogicalId": "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg"
+          "versionLogicalId": "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek"
+        },
+        "getDashboardOverview": {
+          "handler": "src/handlers/dashboard/getDashboardOverview.getDashboardOverview",
+          "events": [
+            {
+              "httpApi": {
+                "path": "/dashboard/overview",
+                "method": "GET"
+              },
+              "resolvedMethod": "GET",
+              "resolvedPath": "/dashboard/overview"
+            }
+          ],
+          "package": {
+            "artifact": "/Users/tecnologia01/sttartpay/order-service/.serverless/build/order-service-getDashboardOverview.zip"
+          },
+          "name": "order-service-dev-getDashboardOverview",
+          "environment": {
+            "NODE_OPTIONS": "--enable-source-maps"
+          },
+          "memory": 1024,
+          "timeout": 6,
+          "runtime": "nodejs18.x",
+          "vpc": {},
+          "versionLogicalId": "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY"
         }
       }
     },
@@ -1968,10 +2640,28 @@
               "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrder"
             }
           },
+          "CreateSupplierOrderV2LogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrderV2"
+            }
+          },
           "CreateOtcOrderLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/order-service-dev-createOtcOrder"
+            }
+          },
+          "UpdateOtcOrderLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/order-service-dev-updateOtcOrder"
+            }
+          },
+          "DeleteOrderOtcLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/order-service-dev-deleteOrderOtc"
             }
           },
           "CreateBulkOrderLogGroup": {
@@ -2020,6 +2710,12 @@
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
               "LogGroupName": "/aws/lambda/order-service-dev-registerDebitsFromSuccessSubs"
+            }
+          },
+          "GetDashboardOverviewLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/order-service-dev-getDashboardOverview"
             }
           },
           "IamRoleLambdaExecution": {
@@ -2119,7 +2815,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createSupplierOrder.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrder.zip"
               },
               "Handler": "src/handlers/orders/createSupplier.createSupplier",
               "Runtime": "nodejs18.x",
@@ -2157,12 +2853,55 @@
               "CreateSupplierOrderLogGroup"
             ]
           },
+          "CreateSupplierOrderV2LambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrderV2.zip"
+              },
+              "Handler": "src/handlers/orders/createSupplierV2.createSupplierV2",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "order-service-dev-createSupplierOrderV2",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "CreateSupplierOrderV2LogGroup"
+            ]
+          },
           "CreateOtcOrderLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createOtcOrder.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createOtcOrder.zip"
               },
               "Handler": "src/handlers/orders/createOtc.createOtc",
               "Runtime": "nodejs18.x",
@@ -2200,12 +2939,98 @@
               "CreateOtcOrderLogGroup"
             ]
           },
+          "UpdateOtcOrderLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-updateOtcOrder.zip"
+              },
+              "Handler": "src/handlers/orders/updateOtc.updateOtc",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "order-service-dev-updateOtcOrder",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "UpdateOtcOrderLogGroup"
+            ]
+          },
+          "DeleteOrderOtcLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-deleteOrderOtc.zip"
+              },
+              "Handler": "src/handlers/orders/deleteOrderOtc.deleteOrderOtc",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "order-service-dev-deleteOrderOtc",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "DeleteOrderOtcLogGroup"
+            ]
+          },
           "CreateBulkOrderLambdaFunction": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createBulkOrder.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createBulkOrder.zip"
               },
               "Handler": "src/handlers/orders/createBulk.createBulk",
               "Runtime": "nodejs18.x",
@@ -2248,7 +3073,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createAdhocOrder.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createAdhocOrder.zip"
               },
               "Handler": "src/handlers/orders/createAdhoc.createAdhoc",
               "Runtime": "nodejs18.x",
@@ -2291,7 +3116,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderById.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderById.zip"
               },
               "Handler": "src/handlers/orders/getById.getById",
               "Runtime": "nodejs18.x",
@@ -2334,7 +3159,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrders.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrders.zip"
               },
               "Handler": "src/handlers/orders/getAll.getAll",
               "Runtime": "nodejs18.x",
@@ -2377,7 +3202,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrdersByCustomer.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrdersByCustomer.zip"
               },
               "Handler": "src/handlers/orders/getByCustomer.getByCustomer",
               "Runtime": "nodejs18.x",
@@ -2420,7 +3245,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderReceipts.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderReceipts.zip"
               },
               "Handler": "src/handlers/orders/getOrderReceipts.getOrderReceipts",
               "Runtime": "nodejs18.x",
@@ -2463,7 +3288,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-retryOrder.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-retryOrder.zip"
               },
               "Handler": "src/handlers/orders/retry.retry",
               "Runtime": "nodejs18.x",
@@ -2506,7 +3331,7 @@
             "Properties": {
               "Code": {
                 "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-                "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-registerDebitsFromSuccessSubs.zip"
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-registerDebitsFromSuccessSubs.zip"
               },
               "Handler": "src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs",
               "Runtime": "nodejs18.x",
@@ -2544,104 +3369,187 @@
               "RegisterDebitsFromSuccessSubsLogGroup"
             ]
           },
-          "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
+          "GetDashboardOverviewLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
             "Properties": {
-              "FunctionName": {
-                "Ref": "RetryOrderLambdaFunction"
+              "Code": {
+                "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+                "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getDashboardOverview.zip"
               },
-              "CodeSha256": "xKC78PkG9+M9qs/ij01ih1tLutTtBXjGeC6Y+81fHaQ="
-            }
+              "Handler": "src/handlers/dashboard/getDashboardOverview.getDashboardOverview",
+              "Runtime": "nodejs18.x",
+              "FunctionName": "order-service-dev-getDashboardOverview",
+              "MemorySize": 1024,
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                  "JWT_SECRET": "<REDACTED>",
+                  "NODE_OPTIONS": "--enable-source-maps"
+                }
+              },
+              "Role": {
+                "Fn::GetAtt": [
+                  "IamRoleLambdaExecution",
+                  "Arn"
+                ]
+              },
+              "VpcConfig": {
+                "SecurityGroupIds": [
+                  "sg-0c53a9fdbac3c3f1d"
+                ],
+                "SubnetIds": [
+                  "subnet-0db66bddd09cf4ea4",
+                  "subnet-0025ce174e80dbd39",
+                  "subnet-0b3d786ce9758f63d",
+                  "subnet-04db367d4eefcbc92",
+                  "subnet-044f588274a69635f",
+                  "subnet-09be2de009329d2a1"
+                ]
+              }
+            },
+            "DependsOn": [
+              "GetDashboardOverviewLogGroup"
+            ]
           },
-          "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo": {
+          "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetOrdersByCustomerLambdaFunction"
               },
-              "CodeSha256": "TlgcQJFn6bA/bNQmLPp1xpt8Gm+uoKbumDZwtWODjfo="
+              "CodeSha256": "DRVLD3oQkFLxexBp9S7r+DkM2P7rC6+bLgEX5ZlI60M="
             }
           },
-          "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64": {
+          "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "RetryOrderLambdaFunction"
+              },
+              "CodeSha256": "qchgbPy0in2qNmODTZBh7HoSpPiL5/o/sVZR3B8Ln3Q="
+            }
+          },
+          "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GetOrderByIdLambdaFunction"
               },
-              "CodeSha256": "g3YiD2iFshgxmQZiUCd8mr3otC5ezjedAiIXu2b++E0="
+              "CodeSha256": "jUZoVHKDxd7YZHfZfZmO5GKdwWqdfkPdAuClF8oqJYI="
             }
           },
-          "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetOrdersLambdaFunction"
-              },
-              "CodeSha256": "1IBvsM+NJA4Ow6kBUzzPAUhpXEk4MJKSWuYX1FSRBmo="
-            }
-          },
-          "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "CreateSupplierOrderLambdaFunction"
-              },
-              "CodeSha256": "eTEpcY5TCiDYyOPdgorEMVyUKegZNC6KubGAlWdnmYQ="
-            }
-          },
-          "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "CreateOtcOrderLambdaFunction"
-              },
-              "CodeSha256": "zKjpzwqcqzxqgwlQ6lb8QxazMNKNmb4KTuV+5RibtKM="
-            }
-          },
-          "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw": {
-            "Type": "AWS::Lambda::Version",
-            "DeletionPolicy": "Retain",
-            "Properties": {
-              "FunctionName": {
-                "Ref": "GetOrderReceiptsLambdaFunction"
-              },
-              "CodeSha256": "rcjDguP6snnbuGU9O6javkkijPWxodQpo8+0J7CkulY="
-            }
-          },
-          "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg": {
+          "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "RegisterDebitsFromSuccessSubsLambdaFunction"
               },
-              "CodeSha256": "R/45Sx5vDoS6xT7DuETTGbHiaqIkFVmIsTckdflI8Jo="
+              "CodeSha256": "EDYtpCV1UHnG5NXDnO0nThULwFtxUDaOWqG+ZhxdEQ8="
             }
           },
-          "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI": {
+          "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "DeleteOrderOtcLambdaFunction"
+              },
+              "CodeSha256": "Ork/vOmPNhNoiwQBBMaBHjxNHQBktCky9CfJ4VbcMTc="
+            }
+          },
+          "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateSupplierOrderLambdaFunction"
+              },
+              "CodeSha256": "YTHvjusmCMXKjx7jQ7j+H5668W6SebNjzsnwDBZA6OI="
+            }
+          },
+          "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CreateBulkOrderLambdaFunction"
               },
-              "CodeSha256": "9dVr51hrf8hi4Bznjrc+mdIFFfxRqrR1SKpOsvrnL+M="
+              "CodeSha256": "Qi1qKFB45XURJHbrV9cNeJGzzTp1TekQFBtDN80JN5Y="
             }
           },
-          "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU": {
+          "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateOtcOrderLambdaFunction"
+              },
+              "CodeSha256": "1cpyaH4L1zA1GBW/J7Ju3l/mgdKtGTZiFVvLoZWrcrY="
+            }
+          },
+          "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "UpdateOtcOrderLambdaFunction"
+              },
+              "CodeSha256": "B1DeVA99NF2AlK02d+gxq/1D98M/oYHAPEJGOrmgXqY="
+            }
+          },
+          "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "CreateAdhocOrderLambdaFunction"
               },
-              "CodeSha256": "2MjHEJbAahJc2WnfKH7LBZU67etzbxGipjlcVpuZSKs="
+              "CodeSha256": "lMJykZo+tBeQI3mhY57q8wFCN9eABYabYVCTAWlBT9I="
+            }
+          },
+          "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "CreateSupplierOrderV2LambdaFunction"
+              },
+              "CodeSha256": "K+Rv37qO3gnspQGSf3RXdju/+NcNCsVfOK+A2eCAxsU="
+            }
+          },
+          "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetOrderReceiptsLambdaFunction"
+              },
+              "CodeSha256": "eu0spD8IkpNYK4/Fgg3l58teHsLmI+gT574ewuxjlxA="
+            }
+          },
+          "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetDashboardOverviewLambdaFunction"
+              },
+              "CodeSha256": "Y7uSthqbypQAEDhHh7lHpBqOJbGPqKUnO6knxIruMCQ="
+            }
+          },
+          "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "GetOrdersLambdaFunction"
+              },
+              "CodeSha256": "Wp20GqDZ+uMTNDy9g5I408HWCOxl3rcinVaLyM4CPm0="
             }
           },
           "HttpApi": {
@@ -2756,6 +3664,81 @@
             },
             "DependsOn": "HttpApiIntegrationCreateSupplierOrder"
           },
+          "CreateSupplierOrderV2LambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "CreateSupplierOrderV2LambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationCreateSupplierOrderV2": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "CreateSupplierOrderV2LambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostOrdersSupplierDashv2": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /orders/supplier-v2",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationCreateSupplierOrderV2"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationCreateSupplierOrderV2"
+          },
           "CreateOtcOrderLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
@@ -2830,6 +3813,156 @@
               }
             },
             "DependsOn": "HttpApiIntegrationCreateOtcOrder"
+          },
+          "UpdateOtcOrderLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "UpdateOtcOrderLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationUpdateOtcOrder": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "UpdateOtcOrderLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePatchOrdersOtc": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "PATCH /orders/otc",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationUpdateOtcOrder"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationUpdateOtcOrder"
+          },
+          "DeleteOrderOtcLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "DeleteOrderOtcLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationDeleteOrderOtc": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "DeleteOrderOtcLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRoutePostOrdersOtcDelete": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "POST /orders/otc/delete",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationDeleteOrderOtc"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationDeleteOrderOtc"
           },
           "CreateBulkOrderLambdaPermissionHttpApi": {
             "Type": "AWS::Lambda::Permission",
@@ -3430,6 +4563,81 @@
               }
             },
             "DependsOn": "HttpApiIntegrationRegisterDebitsFromSuccessSubs"
+          },
+          "GetDashboardOverviewLambdaPermissionHttpApi": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "GetDashboardOverviewLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "HttpApi"
+                    },
+                    "/*"
+                  ]
+                ]
+              }
+            }
+          },
+          "HttpApiIntegrationGetDashboardOverview": {
+            "Type": "AWS::ApiGatewayV2::Integration",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "IntegrationType": "AWS_PROXY",
+              "IntegrationUri": {
+                "Fn::GetAtt": [
+                  "GetDashboardOverviewLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "PayloadFormatVersion": "2.0",
+              "TimeoutInMillis": 30000
+            }
+          },
+          "HttpApiRouteGetDashboardOverview": {
+            "Type": "AWS::ApiGatewayV2::Route",
+            "Properties": {
+              "ApiId": {
+                "Ref": "HttpApi"
+              },
+              "RouteKey": "GET /dashboard/overview",
+              "Target": {
+                "Fn::Join": [
+                  "/",
+                  [
+                    "integrations",
+                    {
+                      "Ref": "HttpApiIntegrationGetDashboardOverview"
+                    }
+                  ]
+                ]
+              }
+            },
+            "DependsOn": "HttpApiIntegrationGetDashboardOverview"
           }
         },
         "Outputs": {
@@ -3439,94 +4647,130 @@
               "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
             }
           },
-          "RetryOrderLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4"
-            },
-            "Export": {
-              "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
-            }
-          },
           "GetOrdersByCustomerLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo"
+              "Ref": "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8"
             },
             "Export": {
               "Name": "sls-order-service-dev-GetOrdersByCustomerLambdaFunctionQualifiedArn"
             }
           },
+          "RetryOrderLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
+            }
+          },
           "GetOrderByIdLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64"
+              "Ref": "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0"
             },
             "Export": {
               "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
             }
           },
-          "GetOrdersLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0"
-            },
-            "Export": {
-              "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
-            }
-          },
-          "CreateSupplierOrderLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo"
-            },
-            "Export": {
-              "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
-            }
-          },
-          "CreateOtcOrderLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY"
-            },
-            "Export": {
-              "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
-            }
-          },
-          "GetOrderReceiptsLambdaFunctionQualifiedArn": {
-            "Description": "Current Lambda function version",
-            "Value": {
-              "Ref": "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw"
-            },
-            "Export": {
-              "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
-            }
-          },
           "RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg"
+              "Ref": "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek"
             },
             "Export": {
               "Name": "sls-order-service-dev-RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn"
             }
           },
+          "DeleteOrderOtcLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-DeleteOrderOtcLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateSupplierOrderLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
+            }
+          },
           "CreateBulkOrderLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI"
+              "Ref": "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc"
             },
             "Export": {
               "Name": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
             }
           },
+          "CreateOtcOrderLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
+            }
+          },
+          "UpdateOtcOrderLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-UpdateOtcOrderLambdaFunctionQualifiedArn"
+            }
+          },
           "CreateAdhocOrderLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU"
+              "Ref": "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs"
             },
             "Export": {
               "Name": "sls-order-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
+            }
+          },
+          "CreateSupplierOrderV2LambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-CreateSupplierOrderV2LambdaFunctionQualifiedArn"
+            }
+          },
+          "GetOrderReceiptsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetDashboardOverviewLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-GetDashboardOverviewLambdaFunctionQualifiedArn"
+            }
+          },
+          "GetOrdersLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo"
+            },
+            "Export": {
+              "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -3575,7 +4819,7 @@
       "serviceProvider": null,
       "instanceParameters": null
     },
-    "serviceRawFile": "service: order-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  stage: dev\n\n  httpApi:\n    name: order-service-httpapi-dev\n    payload: \"2.0\"\n    cors:\n      allowedOrigins:\n        - \"*\"\n      allowedHeaders:\n        - Authorization\n        - Content-Type\n        - x-api-key\n      allowedMethods:\n        - GET\n        - POST\n        - PATCH\n        - OPTIONS\n\n  vpc:\n    securityGroupIds:\n      - sg-0c53a9fdbac3c3f1d\n    subnetIds:\n      - subnet-0db66bddd09cf4ea4\n      - subnet-0025ce174e80dbd39\n      - subnet-0b3d786ce9758f63d\n      - subnet-04db367d4eefcbc92\n      - subnet-044f588274a69635f\n      - subnet-09be2de009329d2a1\n\n  environment:\n    DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core\n    JWT_SECRET: uma-super-chave-secreta\n\npackage:\n  individually: true\n\nfunctions:\n  createSupplierOrder:\n    handler: src/handlers/orders/createSupplier.createSupplier\n    events:\n      - httpApi:\n          path: /orders/supplier\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createSupplier.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createOtcOrder:\n    handler: src/handlers/orders/createOtc.createOtc\n    events:\n      - httpApi:\n          path: /orders/otc\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createOtc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createBulkOrder:\n    handler: src/handlers/orders/createBulk.createBulk\n    events:\n      - httpApi:\n          path: /orders/bulk\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createBulk.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createAdhocOrder:\n    handler: src/handlers/orders/createAdhoc.createAdhoc\n    events:\n      - httpApi:\n          path: /orders/adhoc\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createAdhoc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrderById:\n    handler: src/handlers/orders/getById.getById\n    events:\n      - httpApi:\n          path: /orders/{id}\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getById.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrders:\n    handler: src/handlers/orders/getAll.getAll\n    events:\n      - httpApi:\n          path: /orders\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getAll.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  # ✅ NOVO: listar ordens por customer_id\n  getOrdersByCustomer:\n    handler: src/handlers/orders/getByCustomer.getByCustomer\n    events:\n      - httpApi:\n          path: /customers/{customerId}/orders\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getByCustomer.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  # ✅ listar comprovantes/receipts de uma order (via subtransactions)\n  getOrderReceipts:\n    handler: src/handlers/orders/getOrderReceipts.getOrderReceipts\n    events:\n      - httpApi:\n          path: /orders/{id}/receipts\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getOrderReceipts.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  retryOrder:\n    handler: src/handlers/orders/retry.retry\n    events:\n      - httpApi:\n          path: /orders/{id}/retry\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/retry.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  # ✅ NOVO: reconciliar debits (AUTO_PIX_DEBIT) a partir das subtransactions SUCCESS de uma order\n  registerDebitsFromSuccessSubs:\n    handler: src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs\n    events:\n      - httpApi:\n          path: /orders/{orderId}/reconcile-debits\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/registerDebitsFromSuccessSubs.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        # ✅ Prisma Client + engine\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        # ✅ deps usadas no handler\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"",
+    "serviceRawFile": "service: order-service\n\nprovider:\n  name: aws\n  runtime: nodejs18.x\n  region: us-east-1\n  stage: dev\n\n  httpApi:\n    name: order-service-httpapi-dev\n    payload: \"2.0\"\n    cors:\n      allowedOrigins:\n        - \"*\"\n      allowedHeaders:\n        - Authorization\n        - Content-Type\n        - x-api-key\n      allowedMethods:\n        - GET\n        - POST\n        - PATCH\n        - OPTIONS\n\n  vpc:\n    securityGroupIds:\n      - sg-0c53a9fdbac3c3f1d\n    subnetIds:\n      - subnet-0db66bddd09cf4ea4\n      - subnet-0025ce174e80dbd39\n      - subnet-0b3d786ce9758f63d\n      - subnet-04db367d4eefcbc92\n      - subnet-044f588274a69635f\n      - subnet-09be2de009329d2a1\n\n  environment:\n    DATABASE_URL: postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core\n    JWT_SECRET: uma-super-chave-secreta\n\npackage:\n  individually: true\n\nfunctions:\n  createSupplierOrder:\n    handler: src/handlers/orders/createSupplier.createSupplier\n    events:\n      - httpApi:\n          path: /orders/supplier\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createSupplier.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  # ✅ NOVO: Supplier V2 (usa supplier_id + lock igual ADHOC/BULK)\n  createSupplierOrderV2:\n    handler: src/handlers/orders/createSupplierV2.createSupplierV2\n    events:\n      - httpApi:\n          path: /orders/supplier-v2\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createSupplierV2.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createOtcOrder:\n    handler: src/handlers/orders/createOtc.createOtc\n    events:\n      - httpApi:\n          path: /orders/otc\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createOtc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  updateOtcOrder:\n    handler: src/handlers/orders/updateOtc.updateOtc\n    events:\n      - httpApi:\n          path: /orders/otc\n          method: PATCH\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/updateOtc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  # ✅ NOVO: \"delete\" lógico da OTC (remove debit do relatório + estorna saldo; NÃO apaga core_orders)\n  deleteOrderOtc:\n    handler: src/handlers/orders/deleteOrderOtc.deleteOrderOtc\n    events:\n      - httpApi:\n          path: /orders/otc/delete\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/deleteOrderOtc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createBulkOrder:\n    handler: src/handlers/orders/createBulk.createBulk\n    events:\n      - httpApi:\n          path: /orders/bulk\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createBulk.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  createAdhocOrder:\n    handler: src/handlers/orders/createAdhoc.createAdhoc\n    events:\n      - httpApi:\n          path: /orders/adhoc\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/createAdhoc.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrderById:\n    handler: src/handlers/orders/getById.getById\n    events:\n      - httpApi:\n          path: /orders/{id}\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getById.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrders:\n    handler: src/handlers/orders/getAll.getAll\n    events:\n      - httpApi:\n          path: /orders\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getAll.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrdersByCustomer:\n    handler: src/handlers/orders/getByCustomer.getByCustomer\n    events:\n      - httpApi:\n          path: /customers/{customerId}/orders\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getByCustomer.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getOrderReceipts:\n    handler: src/handlers/orders/getOrderReceipts.getOrderReceipts\n    events:\n      - httpApi:\n          path: /orders/{id}/receipts\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/getOrderReceipts.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  retryOrder:\n    handler: src/handlers/orders/retry.retry\n    events:\n      - httpApi:\n          path: /orders/{id}/retry\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/retry.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  registerDebitsFromSuccessSubs:\n    handler: src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs\n    events:\n      - httpApi:\n          path: /orders/{orderId}/reconcile-debits\n          method: POST\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/orders/registerDebitsFromSuccessSubs.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"\n\n  getDashboardOverview:\n    handler: src/handlers/dashboard/getDashboardOverview.getDashboardOverview\n    events:\n      - httpApi:\n          path: /dashboard/overview\n          method: GET\n    package:\n      patterns:\n        - \"!**\"\n        - \"src/handlers/dashboard/getDashboardOverview.ts\"\n        - \"src/lib/prisma.ts\"\n        - \"src/middleware/authMiddleware.ts\"\n        - \"prisma/schema.prisma\"\n        - \"node_modules/@prisma/client/**\"\n        - \"node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x\"\n        - \"node_modules/.prisma/client/schema.prisma\"\n        - \"node_modules/zod/**\"\n        - \"node_modules/jsonwebtoken/**\"\n        - \"node_modules/jwa/**\"\n        - \"node_modules/jws/**\"\n        - \"node_modules/ms/**\"\n        - \"node_modules/ecdsa-sig-formatter/**\"\n        - \"node_modules/safe-buffer/**\"\n        - \"node_modules/buffer-equal-constant-time/**\"",
     "command": [
       "deploy"
     ],
@@ -3590,30 +4834,36 @@
     "serviceProviderAwsCfStackName": "order-service-dev",
     "serviceProviderAwsCfStackId": "arn:aws:cloudformation:us-east-1:041063250501:stack/order-service-dev/c2c5b4d0-fd16-11f0-90bc-0affcc2e178d",
     "serviceProviderAwsCfStackCreated": "2026-01-29T13:31:04.844Z",
-    "serviceProviderAwsCfStackUpdated": "2026-02-26T18:16:47.854Z",
+    "serviceProviderAwsCfStackUpdated": "2026-03-05T02:47:52.038Z",
     "serviceProviderAwsCfStackStatus": "UPDATE_COMPLETE",
     "serviceProviderAwsCfStackOutputs": [
       {
+        "OutputKey": "CreateSupplierOrderV2LambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createSupplierOrderV2:7",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-order-service-dev-CreateSupplierOrderV2LambdaFunctionQualifiedArn"
+      },
+      {
         "OutputKey": "RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-registerDebitsFromSuccessSubs:2",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-registerDebitsFromSuccessSubs:10",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "CreateBulkOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createBulkOrder:15",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createBulkOrder:23",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "GetOrdersLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrders:22",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrders:30",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "GetOrdersByCustomerLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrdersByCustomer:5",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrdersByCustomer:13",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-GetOrdersByCustomerLambdaFunctionQualifiedArn"
       },
@@ -3625,7 +4875,7 @@
       },
       {
         "OutputKey": "CreateSupplierOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createSupplierOrder:15",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createSupplierOrder:23",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
       },
@@ -3636,7 +4886,7 @@
       },
       {
         "OutputKey": "CreateAdhocOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createAdhocOrder:9",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createAdhocOrder:17",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
       },
@@ -3648,25 +4898,37 @@
       },
       {
         "OutputKey": "GetOrderByIdLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrderById:22",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrderById:30",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "RetryOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-retryOrder:17",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-retryOrder:25",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
       },
       {
         "OutputKey": "CreateOtcOrderLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createOtcOrder:15",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-createOtcOrder:23",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
       },
       {
+        "OutputKey": "DeleteOrderOtcLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-deleteOrderOtc:3",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-order-service-dev-DeleteOrderOtcLambdaFunctionQualifiedArn"
+      },
+      {
+        "OutputKey": "UpdateOtcOrderLambdaFunctionQualifiedArn",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-updateOtcOrder:5",
+        "Description": "Current Lambda function version",
+        "ExportName": "sls-order-service-dev-UpdateOtcOrderLambdaFunctionQualifiedArn"
+      },
+      {
         "OutputKey": "GetOrderReceiptsLambdaFunctionQualifiedArn",
-        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrderReceipts:12",
+        "OutputValue": "arn:aws:lambda:us-east-1:041063250501:function:order-service-dev-getOrderReceipts:20",
         "Description": "Current Lambda function version",
         "ExportName": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
       }
@@ -3681,10 +4943,28 @@
             "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrder"
           }
         },
+        "CreateSupplierOrderV2LogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/order-service-dev-createSupplierOrderV2"
+          }
+        },
         "CreateOtcOrderLogGroup": {
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
             "LogGroupName": "/aws/lambda/order-service-dev-createOtcOrder"
+          }
+        },
+        "UpdateOtcOrderLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/order-service-dev-updateOtcOrder"
+          }
+        },
+        "DeleteOrderOtcLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/order-service-dev-deleteOrderOtc"
           }
         },
         "CreateBulkOrderLogGroup": {
@@ -3733,6 +5013,12 @@
           "Type": "AWS::Logs::LogGroup",
           "Properties": {
             "LogGroupName": "/aws/lambda/order-service-dev-registerDebitsFromSuccessSubs"
+          }
+        },
+        "GetDashboardOverviewLogGroup": {
+          "Type": "AWS::Logs::LogGroup",
+          "Properties": {
+            "LogGroupName": "/aws/lambda/order-service-dev-getDashboardOverview"
           }
         },
         "IamRoleLambdaExecution": {
@@ -3832,7 +5118,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createSupplierOrder.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrder.zip"
             },
             "Handler": "src/handlers/orders/createSupplier.createSupplier",
             "Runtime": "nodejs18.x",
@@ -3870,12 +5156,55 @@
             "CreateSupplierOrderLogGroup"
           ]
         },
+        "CreateSupplierOrderV2LambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createSupplierOrderV2.zip"
+            },
+            "Handler": "src/handlers/orders/createSupplierV2.createSupplierV2",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "order-service-dev-createSupplierOrderV2",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "CreateSupplierOrderV2LogGroup"
+          ]
+        },
         "CreateOtcOrderLambdaFunction": {
           "Type": "AWS::Lambda::Function",
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createOtcOrder.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createOtcOrder.zip"
             },
             "Handler": "src/handlers/orders/createOtc.createOtc",
             "Runtime": "nodejs18.x",
@@ -3913,12 +5242,98 @@
             "CreateOtcOrderLogGroup"
           ]
         },
+        "UpdateOtcOrderLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-updateOtcOrder.zip"
+            },
+            "Handler": "src/handlers/orders/updateOtc.updateOtc",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "order-service-dev-updateOtcOrder",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "UpdateOtcOrderLogGroup"
+          ]
+        },
+        "DeleteOrderOtcLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
+          "Properties": {
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-deleteOrderOtc.zip"
+            },
+            "Handler": "src/handlers/orders/deleteOrderOtc.deleteOrderOtc",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "order-service-dev-deleteOrderOtc",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "DeleteOrderOtcLogGroup"
+          ]
+        },
         "CreateBulkOrderLambdaFunction": {
           "Type": "AWS::Lambda::Function",
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createBulkOrder.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createBulkOrder.zip"
             },
             "Handler": "src/handlers/orders/createBulk.createBulk",
             "Runtime": "nodejs18.x",
@@ -3961,7 +5376,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-createAdhocOrder.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-createAdhocOrder.zip"
             },
             "Handler": "src/handlers/orders/createAdhoc.createAdhoc",
             "Runtime": "nodejs18.x",
@@ -4004,7 +5419,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderById.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderById.zip"
             },
             "Handler": "src/handlers/orders/getById.getById",
             "Runtime": "nodejs18.x",
@@ -4047,7 +5462,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrders.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrders.zip"
             },
             "Handler": "src/handlers/orders/getAll.getAll",
             "Runtime": "nodejs18.x",
@@ -4090,7 +5505,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrdersByCustomer.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrdersByCustomer.zip"
             },
             "Handler": "src/handlers/orders/getByCustomer.getByCustomer",
             "Runtime": "nodejs18.x",
@@ -4133,7 +5548,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-getOrderReceipts.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getOrderReceipts.zip"
             },
             "Handler": "src/handlers/orders/getOrderReceipts.getOrderReceipts",
             "Runtime": "nodejs18.x",
@@ -4176,7 +5591,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-retryOrder.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-retryOrder.zip"
             },
             "Handler": "src/handlers/orders/retry.retry",
             "Runtime": "nodejs18.x",
@@ -4219,7 +5634,7 @@
           "Properties": {
             "Code": {
               "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
-              "S3Key": "serverless/order-service/dev/1772137796124-2026-02-26T20:29:56.124Z/order-service-registerDebitsFromSuccessSubs.zip"
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-registerDebitsFromSuccessSubs.zip"
             },
             "Handler": "src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs",
             "Runtime": "nodejs18.x",
@@ -4257,104 +5672,187 @@
             "RegisterDebitsFromSuccessSubsLogGroup"
           ]
         },
-        "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
+        "GetDashboardOverviewLambdaFunction": {
+          "Type": "AWS::Lambda::Function",
           "Properties": {
-            "FunctionName": {
-              "Ref": "RetryOrderLambdaFunction"
+            "Code": {
+              "S3Bucket": "serverless-framework-deployments-us-east-1-450298af-2cc9",
+              "S3Key": "serverless/order-service/dev/1772679251548-2026-03-05T02:54:11.548Z/order-service-getDashboardOverview.zip"
             },
-            "CodeSha256": "xKC78PkG9+M9qs/ij01ih1tLutTtBXjGeC6Y+81fHaQ="
-          }
+            "Handler": "src/handlers/dashboard/getDashboardOverview.getDashboardOverview",
+            "Runtime": "nodejs18.x",
+            "FunctionName": "order-service-dev-getDashboardOverview",
+            "MemorySize": 1024,
+            "Timeout": 6,
+            "Environment": {
+              "Variables": {
+                "DATABASE_URL": "postgresql://postgres:SttartPg2026@sttart-finance-db.c0jcsykm0pvl.us-east-1.rds.amazonaws.com:5432/sttart_core",
+                "JWT_SECRET": "<REDACTED>",
+                "NODE_OPTIONS": "--enable-source-maps"
+              }
+            },
+            "Role": {
+              "Fn::GetAtt": [
+                "IamRoleLambdaExecution",
+                "Arn"
+              ]
+            },
+            "VpcConfig": {
+              "SecurityGroupIds": [
+                "sg-0c53a9fdbac3c3f1d"
+              ],
+              "SubnetIds": [
+                "subnet-0db66bddd09cf4ea4",
+                "subnet-0025ce174e80dbd39",
+                "subnet-0b3d786ce9758f63d",
+                "subnet-04db367d4eefcbc92",
+                "subnet-044f588274a69635f",
+                "subnet-09be2de009329d2a1"
+              ]
+            }
+          },
+          "DependsOn": [
+            "GetDashboardOverviewLogGroup"
+          ]
         },
-        "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo": {
+        "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "GetOrdersByCustomerLambdaFunction"
             },
-            "CodeSha256": "TlgcQJFn6bA/bNQmLPp1xpt8Gm+uoKbumDZwtWODjfo="
+            "CodeSha256": "DRVLD3oQkFLxexBp9S7r+DkM2P7rC6+bLgEX5ZlI60M="
           }
         },
-        "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64": {
+        "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "RetryOrderLambdaFunction"
+            },
+            "CodeSha256": "qchgbPy0in2qNmODTZBh7HoSpPiL5/o/sVZR3B8Ln3Q="
+          }
+        },
+        "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "GetOrderByIdLambdaFunction"
             },
-            "CodeSha256": "g3YiD2iFshgxmQZiUCd8mr3otC5ezjedAiIXu2b++E0="
+            "CodeSha256": "jUZoVHKDxd7YZHfZfZmO5GKdwWqdfkPdAuClF8oqJYI="
           }
         },
-        "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
-          "Properties": {
-            "FunctionName": {
-              "Ref": "GetOrdersLambdaFunction"
-            },
-            "CodeSha256": "1IBvsM+NJA4Ow6kBUzzPAUhpXEk4MJKSWuYX1FSRBmo="
-          }
-        },
-        "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
-          "Properties": {
-            "FunctionName": {
-              "Ref": "CreateSupplierOrderLambdaFunction"
-            },
-            "CodeSha256": "eTEpcY5TCiDYyOPdgorEMVyUKegZNC6KubGAlWdnmYQ="
-          }
-        },
-        "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
-          "Properties": {
-            "FunctionName": {
-              "Ref": "CreateOtcOrderLambdaFunction"
-            },
-            "CodeSha256": "zKjpzwqcqzxqgwlQ6lb8QxazMNKNmb4KTuV+5RibtKM="
-          }
-        },
-        "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw": {
-          "Type": "AWS::Lambda::Version",
-          "DeletionPolicy": "Retain",
-          "Properties": {
-            "FunctionName": {
-              "Ref": "GetOrderReceiptsLambdaFunction"
-            },
-            "CodeSha256": "rcjDguP6snnbuGU9O6javkkijPWxodQpo8+0J7CkulY="
-          }
-        },
-        "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg": {
+        "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "RegisterDebitsFromSuccessSubsLambdaFunction"
             },
-            "CodeSha256": "R/45Sx5vDoS6xT7DuETTGbHiaqIkFVmIsTckdflI8Jo="
+            "CodeSha256": "EDYtpCV1UHnG5NXDnO0nThULwFtxUDaOWqG+ZhxdEQ8="
           }
         },
-        "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI": {
+        "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "DeleteOrderOtcLambdaFunction"
+            },
+            "CodeSha256": "Ork/vOmPNhNoiwQBBMaBHjxNHQBktCky9CfJ4VbcMTc="
+          }
+        },
+        "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CreateSupplierOrderLambdaFunction"
+            },
+            "CodeSha256": "YTHvjusmCMXKjx7jQ7j+H5668W6SebNjzsnwDBZA6OI="
+          }
+        },
+        "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "CreateBulkOrderLambdaFunction"
             },
-            "CodeSha256": "9dVr51hrf8hi4Bznjrc+mdIFFfxRqrR1SKpOsvrnL+M="
+            "CodeSha256": "Qi1qKFB45XURJHbrV9cNeJGzzTp1TekQFBtDN80JN5Y="
           }
         },
-        "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU": {
+        "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CreateOtcOrderLambdaFunction"
+            },
+            "CodeSha256": "1cpyaH4L1zA1GBW/J7Ju3l/mgdKtGTZiFVvLoZWrcrY="
+          }
+        },
+        "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "UpdateOtcOrderLambdaFunction"
+            },
+            "CodeSha256": "B1DeVA99NF2AlK02d+gxq/1D98M/oYHAPEJGOrmgXqY="
+          }
+        },
+        "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs": {
           "Type": "AWS::Lambda::Version",
           "DeletionPolicy": "Retain",
           "Properties": {
             "FunctionName": {
               "Ref": "CreateAdhocOrderLambdaFunction"
             },
-            "CodeSha256": "2MjHEJbAahJc2WnfKH7LBZU67etzbxGipjlcVpuZSKs="
+            "CodeSha256": "lMJykZo+tBeQI3mhY57q8wFCN9eABYabYVCTAWlBT9I="
+          }
+        },
+        "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "CreateSupplierOrderV2LambdaFunction"
+            },
+            "CodeSha256": "K+Rv37qO3gnspQGSf3RXdju/+NcNCsVfOK+A2eCAxsU="
+          }
+        },
+        "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "GetOrderReceiptsLambdaFunction"
+            },
+            "CodeSha256": "eu0spD8IkpNYK4/Fgg3l58teHsLmI+gT574ewuxjlxA="
+          }
+        },
+        "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "GetDashboardOverviewLambdaFunction"
+            },
+            "CodeSha256": "Y7uSthqbypQAEDhHh7lHpBqOJbGPqKUnO6knxIruMCQ="
+          }
+        },
+        "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo": {
+          "Type": "AWS::Lambda::Version",
+          "DeletionPolicy": "Retain",
+          "Properties": {
+            "FunctionName": {
+              "Ref": "GetOrdersLambdaFunction"
+            },
+            "CodeSha256": "Wp20GqDZ+uMTNDy9g5I408HWCOxl3rcinVaLyM4CPm0="
           }
         },
         "HttpApi": {
@@ -4468,6 +5966,81 @@
           },
           "DependsOn": "HttpApiIntegrationCreateSupplierOrder"
         },
+        "CreateSupplierOrderV2LambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "CreateSupplierOrderV2LambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationCreateSupplierOrderV2": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "CreateSupplierOrderV2LambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostOrdersSupplierDashv2": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "POST /orders/supplier-v2",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationCreateSupplierOrderV2"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationCreateSupplierOrderV2"
+        },
         "CreateOtcOrderLambdaPermissionHttpApi": {
           "Type": "AWS::Lambda::Permission",
           "Properties": {
@@ -4542,6 +6115,156 @@
             }
           },
           "DependsOn": "HttpApiIntegrationCreateOtcOrder"
+        },
+        "UpdateOtcOrderLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "UpdateOtcOrderLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationUpdateOtcOrder": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "UpdateOtcOrderLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePatchOrdersOtc": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "PATCH /orders/otc",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationUpdateOtcOrder"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationUpdateOtcOrder"
+        },
+        "DeleteOrderOtcLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "DeleteOrderOtcLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationDeleteOrderOtc": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "DeleteOrderOtcLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRoutePostOrdersOtcDelete": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "POST /orders/otc/delete",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationDeleteOrderOtc"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationDeleteOrderOtc"
         },
         "CreateBulkOrderLambdaPermissionHttpApi": {
           "Type": "AWS::Lambda::Permission",
@@ -5142,6 +6865,81 @@
             }
           },
           "DependsOn": "HttpApiIntegrationRegisterDebitsFromSuccessSubs"
+        },
+        "GetDashboardOverviewLambdaPermissionHttpApi": {
+          "Type": "AWS::Lambda::Permission",
+          "Properties": {
+            "FunctionName": {
+              "Fn::GetAtt": [
+                "GetDashboardOverviewLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Action": "lambda:InvokeFunction",
+            "Principal": "apigateway.amazonaws.com",
+            "SourceArn": {
+              "Fn::Join": [
+                "",
+                [
+                  "arn:",
+                  {
+                    "Ref": "AWS::Partition"
+                  },
+                  ":execute-api:",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ":",
+                  {
+                    "Ref": "AWS::AccountId"
+                  },
+                  ":",
+                  {
+                    "Ref": "HttpApi"
+                  },
+                  "/*"
+                ]
+              ]
+            }
+          }
+        },
+        "HttpApiIntegrationGetDashboardOverview": {
+          "Type": "AWS::ApiGatewayV2::Integration",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "IntegrationType": "AWS_PROXY",
+            "IntegrationUri": {
+              "Fn::GetAtt": [
+                "GetDashboardOverviewLambdaFunction",
+                "Arn"
+              ]
+            },
+            "PayloadFormatVersion": "2.0",
+            "TimeoutInMillis": 30000
+          }
+        },
+        "HttpApiRouteGetDashboardOverview": {
+          "Type": "AWS::ApiGatewayV2::Route",
+          "Properties": {
+            "ApiId": {
+              "Ref": "HttpApi"
+            },
+            "RouteKey": "GET /dashboard/overview",
+            "Target": {
+              "Fn::Join": [
+                "/",
+                [
+                  "integrations",
+                  {
+                    "Ref": "HttpApiIntegrationGetDashboardOverview"
+                  }
+                ]
+              ]
+            }
+          },
+          "DependsOn": "HttpApiIntegrationGetDashboardOverview"
         }
       },
       "Outputs": {
@@ -5151,94 +6949,130 @@
             "Name": "sls-order-service-dev-ServerlessDeploymentBucketName"
           }
         },
-        "RetryOrderLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "RetryOrderLambdaVersionObBSH0jU08DETHx6lTTLC1AbNmeZELSxbYlkGbXVK4"
-          },
-          "Export": {
-            "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
-          }
-        },
         "GetOrdersByCustomerLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "GetOrdersByCustomerLambdaVersion2oMMW8UTxvqIU1aWjItyKq09hEuV6Zpq41V2NLB1zo"
+            "Ref": "GetOrdersByCustomerLambdaVersionzM0JHXTa1JyBBegunR0yF87JbYjXWdHXpQAfFCDK8"
           },
           "Export": {
             "Name": "sls-order-service-dev-GetOrdersByCustomerLambdaFunctionQualifiedArn"
           }
         },
+        "RetryOrderLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "RetryOrderLambdaVersionRrBcs2auI1AvirlIDn8d6wuya6Qednrnx2y8UAbpJI"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-RetryOrderLambdaFunctionQualifiedArn"
+          }
+        },
         "GetOrderByIdLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "GetOrderByIdLambdaVersionv2IMh6lb1uQAjMaxckI5ol5rnvP1EA2nO7HlquR64"
+            "Ref": "GetOrderByIdLambdaVersionxWMD99Vz6BciJBCuttQviep8TzKEpt985rXcQBmS0"
           },
           "Export": {
             "Name": "sls-order-service-dev-GetOrderByIdLambdaFunctionQualifiedArn"
           }
         },
-        "GetOrdersLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "GetOrdersLambdaVersionOcGEKPorNo4eYTR82weNbA2dDPpgquCZUGEhGlQO7N0"
-          },
-          "Export": {
-            "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
-          }
-        },
-        "CreateSupplierOrderLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "CreateSupplierOrderLambdaVersionuqh9uZlUbSuhFb8hOX9bpRgxpmjUmjetbjBErFoy8Wo"
-          },
-          "Export": {
-            "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
-          }
-        },
-        "CreateOtcOrderLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "CreateOtcOrderLambdaVersionltKrPZJGl5Q2aycNyYzV5AX6xexQmI3sGDWCpEwvY"
-          },
-          "Export": {
-            "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
-          }
-        },
-        "GetOrderReceiptsLambdaFunctionQualifiedArn": {
-          "Description": "Current Lambda function version",
-          "Value": {
-            "Ref": "GetOrderReceiptsLambdaVersionOT8koYSiymHc2Kw8cRFpUQhxfNMdmTuZCc4lk1Ab4Fw"
-          },
-          "Export": {
-            "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
-          }
-        },
         "RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "RegisterDebitsFromSuccessSubsLambdaVersionM5EoFrtX4tMYkpC0irWnmNUVHSkoCpfg8bOkm7fGACg"
+            "Ref": "RegisterDebitsFromSuccessSubsLambdaVersion6lavUXm70YGwF4bhAQouh9x17UsSyT5RRtuGjDa2Ek"
           },
           "Export": {
             "Name": "sls-order-service-dev-RegisterDebitsFromSuccessSubsLambdaFunctionQualifiedArn"
           }
         },
+        "DeleteOrderOtcLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "DeleteOrderOtcLambdaVersionZkFiY20LiEfWGizFTKW4sOhxDXhfaw2ulgiyoFIZzm0"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-DeleteOrderOtcLambdaFunctionQualifiedArn"
+          }
+        },
+        "CreateSupplierOrderLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CreateSupplierOrderLambdaVersionYFOFND1zS0gyiFeVJl7dmnlt4Hj8CxHz57UQL97zUKo"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-CreateSupplierOrderLambdaFunctionQualifiedArn"
+          }
+        },
         "CreateBulkOrderLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "CreateBulkOrderLambdaVersiond2S9TUD8KjBJy9qYrejLdv26x4u8eyWPY7hVwCbJI"
+            "Ref": "CreateBulkOrderLambdaVersionSG64elhbQV71JsnFPzHRdwg1aat2DF2mJIsQfdGIggc"
           },
           "Export": {
             "Name": "sls-order-service-dev-CreateBulkOrderLambdaFunctionQualifiedArn"
           }
         },
+        "CreateOtcOrderLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CreateOtcOrderLambdaVersionOuUDcShHtNYjZMcoeXn1d7ireFGqeJt1tDxsbi1Go"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-CreateOtcOrderLambdaFunctionQualifiedArn"
+          }
+        },
+        "UpdateOtcOrderLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "UpdateOtcOrderLambdaVersion5TFuVGJRBKCfm24FWolKDgsoz578uJQ4KJc103LgMzI"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-UpdateOtcOrderLambdaFunctionQualifiedArn"
+          }
+        },
         "CreateAdhocOrderLambdaFunctionQualifiedArn": {
           "Description": "Current Lambda function version",
           "Value": {
-            "Ref": "CreateAdhocOrderLambdaVersionM4aYKsKIrawTrfhbKf1Fm1YdmljaTjwVxIPXuWS0EU"
+            "Ref": "CreateAdhocOrderLambdaVersionapYMziFlY4EokGcpyKPIDq477vrgmUEXBfMoAafRvs"
           },
           "Export": {
             "Name": "sls-order-service-dev-CreateAdhocOrderLambdaFunctionQualifiedArn"
+          }
+        },
+        "CreateSupplierOrderV2LambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "CreateSupplierOrderV2LambdaVersion8Sx1kMVWwoPxPAbdCXjnVNUpCODwTNvcyyDPSxdQ"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-CreateSupplierOrderV2LambdaFunctionQualifiedArn"
+          }
+        },
+        "GetOrderReceiptsLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "GetOrderReceiptsLambdaVersionv7bbnHfjQrMPpNvnocqMzEe0AT4iJ3RAzXqydyneoJI"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-GetOrderReceiptsLambdaFunctionQualifiedArn"
+          }
+        },
+        "GetDashboardOverviewLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "GetDashboardOverviewLambdaVersionJu0xcRybHam3QYlPqLJ9407xcGdzajgfXpmUBQuY"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-GetDashboardOverviewLambdaFunctionQualifiedArn"
+          }
+        },
+        "GetOrdersLambdaFunctionQualifiedArn": {
+          "Description": "Current Lambda function version",
+          "Value": {
+            "Ref": "GetOrdersLambdaVersionWGHp33INVLi0sWoSwpITe7xNRx5WXFUMw4t7nu3kFWo"
+          },
+          "Export": {
+            "Name": "sls-order-service-dev-GetOrdersLambdaFunctionQualifiedArn"
           }
         },
         "HttpApiId": {

@@ -54,11 +54,35 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  # ✅ NOVO: Supplier V2 (usa supplier_id + lock igual ADHOC/BULK)
+  createSupplierOrderV2:
+    handler: src/handlers/orders/createSupplierV2.createSupplierV2
+    events:
+      - httpApi:
+          path: /orders/supplier-v2
+          method: POST
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/orders/createSupplierV2.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
@@ -81,11 +105,60 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  updateOtcOrder:
+    handler: src/handlers/orders/updateOtc.updateOtc
+    events:
+      - httpApi:
+          path: /orders/otc
+          method: PATCH
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/orders/updateOtc.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/zod/**"
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  # ✅ NOVO: "delete" lógico da OTC (remove debit do relatório + estorna saldo; NÃO apaga core_orders)
+  deleteOrderOtc:
+    handler: src/handlers/orders/deleteOrderOtc.deleteOrderOtc
+    events:
+      - httpApi:
+          path: /orders/otc/delete
+          method: POST
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/orders/deleteOrderOtc.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
         - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
@@ -108,11 +181,9 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
         - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
@@ -135,11 +206,9 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
         - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
@@ -198,7 +267,6 @@ functions:
         - "node_modules/safe-buffer/**"
         - "node_modules/buffer-equal-constant-time/**"
 
-  # ✅ NOVO: listar ordens por customer_id
   getOrdersByCustomer:
     handler: src/handlers/orders/getByCustomer.getByCustomer
     events:
@@ -218,13 +286,11 @@ functions:
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
         - "node_modules/jws/**"
-        - "node_modules/jws/**"
         - "node_modules/ms/**"
         - "node_modules/ecdsa-sig-formatter/**"
         - "node_modules/safe-buffer/**"
         - "node_modules/buffer-equal-constant-time/**"
 
-  # ✅ listar comprovantes/receipts de uma order (via subtransactions)
   getOrderReceipts:
     handler: src/handlers/orders/getOrderReceipts.getOrderReceipts
     events:
@@ -238,11 +304,9 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
         - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
@@ -276,7 +340,6 @@ functions:
         - "node_modules/safe-buffer/**"
         - "node_modules/buffer-equal-constant-time/**"
 
-  # ✅ NOVO: reconciliar debits (AUTO_PIX_DEBIT) a partir das subtransactions SUCCESS de uma order
   registerDebitsFromSuccessSubs:
     handler: src/handlers/orders/registerDebitsFromSuccessSubs.registerDebitsFromSuccessSubs
     events:
@@ -290,11 +353,34 @@ functions:
         - "src/lib/prisma.ts"
         - "src/middleware/authMiddleware.ts"
         - "prisma/schema.prisma"
-        # ✅ Prisma Client + engine
         - "node_modules/@prisma/client/**"
         - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
         - "node_modules/.prisma/client/schema.prisma"
-        # ✅ deps usadas no handler
+        - "node_modules/jsonwebtoken/**"
+        - "node_modules/jwa/**"
+        - "node_modules/jws/**"
+        - "node_modules/ms/**"
+        - "node_modules/ecdsa-sig-formatter/**"
+        - "node_modules/safe-buffer/**"
+        - "node_modules/buffer-equal-constant-time/**"
+
+  getDashboardOverview:
+    handler: src/handlers/dashboard/getDashboardOverview.getDashboardOverview
+    events:
+      - httpApi:
+          path: /dashboard/overview
+          method: GET
+    package:
+      patterns:
+        - "!**"
+        - "src/handlers/dashboard/getDashboardOverview.ts"
+        - "src/lib/prisma.ts"
+        - "src/middleware/authMiddleware.ts"
+        - "prisma/schema.prisma"
+        - "node_modules/@prisma/client/**"
+        - "node_modules/.prisma/client/query-engine-rhel-openssl-1.0.x"
+        - "node_modules/.prisma/client/schema.prisma"
+        - "node_modules/zod/**"
         - "node_modules/jsonwebtoken/**"
         - "node_modules/jwa/**"
         - "node_modules/jws/**"
